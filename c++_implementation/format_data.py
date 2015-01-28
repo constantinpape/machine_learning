@@ -66,8 +66,8 @@ if __name__ == '__main__':
 	labels_test[np.where(labels_test==8)]   = 1
 
 	# save to read in via c++
-	np.savetxt("mnist_data/images_train.out",images_train)
-	np.savetxt("mnist_data/labels_train.out",labels_train)
-	np.savetxt("mnist_data/images_test.out", images_test)
-	np.savetxt("mnist_data/labels_test.out", labels_test)
+	np.savetxt("mnist_data/images_train.out", images_train, fmt='%f')
+	np.savetxt("mnist_data/labels_train.out", labels_train, fmt='%i')
+	np.savetxt("mnist_data/images_test.out",  images_test,  fmt='%f')
+	np.savetxt("mnist_data/labels_test.out",  labels_test,  fmt='%i')
 	
