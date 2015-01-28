@@ -7,7 +7,7 @@
 	
 using namespace boost::numeric::ublas;
 
-image_data_t read_mnist_data(std::string fname)
+image_data_t read_mnist_data(const std::string & fname)
 {
 // open filestream to read in the data
 	std::fstream fs;
@@ -17,7 +17,7 @@ image_data_t read_mnist_data(std::string fname)
 		throw std::runtime_error("Filestream not openend correctly!");
 	}
 // determine number of lines and number of values per line
-	int num_lines = std::count(std::istreambuf_iterator<char>(fs),
+	size_t num_lines = std::count(std::istreambuf_iterator<char>(fs),
 				std::istreambuf_iterator<char>(),
 				'\n');
 	std::cout << "Reading " << fname << ": Number of instances: " << num_lines << std::endl;
@@ -26,7 +26,7 @@ image_data_t read_mnist_data(std::string fname)
 	char s[1024];
 	fs.getline(s,1024);
 	std::stringstream ss(s);
-	int per_line = std::count(std::istreambuf_iterator<char>(ss),
+	size_t per_line = std::count(std::istreambuf_iterator<char>(ss),
 				std::istreambuf_iterator<char>(),
 				' ') + 1;
 	std::cout << "Reading " << fname <<": Number of dimensions: " << per_line << std::endl;
@@ -35,10 +35,10 @@ image_data_t read_mnist_data(std::string fname)
 // initialise the data
 	 image_data_t data_return(num_lines, per_line);
 // read in the data
-	int i = 0;
+	size_t i = 0;
 	while( !fs.eof() && i < num_lines )
 	{
-		int j = 0;
+		size_t j = 0;
 		char line[1024];
 		fs.getline(line,1024);
 		std::stringstream sss(line);
@@ -55,7 +55,7 @@ image_data_t read_mnist_data(std::string fname)
 	return data_return;
 }
 
-label_data_t read_mnist_label(std::string fname)
+label_data_t read_mnist_label(const std::string & fname)
 {
 // open filestream to read in the data
 	std::fstream fs;
@@ -65,7 +65,7 @@ label_data_t read_mnist_label(std::string fname)
 		throw std::runtime_error("Filestream not openend correctly!");
 	}
 // determine number of lines
-	int num_lines = std::count(std::istreambuf_iterator<char>(fs),
+	size_t num_lines = std::count(std::istreambuf_iterator<char>(fs),
 				std::istreambuf_iterator<char>(),
 				'\n');
 	std::cout << "Reading " << fname << ": Number of instances: " << num_lines << std::endl;
@@ -74,14 +74,46 @@ label_data_t read_mnist_label(std::string fname)
 // init return data
 	label_data_t label_return;
 // read in the data
-	int i = 0;
+	size_t i = 0;
 	while( !fs.eof() && i < num_lines )
 	{
 		char num[16];
 		fs.getline(num,16);
-		uint8_t val = atoi(num);
+		short val = atoi(num);
 		label_return.push_back(val);
 		i++;
 	}
 	return label_return;
+}
+
+void save_data(const std::string & fname, const image_data_t & data)
+{
+	std::fstream fs;
+	fs.open(fname, std::fstream::out);
+	if(!fs)
+	{
+		throw std::runtime_error("Filestream not openend correctly!");
+	}
+	for(size_t i = 0; i < data.size1(); i++)
+	{
+		for(size_t j = 0; j < data.size2(); j++)
+		{
+			fs << data(i,j) << " ";
+		}
+		fs << '\n';
+	}
+}
+
+void save_label(const std::string & fname, const label_data_t & label)
+{
+	std::fstream fs;
+	fs.open(fname, std::fstream::out);
+	if(!fs)
+	{
+		throw std::runtime_error("Filestream not openend correctly!");
+	}
+	for(size_t i = 0; i < label.size(); i++)
+	{
+		fs << label[i] << '\n';
+	}
 }
