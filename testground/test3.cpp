@@ -2,9 +2,11 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cstdlib>
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <algorithm>
 
 int main()
 {
@@ -12,37 +14,61 @@ int main()
 
 	fs.open("test", std::fstream::in);
 
-// get length of file and line
-	int count = 1;
-	char aux[256];
-	fs.getline(aux,256);
-	std::stringstream ss(aux);
-
-	std::cout << "AAA" << std::endl;
-	int line_count = 0;
-	while( !ss.eof() )
+	if(!fs)
 	{
-		line_count++;
-		char s[256];
-		ss.get(s, 256);
-		std::cout << line_count << " " << s << std::endl; 	
+		std::cout << "failed to read in file" << std::endl;
 	}
-	std::cout << "BBB" << std::endl;
-
-	while( !fs.eof() )
-	{
-		count++;
-		char s[256];
-		fs.getline(s, 256);
-		std::cout << count << "\n" << s << std::endl;
-	}
-	count--;
-	std::cout << "Lines in file: " << count << std::endl; 
-// get length of line
 	
+	int num_lines = std::count(std::istreambuf_iterator<char>(fs),
+				std::istreambuf_iterator<char>(),
+				'\n');
+
+	std::cout << "Number of lines " << num_lines << std::endl;
+	
+	fs.close();
+	fs.open("test", std::fstream::in);
+
+	char s[256];
+	
+	fs.getline(s,256);
+
+	std::stringstream ss(s);
+
+	int per_line = std::count(std::istreambuf_iterator<char>(ss),
+				std::istreambuf_iterator<char>(),
+				' ') + 1;
+
+	std::cout << "Numbers per line " << per_line << std::endl;
+	
+	fs.close();
+	fs.open("test", std::fstream::in);
+
 	using namespace boost::numeric::ublas;
-	matrix<double> m(count,4);
-	
+	matrix<double> m(num_lines, per_line);
+
+	std::cout << m << std::endl;
+
+	int i = 0;
+	while( !fs.eof() && i < num_lines )
+	{
+		std::cout << i << std::endl;
+		int j = 0;
+		char line[256];
+		fs.getline(line,256);
+		std::stringstream sss(line);
+		while( !sss.eof() )
+		{
+			char num[16];
+			sss.getline(num,16,' ');
+			float val = atof(num);
+			m(i,j) = val;
+			j++;
+			std::cout << j << std::endl;
+		}
+		i++;
+	}
+
+	std::cout << m << std::endl;
 
 	return 0;
 }
