@@ -1,0 +1,12 @@
+# object files
+.o
+.obj
+
+# swp and swo
+.swp
+.swo
+
+# bin and lib folder, data folder
+c++_implementation/bin
+c++_implementation/lib
+data
