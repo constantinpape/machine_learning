@@ -1,6 +1,9 @@
-# object files
+# c++ object files
 *.o
 *.obj
+
+# python object files
+*.pyc
 
 # swp and swo
 .*.swp

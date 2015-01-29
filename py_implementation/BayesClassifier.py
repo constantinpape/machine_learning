@@ -160,10 +160,10 @@ class BayesClassifier:
 					gen[d] = 0.
 					continue
 				else:
-					#sampling strategy: sample from the 2 most likely histogram bins, irresponsible of their prob.
+					#sampling strategy: sample from the 3 most likely histogram bins, irresponsible of their prob.
 					likelihoods = self.histos[d][:,C]
 					sorted_bins = np.argsort(likelihoods)
-					which_bin   = np.random.randint(3)
+					which_bin   = likelihoods.shape[0] - 1 - np.random.randint(3)
 					bin_chosen  = sorted_bins[which_bin]
 					#sample the pixel value uniformly inside the chosen bin:
 					bin_min = bin_chosen*self.bin_widths[d]

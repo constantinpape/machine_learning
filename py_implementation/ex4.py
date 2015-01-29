@@ -11,8 +11,8 @@ from DensityTreeClassifier import DensityTreeClassifier
 
 # importing the adapted mnist data
 def import_data():
-	test_path     = "mnist/small/test.h5"
-	training_path = "mnist/small/train.h5"
+	test_path     = "../data/mnist/small/test.h5"
+	training_path = "../data/mnist/small/train.h5"
 	
 	f = h5py.File(training_path, 'r')
 	images_train = f["images"].value
