@@ -1,12 +1,16 @@
 # object files
-.o
-.obj
+*.o
+*.obj
 
 # swp and swo
-.swp
-.swo
+.*.swp
+.*.swo
+
+# data types
+*.out
 
 # bin and lib folder, data folder
 c++_implementation/bin
 c++_implementation/lib
+c++_implementation/mnist_data
 data

@@ -1,15 +1,18 @@
 #pragma once
 
 #include "common.h"
+#include "Classifier.h"
 
-class BayesClassifier
+class BayesClassifier : public Classifier
 {
 public:
 	BayesClassifier();
 	
 	void train(const image_data_t & train_data, const label_data_t & train_label);
 	
-	const label_data_t & predict(const image_data_t & test_data);
+	label_data_t predict(const image_data_t & test_data);
+
+	image_data_t generate(const short label);
 	
 	void compute_cdf();
 	
@@ -25,5 +28,5 @@ private:
 	std::vector<size_t> 	irrelevant_dims;
 	std::vector<histogram_t> histograms;
 	//private functions
-	bin_t get_optimal_bins(const image_data_t & train_data, size_t dim);
+	bin_t get_optimal_bins(const image_data_t & train_data, const size_t dim);
 };

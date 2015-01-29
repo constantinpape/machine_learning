@@ -14,7 +14,9 @@ image_data_t read_mnist_data(const std::string & fname)
 	fs.open(fname, std::fstream::in);
 	if(!fs)
 	{
-		throw std::runtime_error("Filestream not openend correctly!");
+		std::stringstream stream("Filestream not openend correctly for file ");
+		stream << fname;
+		throw std::runtime_error(stream.str());
 	}
 // determine number of lines and number of values per line
 	size_t num_lines = std::count(std::istreambuf_iterator<char>(fs),
@@ -62,7 +64,9 @@ label_data_t read_mnist_label(const std::string & fname)
 	fs.open(fname, std::fstream::in);
 	if(!fs)
 	{
-		throw std::runtime_error("Filestream not openend correctly!");
+		std::stringstream stream("Filestream not openend correctly for file ");
+		stream << fname;
+		throw std::runtime_error(stream.str());
 	}
 // determine number of lines
 	size_t num_lines = std::count(std::istreambuf_iterator<char>(fs),
@@ -92,7 +96,9 @@ void save_data(const std::string & fname, const image_data_t & data)
 	fs.open(fname, std::fstream::out);
 	if(!fs)
 	{
-		throw std::runtime_error("Filestream not openend correctly!");
+		std::stringstream stream("Filestream not openend correctly for file ");
+		stream << fname;
+		throw std::runtime_error(stream.str());
 	}
 	for(size_t i = 0; i < data.size1(); i++)
 	{
@@ -110,7 +116,9 @@ void save_label(const std::string & fname, const label_data_t & label)
 	fs.open(fname, std::fstream::out);
 	if(!fs)
 	{
-		throw std::runtime_error("Filestream not openend correctly!");
+		std::stringstream stream("Filestream not openend correctly for file ");
+		stream << fname;
+		throw std::runtime_error(stream.str());
 	}
 	for(size_t i = 0; i < label.size(); i++)
 	{
