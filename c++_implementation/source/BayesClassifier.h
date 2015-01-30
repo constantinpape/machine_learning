@@ -12,7 +12,7 @@ public:
 	
 	label_data_t predict(const image_data_t & test_data);
 
-	image_data_t generate(const short label);
+	image_data_t generate(const short N, const short label);
 	
 	void compute_cdf();
 	

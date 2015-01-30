@@ -15,5 +15,7 @@
 # bin and lib folder, data folder
 c++_implementation/bin
 c++_implementation/lib
-c++_implementation/mnist_data
+c++_implementation/mnist_data/original
+c++_implementation/mnist_data/test_bayes
+c++_implementation/mnist_data/test_readin
 data

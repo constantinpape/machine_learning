@@ -1,8 +1,10 @@
 #include <algorithm>
+#include <chrono>
 #include <exception>
 #include <iostream>
 #include <iterator>
 #include <math.h>
+#include <random>
 
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
@@ -75,8 +77,8 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 // iterate over the training data and assign to corresponding bin
 			for( size_t i = 0; i < num_instances; i++)
 			{
-				double val 		= train_data(i,d);
-				uint8_t label 	= train_label[i];
+				double val 	= train_data(i,d);
+				short label = train_label[i];
 				// find the bin
 				size_t bin = static_cast<size_t>( ( (val - bins[d].lowest_val) / bins[d].val_range) * bins[d].num_bins );
 // lower bin by 1 if it is too big (this may happen...) FIXME
@@ -145,10 +147,60 @@ label_data_t BayesClassifier::predict(const image_data_t & test_data)
 	return labels_return;
 }
 
-image_data_t BayesClassifier::generate(const short label)
+image_data_t BayesClassifier::generate(const short N, const short label)
 {
-	image_data_t data_return;
-
+	image_data_t data_return(N,num_dimensions);
+// instantiate and seed random generator
+	unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
+	std::default_random_engine gen(seed);
+// instantiate uniform real distribution (0 to 1)
+	std::uniform_real_distribution<double> distr(0.0,1.0);
+// generate N new instances
+	for( size_t i = 0; i < N; ++i)
+	{
+		for( size_t d = 0; d < num_dimensions; d++ )
+		{
+// check if this dimension is irrelevant and continue if it is
+			if( std::find( irrelevant_dims.begin(), irrelevant_dims.end(), d) != irrelevant_dims.end() )
+			{
+				data_return(i,d) = 0.;
+			}
+// sampling strategy: sample from the 2 most likely histogram bins with their prob.
+// then sample uniform inside the chosen bin
+			else
+			{
+// get data and copy it to safely operate on it
+				matrix_column<matrix<double> const> histo(histograms[d], label);
+				assert(histo.size() == bins[d].num_bins);
+				vector<double> histo_sort( histo.size() );
+				std::copy( histo.begin(), histo.end(), histo_sort.begin() );
+// sort bins by their probability
+				std::sort( histo_sort.begin(), histo_sort.end() );
+// get probabilities of the 2 bins with highest probability
+				double p = *(histo_sort.end() - 1);
+				double q = *(histo_sort.end() - 2);
+// normalise the probability
+				double p_1 = p / (p + q);
+// decide which bin according to the probs
+				size_t bin_chosen = 0;
+				if( p_1 > distr(gen) )
+				{
+					auto search_bin = std::find(histo.begin(), histo.end(), p);
+					bin_chosen 		= std::distance(histo.begin(), search_bin);
+				}
+				else
+				{
+					auto search_bin = std::find(histo.begin(), histo.end(), q);
+					bin_chosen 		= std::distance(histo.begin(), search_bin);
+				}
+// sample uniform inside the bin
+				double bin_min = bin_chosen * bins[d].width + bins[d].lowest_val;	
+				double bin_max = (bin_chosen + 1) * bins[d].width + bins[d].lowest_val;	
+				std::uniform_real_distribution<double> distr_bin(bin_min, bin_max);
+				data_return(i,d) = distr_bin(gen);
+			}
+		}	
+	}
 	return data_return;
 }
 
@@ -157,7 +209,7 @@ void BayesClassifier::compute_cdf()
 
 }
 
-// TODO implement different bin width if issues occur
+// TODO what to do for too small bins <-> too many bins
 bin_t BayesClassifier::get_optimal_bins(const image_data_t & train_data, const size_t dim)
 {
 	bin_t bin;
@@ -178,7 +230,7 @@ bin_t BayesClassifier::get_optimal_bins(const image_data_t & train_data, const s
 	double q_3     	= (size%2 == 0) ? ( data_dim(ind_3+1) + data_dim(ind_3) )/2 : data_dim(ind_3+1);
 // calculate the iqr and bin width
 	double iqr	   	= q_3 - q_1;
-	bin.width 		= 2*iqr / std::cbrt(num_instances);
+	bin.width 		= 2.*iqr / std::cbrt(num_instances);
 // get lowest and highest value in the dimension
 	bin.lowest_val  = *( data_dim.begin() );
 	bin.highest_val = *( data_dim.end() - 1 );
@@ -189,7 +241,10 @@ bin_t BayesClassifier::get_optimal_bins(const image_data_t & train_data, const s
 	if(bin.num_bins > std::sqrt(num_instances) )
 	{
 		std::cout << "Number of bins " << bin.num_bins << " bigger than sqrt(N) = " << std::sqrt(num_instances) << std::endl;
-		// TODO change number of bins
+		std::cout << "IQR " << iqr << " N^1/3 " << std::cbrt(num_instances) << std::endl; 
+		bin.num_bins = static_cast<size_t>( std::sqrt(num_instances) );
+		bin.width    = bin.val_range / bin.num_bins;
+		std::cout << "Changing number of bins to: " << bin.num_bins << std::endl;
 	}
 	return bin;
 }
