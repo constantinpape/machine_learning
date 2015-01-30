@@ -6,10 +6,10 @@
 #include <cstdint>
 
 //typedefs for the datastructures
-//TODO proper types
 typedef boost::numeric::ublas::matrix<double>  	image_data_t;
 typedef std::vector<short> 						label_data_t;
 typedef boost::numeric::ublas::matrix<double>  	histogram_t;
+typedef std::vector<std::vector<double> >		cdf_t;
 
 // stores the information for bins in given dimenstion
 struct bin_t

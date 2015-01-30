@@ -11,6 +11,7 @@ class DensityTreeClassifier:
 		self.num_classes 	= []
 		self.num_dimensions = []
 		self.trees 			= []
+		self.priors = []
 
 	# tree data structure
 	class node:
@@ -167,7 +168,7 @@ class DensityTreeClassifier:
 	def train(self, data, labels, train_to_generate = (False,0) ):
 		
 		if self.trained:
-			"Retraining DensityTreeClassifier!"
+			print "Retraining DensityTreeClassifier!"
 		
 		self.trees = []
 		self.priors = []

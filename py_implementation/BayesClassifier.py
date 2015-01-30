@@ -178,7 +178,7 @@ class BayesClassifier:
 	# comute the CDF of the histograms
 	def compute_CDF(self): 
 		if not self.trained:
-			raise RuntimeError("BayesClassifier: generate called, before calling train!")
+			raise RuntimeError("BayesClassifier: compute_CDF called, before calling train!")
 		
 		self.CDF = []
 		print len(self.histos)
@@ -205,7 +205,7 @@ class BayesClassifier:
 	# compute the inverse CDF-value of x
 	def inverse_CDF(self, x, clas):
 		if not self.trained:
-			raise RuntimeError("BayesClassifier: generate called, before calling train!")
+			raise RuntimeError("BayesClassifier: inverse_CDF called, before calling train!")
 		
 		C = np.searchsorted(self.wanted, clas)
 		

@@ -21,7 +21,8 @@ BayesClassifier::BayesClassifier() : 	trained(false),
 										priors(),
 										bins(),
 										irrelevant_dims(),
-										histograms()
+										histograms(),
+										cdfs()
 {}
 
 void BayesClassifier::train(const image_data_t & train_data, const label_data_t & train_label)
@@ -39,9 +40,9 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 // calculate the number of class instances and the priors
 	instances_per_class.clear();
 	priors.clear();
-	for( size_t i = 0; i < num_classes; i++)
+	for( size_t c = 0; c < num_classes; c++)
 	{
-		size_t N_class = std::count( train_label.begin(), train_label.end(), i);
+		size_t N_class = std::count( train_label.begin(), train_label.end(), c);
 	  	instances_per_class.push_back(N_class);
 		priors.push_back( N_class/static_cast<double>(num_instances) );
 	}
@@ -97,6 +98,8 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 			}
 		}
 	}
+// create the cumulative densities
+	compute_cdf();
 // set train flag to true
 	trained = true;
 }
@@ -204,9 +207,41 @@ image_data_t BayesClassifier::generate(const short N, const short label)
 	return data_return;
 }
 
+//TODO
+// inverse_cdf()
+
 void BayesClassifier::compute_cdf()
 {
-
+	cdfs.clear();
+	for(size_t d = 0; d < num_dimensions; d++)
+	{
+		cdf_t cdf_d;	
+		if( std::find( irrelevant_dims.begin(), irrelevant_dims.end(), d) != irrelevant_dims.end() )
+		{
+			for(size_t c = 0; c < num_classes; c++)
+			{
+				cdf_d.push_back( std::vector<double>{{0}} );
+			}
+		}
+		else
+		{
+			const auto & histo 	= histograms[d];
+		   	size_t n_bins 		= bins[d].num_bins;
+			assert(histo.size1() == n_bins);
+			for(size_t c = 0; c < num_classes; c++)
+			{
+				std::vector<double> cdf_c;
+				cdf_c.push_back( histo(0,c) );
+				for(size_t b = 1; b < n_bins; b++)
+				{
+					double val = cdf_c[b-1] + histo(b,c);
+					cdf_c.push_back(val);	
+				}	
+				cdf_d.push_back(cdf_c);
+			}
+		}
+		cdfs.push_back(cdf_d);
+	}
 }
 
 // TODO what to do for too small bins <-> too many bins
