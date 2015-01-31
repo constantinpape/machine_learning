@@ -150,7 +150,7 @@ label_data_t BayesClassifier::predict(const image_data_t & test_data)
 	return labels_return;
 }
 
-image_data_t BayesClassifier::generate(const short N, const short label)
+image_data_t BayesClassifier::generate(const size_t N, const short label)
 {
 	image_data_t data_return(N,num_dimensions);
 // instantiate and seed random generator

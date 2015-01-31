@@ -86,7 +86,7 @@ class DensityTreeClassifier:
 	# split the node according to the optimal scheme
 	def split_node_optimal(self, node):
 		
-		# calculate the loss
+		# calculate the gain
 		def calc_gain(node, t, N, d):
 			N_l = float(np.where(node.data[:,d] < t)[0].shape[0])
 			N_r = float(np.where(node.data[:,d] > t)[0].shape[0])

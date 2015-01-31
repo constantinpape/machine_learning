@@ -21,6 +21,30 @@ struct bin_t
 	size_t num_bins;
 };
 
+struct GreaterThreshold
+{
+	GreaterThreshold(const double & threshold) : mThresh(threshold)
+	{}
+	bool operator()(const double & val)
+	{
+		return val > mThresh; 
+	}
+private:
+	double mThresh;
+};
+
+struct LessThreshold
+{
+	LessThreshold(const double & threshold) : mThresh(threshold)
+	{}
+	bool operator()(const double & val)
+	{
+		return val < mThresh; 
+	}
+private:
+	double mThresh;
+};
+
 image_data_t read_mnist_data(const std::string & fname);
 label_data_t read_mnist_label(const std::string & fname);
 

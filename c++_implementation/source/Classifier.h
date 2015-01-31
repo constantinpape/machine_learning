@@ -12,5 +12,5 @@ public:
 	
 	virtual label_data_t predict(const image_data_t & test_data) = 0;
 
-	virtual image_data_t generate(const short N, const short label) = 0;
+	virtual image_data_t generate(const size_t N, const short label) = 0;
 };

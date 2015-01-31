@@ -36,6 +36,16 @@ void node_t::add_child(node_t* child)
 	}
 }
 	
+const node_t & node_t::get_child( const side_t side ) const
+{
+	return *(mChildren[side]);
+}
+
+node_t & node_t::get_child( const side_t side )
+{
+	return *(mChildren[side]);
+}
+	
 void node_t::calculate_probability( const size_t N_class )
 {
 	size_t N_node = get_data().size1();
