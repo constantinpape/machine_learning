@@ -8,6 +8,7 @@
 # swp and swo
 .*.swp
 .*.swo
+.*.swn
 
 # data types
 *.out
@@ -18,4 +19,6 @@ c++_implementation/lib
 c++_implementation/mnist_data/original
 c++_implementation/mnist_data/test_bayes
 c++_implementation/mnist_data/test_readin
+c++_implementation/mnist_data/test_densitytree
+c++_implementation/mnist_data/test_copula
 data

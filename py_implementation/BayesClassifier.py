@@ -227,7 +227,7 @@ class BayesClassifier:
 						break
 				
 				# return the position (middle of the bin)
-				pos = self.bin_widths[d] * (j + 0.5)
+				pos = self.bin_widths[d] * (j - 0.5)
 				returnval[d] = pos
 		
 		return returnval

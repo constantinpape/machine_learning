@@ -1,11 +1,37 @@
-#include <iostream>
-#include <fstream>
+#include <algorithm>
 #include <exception>
+#include <fstream>
+#include <iostream>
+
 #include <boost/numeric/ublas/io.hpp>
 
 #include "common.h"
 	
 using namespace boost::numeric::ublas;
+
+bool comparator(const pair_t & l, const pair_t & r)
+{
+	return l.first < r.first;
+}
+
+// TODO check if this works properly! -> write a test
+vector<double> get_sorted_indices(const matrix_column<matrix<double> const> & data )
+{
+	std::vector<pair_t> to_sort;
+	for(size_t i = 0; i < data.size(); i++)
+	{
+		double val = data(i);
+		pair_t pair(val,i);
+		to_sort.push_back(pair);
+	}
+	std::sort(to_sort.begin(), to_sort.end(), comparator);
+	vector<double> returnval( to_sort.size() );
+	for(size_t i = 0; i < to_sort.size(); i++)
+	{
+		returnval(i) = to_sort[i].second;
+	}
+	return returnval;
+}
 
 image_data_t read_mnist_data(const std::string & fname)
 {

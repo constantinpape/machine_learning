@@ -6,9 +6,6 @@
 #include <math.h>
 #include <random>
 
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-
 #include "BayesClassifier.h"
 
 using namespace boost::numeric::ublas;
@@ -106,11 +103,11 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 
 label_data_t BayesClassifier::predict(const image_data_t & test_data)
 {
-	label_data_t labels_return;
 	if( !trained )
 	{
 		throw std::runtime_error("BayesClassifier::predict trying to predict without having trained!");
 	}
+	label_data_t labels_return;
 // iterate over test instances
 	for( size_t i = 0; i < test_data.size1(); ++i)
 	{
@@ -152,6 +149,10 @@ label_data_t BayesClassifier::predict(const image_data_t & test_data)
 
 image_data_t BayesClassifier::generate(const size_t N, const short label)
 {
+	if( !trained )
+	{
+		throw std::runtime_error("BayesClassifier::generate: Trying to generate without having trained!");
+	}
 	image_data_t data_return(N,num_dimensions);
 // instantiate and seed random generator
 	unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -163,7 +164,7 @@ image_data_t BayesClassifier::generate(const size_t N, const short label)
 	{
 		for( size_t d = 0; d < num_dimensions; d++ )
 		{
-// check if this dimension is irrelevant and continue if it is
+// check if this dimension is irrelevant and set data to zero if it is
 			if( std::find( irrelevant_dims.begin(), irrelevant_dims.end(), d) != irrelevant_dims.end() )
 			{
 				data_return(i,d) = 0.;
@@ -207,8 +208,44 @@ image_data_t BayesClassifier::generate(const size_t N, const short label)
 	return data_return;
 }
 
-//TODO
-// inverse_cdf()
+vector<double> BayesClassifier::inverse_cdf(const matrix_row<matrix<double> > & data, const short label)
+{
+	if( !trained )
+	{
+		throw std::runtime_error("BayesClassifier::inverse_cdf: Trying to calculate the inverse cdf without having trained!");
+	}	
+	assert(data.size() == num_dimensions);
+	vector<double> data_return(num_dimensions);
+// iterate over the dimensions
+	for( size_t d = 0; d < num_dimensions; d++)
+	{
+// check if this dimension is irrelevant and set data to zero if it is
+		if( std::find( irrelevant_dims.begin(), irrelevant_dims.end(), d) != irrelevant_dims.end() )
+		{
+			data_return(d) = 0.;
+		}
+		else
+		{
+// get the CDF of this dimension and class
+			const std::vector<double> & cdf_dim = cdfs[label][d]; 
+			double val_dim = data(d);
+// find the bin that val_dim is in	
+			size_t b = 0;
+			while( b < cdf_dim.size() )
+			{
+				if( val_dim < cdf_dim[b] )
+				{
+					break;
+				}
+				b++;
+			}
+// the value of the inverse cdf corresponds to the position of the middle of the bin
+// TODO + 0.5 or - 0.5 ??? I think it is correct this way, but not quite sure
+			data_return(d) = bins[d].width * (b - 0.5);
+		}
+	}
+	return data_return;
+}
 
 void BayesClassifier::compute_cdf()
 {

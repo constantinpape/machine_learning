@@ -12,6 +12,9 @@ public:
 	label_data_t predict(const image_data_t & test_data);
 
 	image_data_t generate(const size_t N, const short label);
+
+	boost::numeric::ublas::vector<double> inverse_cdf(
+			const boost::numeric::ublas::matrix_row<boost::numeric::ublas::matrix<double> > & data, const short label);
 	
 private:
 	//private variables

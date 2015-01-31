@@ -1,9 +1,12 @@
 #pragma once
 
-#include <vector>
-#include <boost/numeric/ublas/matrix.hpp>
 #include <string>
-#include <cstdint>
+#include <utility>
+#include <vector>
+
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 
 //typedefs for the datastructures
 typedef boost::numeric::ublas::matrix<double>  	image_data_t;
@@ -44,6 +47,13 @@ struct LessThreshold
 private:
 	double mThresh;
 };
+
+typedef std::pair<double,size_t> pair_t;
+
+bool comparator(const pair_t & l, const pair_t & r);
+
+boost::numeric::ublas::vector<double> get_sorted_indices(
+		const boost::numeric::ublas::matrix_column<boost::numeric::ublas::matrix<double> const> & data );
 
 image_data_t read_mnist_data(const std::string & fname);
 label_data_t read_mnist_label(const std::string & fname);

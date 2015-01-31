@@ -3,8 +3,6 @@
 #include <iterator>
 #include <random>
 
-#include <boost/numeric/ublas/io.hpp>
-
 #include "DensityTreeClassifier.h"
 
 using namespace boost::numeric::ublas;
