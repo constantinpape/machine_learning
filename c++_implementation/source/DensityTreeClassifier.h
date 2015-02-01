@@ -30,12 +30,12 @@ private:
 	size_t 	mNum_dimensions;
 	size_t  mDepth_max;
 // 1 tree for every class
-	std::vector<node_t> mTrees;
+	std::vector<node_t*> mTrees;
 	std::vector<double>	mPriors;
 // private functions
-	bool terminate_num(const node_t & node, const size_t N_class);
-	bool terminate_depth(const node_t & node);
+	bool terminate_num(const node_t * node, const size_t N_class);
+	bool terminate_depth(const node_t * node);
 	double calc_gain(const node_t & node, const double threshold, const size_t N, const size_t dimension);
-	std::array<node_t, 2> split_node(node_t & node);
+	std::array<node_t*, 2> split_node(node_t * node);
 	node_t search_tree(const boost::numeric::ublas::vector<double> & data_point, const size_t c );
 };

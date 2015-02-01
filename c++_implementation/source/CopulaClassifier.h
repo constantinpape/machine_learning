@@ -1,13 +1,7 @@
 #pragma once
 
-#include <memory>
-
-#include "common.h"
-#include "Classifier.h"
-
-// ForwardDeclarations
-class BayesClassifier;
-class DensityTreeClassifier;
+#include "BayesClassifier.h"
+#include "DensityTreeClassifier.h"
 
 class CopulaClassifier : public Classifier
 {
@@ -28,10 +22,10 @@ private:
 	size_t mNum_classes;
 	size_t mNum_dimensions;
 	std::vector<double>	mPriors;
-// pointer to BayesClassifier
-	std::unique_ptr<BayesClassifier>		mBayes;
-// pointer to DensityTreeClassifier
-	std::unique_ptr<DensityTreeClassifier>	mDensityTree;
+// BayesClassifier
+	BayesClassifier	mBayes;
+// DensityTreeClassifier
+	DensityTreeClassifier mDensityTree;
 // private functions
 	image_data_t get_copula(const image_data_t & data);
 };

@@ -24,7 +24,7 @@ const image_data_t & node_t::get_data() const
 	return mData;
 }
 
-void node_t::add_child(node_t* child)
+void node_t::add_child(node_t * child)
 {
 	if( mChildren.size() < max_nodes )
 	{
@@ -36,14 +36,22 @@ void node_t::add_child(node_t* child)
 	}
 }
 	
-const node_t & node_t::get_child( const side_t side ) const
+const node_t * node_t::get_child( const side_t side ) const
 {
-	return *(mChildren[side]);
+	if( mChildren[side] == NULL )
+	{
+		throw std::runtime_error("node_t::get_child NULL");
+	}
+	return mChildren[side];
 }
 
-node_t & node_t::get_child( const side_t side )
+node_t * node_t::get_child( const side_t side )
 {
-	return *(mChildren[side]);
+	if( mChildren[side] == NULL )
+	{
+		throw std::runtime_error("node_t::get_child NULL");
+	}
+	return mChildren[side];
 }
 	
 void node_t::calculate_probability( const size_t N_class )

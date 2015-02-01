@@ -227,7 +227,7 @@ vector<double> BayesClassifier::inverse_cdf(const matrix_row<matrix<double> > & 
 		else
 		{
 // get the CDF of this dimension and class
-			const std::vector<double> & cdf_dim = cdfs[label][d]; 
+			const std::vector<double> & cdf_dim = cdfs[d][label]; 
 			double val_dim = data(d);
 // find the bin that val_dim is in	
 			size_t b = 0;
@@ -254,25 +254,25 @@ double BayesClassifier::get_likelihood(const matrix_row<matrix<double> const> & 
 		throw std::runtime_error("BayesClassifier::get_likelihood: called before calling train!");
 	}	
 	double likelihood = 1.0;
-		for( size_t d = 0; d < num_dimensions; d++)
-		{
-			double val = data(d);
+	for( size_t d = 0; d < num_dimensions; d++)
+	{
+		double val = data(d);
 // check if this dimension is irrelevant and continue if it is
-			if( std::find( irrelevant_dims.begin(), irrelevant_dims.end(), d) != irrelevant_dims.end() )
-			{
-				continue;
-			}
-			else
-			{
-				size_t bin = static_cast<size_t>( ( (val - bins[d].lowest_val) / bins[d].val_range) * bins[d].num_bins );
-// set bin to binmax if it is bigger than binmax, this may happen because we havent seen the test_data yet
-				if( bin >= bins[d].num_bins)
-				{
-					bin = bins[d].num_bins - 1;
-				}
-				likelihood *=  histograms[d](bin,label);
-			}
+		if( std::find( irrelevant_dims.begin(), irrelevant_dims.end(), d) != irrelevant_dims.end() )
+		{
+			continue;
 		}
+		else
+		{
+			size_t bin = static_cast<size_t>( ( (val - bins[d].lowest_val) / bins[d].val_range) * bins[d].num_bins );
+// set bin to binmax if it is bigger than binmax, this may happen because we havent seen the test_data yet
+			if( bin >= bins[d].num_bins)
+			{
+				bin = bins[d].num_bins - 1;
+			}
+			likelihood *=  histograms[d](bin,label);
+		}
+	}
 	return likelihood;
 }
 	
@@ -294,7 +294,12 @@ vector<double> BayesClassifier::get_cdf(const matrix_row<matrix<double> const> &
 		{
 			double val = data(d);
 			size_t bin = static_cast<size_t>( ( (val - bins[d].lowest_val) / bins[d].val_range) * bins[d].num_bins );
-			cdf_return(d) = cdfs[label][d][bin];	
+// set bin to binmax if it is bigger than binmax, this may happen because we havent seen the test_data yet
+			if( bin >= bins[d].num_bins)
+			{
+				bin = bins[d].num_bins - 1;
+			}
+			cdf_return(d) = cdfs[d][label][bin];	
 		}
 	}
 	return cdf_return;

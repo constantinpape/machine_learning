@@ -54,35 +54,35 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 		assert(class_count == N_class);
 // now build the tree for this class
 // initialize the stack for the nodes
-		std::vector<node_t> stack;
+		std::vector<node_t*> stack;
 // initialize the root node
-		node_t root;
-		root.set_data(data_class);
+		node_t* root(new node_t);
+		root->set_data(data_class);
 		stack.push_back(root);
 		size_t count = 0;
 // build the tree
 		while( !stack.empty() )
 		{
 // pop the last node from the stack
-			node_t curr_node = *(stack.end() - 1);
+			node_t* curr_node = *(stack.end() - 1);
 			stack.pop_back();
 // check whether this node is terminal - TODO try different termination criterion, currently using depth criterion
 			//if( terminate_num(curr_node, N_class) )
 			if( terminate_depth(curr_node) )
 			{
-				curr_node.calculate_probability(N_class);
-				curr_node.set_terminal(true);
+				curr_node->calculate_probability(N_class);
+				curr_node->set_terminal(true);
 			}
 // esle split the node, assign the children nodes and put them on the stack
 			else
 			{
-				std::array<node_t, 2> children = split_node(curr_node); 	// TODO try different split criterion
-				node_t & child_left  = children[0];
-				node_t & child_right = children[1];
-				child_left.set_depth(curr_node.get_depth() + 1);
-				child_right.set_depth(curr_node.get_depth() + 1);
-				curr_node.add_child( child_left);
-				curr_node.add_child( child_right);
+				std::array<node_t*, 2> children = split_node(curr_node); 	// TODO try different split criterion
+				node_t * child_left  = children[0];
+				node_t * child_right = children[1];
+				child_left->set_depth(curr_node->get_depth() + 1);
+				child_right->set_depth(curr_node->get_depth() + 1);
+				curr_node->add_child( child_left);
+				curr_node->add_child( child_right);
 				stack.push_back( child_left  );
 				stack.push_back( child_right );
 			}
@@ -95,9 +95,9 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 }
 
 // Termination criterion depending on number of instances in the node
-bool DensityTreeClassifier::terminate_num(const node_t & node, const size_t N_class)
+bool DensityTreeClassifier::terminate_num(const node_t * node, const size_t N_class)
 {
-	size_t N_node = node.get_data().size1();
+	size_t N_node = node->get_data().size1();
 	size_t N_min  = std::cbrt(N_class);
 	if( N_node > N_min )
 	{
@@ -107,15 +107,15 @@ bool DensityTreeClassifier::terminate_num(const node_t & node, const size_t N_cl
 }
 
 // Termination criterion depending on depth of node
-bool DensityTreeClassifier::terminate_depth(const node_t & node)
+bool DensityTreeClassifier::terminate_depth(const node_t * node)
 {
 // terminate the node if it is empyt
-	if( node.get_data().size1() == 0 )
+	if( node->get_data().size1() == 0 )
 	{
 		return true;
 	}
 // check the max_depth-criterion
-	if( node.get_depth() >= mDepth_max )
+	if( node->get_depth() >= mDepth_max )
 	{
 		return true;
 	}
@@ -145,10 +145,10 @@ double DensityTreeClassifier::calc_gain(const node_t & node, const double thresh
 }
 
 // split node and return the two children nodes
-std::array<node_t, 2> DensityTreeClassifier::split_node(node_t & node)
+std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node)
 {
 	double eps 	= 0.01;
-	size_t N_node = node.get_data().size1();
+	size_t N_node = node->get_data().size1();
 	std::vector<double> thresholds;
 	std::vector<double> gains;
 // iterate all dimensions to find the best possible split
@@ -157,7 +157,7 @@ std::array<node_t, 2> DensityTreeClassifier::split_node(node_t & node)
 		std::vector<double> thresholds_dim;
 		std::vector<double> gains_dim;
 // sort the data in this dimension
-		matrix_column<matrix<double> const> data_aux(node.get_data(), d);
+		matrix_column<matrix<double> const> data_aux(node->get_data(), d);
 		vector<double> data_dim( data_aux.size() );
 		std::copy( data_aux.begin(), data_aux.end(), data_dim.begin() );
 		std::sort( data_dim.begin(), data_dim.end() );
@@ -168,14 +168,14 @@ std::array<node_t, 2> DensityTreeClassifier::split_node(node_t & node)
 			if( i!= 0 ) // dont look left for the leftmost instance
 			{
 				double thresh 	= data_dim(i) - eps;
-				double gain 	= calc_gain(node, thresh, N_node, d);
+				double gain 	= calc_gain(*node, thresh, N_node, d);
 				thresholds_dim.push_back( thresh );
 				gains_dim.push_back( gain );
 			}
 			if( i!= N_node ) // dont look right for the rightmost instance
 			{
 				double thresh 	= data_dim(i) + eps;
-				double gain 	= calc_gain(node, thresh, N_node, d);
+				double gain 	= calc_gain(*node, thresh, N_node, d);
 				thresholds_dim.push_back( thresh );
 				gains_dim.push_back( gain );
 			}
@@ -191,10 +191,10 @@ std::array<node_t, 2> DensityTreeClassifier::split_node(node_t & node)
 	size_t d_opt		= std::distance( gains.begin(), max_gain_elem );
 	double thresh_opt	= thresholds[d_opt];
 // store dimension and threshold in the node	
-	node.set_split_dimension(d_opt);
-	node.set_split_threshold(thresh_opt);
+	node->set_split_dimension(d_opt);
+	node->set_split_threshold(thresh_opt);
 // split the data coordingly	
-	matrix_column<matrix<double> const> data_dim( node.get_data(), d_opt );
+	matrix_column<matrix<double> const> data_dim( node->get_data(), d_opt );
 	size_t N_l = std::count_if(data_dim.begin(), data_dim.end(), LessThreshold(thresh_opt) );
 	size_t N_r = std::count_if(data_dim.begin(), data_dim.end(), GreaterThreshold(thresh_opt) );
 	assert(N_l + N_r == N_node);
@@ -204,27 +204,27 @@ std::array<node_t, 2> DensityTreeClassifier::split_node(node_t & node)
 	size_t count_r = 0;
 	for( size_t i = 0; i < N_node; i++)
 	{
-		if( node.get_data()(i,d_opt) < thresh_opt ) // datapoint is on the left
+		if( node->get_data()(i,d_opt) < thresh_opt ) // datapoint is on the left
 		{
-			matrix_row<matrix<double> const> 	copy_source( node.get_data(), i );
+			matrix_row<matrix<double> const> 	copy_source( node->get_data(), i );
 			matrix_row<matrix<double> >			copy_target( data_l, count_l );
 			std::copy( copy_source.begin(), copy_source.end(), copy_target.begin() );
 			count_l++;
 		}
 		else	// datapoint is on the right
 		{
-			matrix_row<matrix<double> const> 	copy_source( node.get_data(), i );
+			matrix_row<matrix<double> const> 	copy_source( node->get_data(), i );
 			matrix_row<matrix<double> >			copy_target( data_r, count_r );
 			std::copy( copy_source.begin(), copy_source.end(), copy_target.begin() );
 			count_r++;
 		}
 	}
 	std::cout << "Splitted " << N_node << " data points: Points to the left: " << N_l << " points to the right: " << N_r << std::endl;
-	node_t node_l;
-	node_l.set_data(data_l);
-	node_t node_r;
-	node_r.set_data(data_r);
-	return std::array<node_t, 2>{ {node_l, node_r} };  
+	node_t* node_l(new node_t);
+	node_l->set_data(data_l);
+	node_t* node_r(new node_t);
+	node_r->set_data(data_r);
+	return std::array<node_t*, 2>{ {node_l, node_r} };  
 }
 	
 label_data_t DensityTreeClassifier::predict(const image_data_t & test_data)
@@ -234,7 +234,6 @@ label_data_t DensityTreeClassifier::predict(const image_data_t & test_data)
 		throw std::runtime_error("DensityTreeClassifier::predict: called before calling train!");
 	}
 	label_data_t label_return;
-	std::cout << "BBB" << std::endl;
 // iterate over the test data
 	for(size_t i = 0; i < test_data.size1(); i++)
 	{
@@ -254,7 +253,6 @@ label_data_t DensityTreeClassifier::predict(const image_data_t & test_data)
 		size_t max_class = std::distance( 	 probabilities.begin(), max_element );
 		label_return.push_back(max_class);
 	}
-	std::cout << "BBB" << std::endl;
 	return label_return;
 }
 
@@ -262,28 +260,23 @@ label_data_t DensityTreeClassifier::predict(const image_data_t & test_data)
 node_t DensityTreeClassifier::search_tree(const vector<double> & data_point, const size_t c )
 {
 // get the root node of the tree belonging to this class
-	node_t & curr_node = mTrees[c];
+	node_t * curr_node = mTrees[c];
 // walk the tree until we come to a terminal node	
-	while( !curr_node.get_terminal() )
+	while( !curr_node->get_terminal() )
 	{
-		size_t dim 		= curr_node.get_split_dimension();
-		double thresh 	= curr_node.get_split_threshold();
+		size_t dim 		= curr_node->get_split_dimension();
+		double thresh 	= curr_node->get_split_threshold();
 // look whether this data_point is left or right of the split boundary
-		std::cout << dim << std::endl;
 		if( data_point(dim) < thresh )
 		{
-			std::cout << "BBB" << std::endl;
-			curr_node = curr_node.get_child( node_t::side_t::left );
-			std::cout << "BBB" << std::endl;
+			curr_node = curr_node->get_child( node_t::side_t::left );
 		}
 		else
 		{
-			std::cout << "BBB" << std::endl;
-			curr_node = curr_node.get_child( node_t::side_t::right );
-			std::cout << "BBB" << std::endl;
+			curr_node = curr_node->get_child( node_t::side_t::right );
 		}
 	}
-	return curr_node;
+	return *curr_node;
 }
 
 // generate N instances of class given by label
@@ -303,20 +296,20 @@ image_data_t DensityTreeClassifier::generate(const size_t N, const short label)
 	for( size_t i = 0; i < N; ++i)
 	{
 // get the root node of the class to generate
-		node_t & curr_node = mTrees[label];
+		node_t * curr_node = mTrees[label];
 // walk the tree until we get to a leaf-node
-		while( !curr_node.get_terminal() )
+		while( !curr_node->get_terminal() )
 		{
-			size_t N = curr_node.get_data().size1();
-			node_t & l_node = curr_node.get_child( node_t::side_t::left );
-			node_t & r_node = curr_node.get_child( node_t::side_t::right);
+			size_t N = curr_node->get_data().size1();
+			node_t * l_node = curr_node->get_child( node_t::side_t::left );
+			node_t * r_node = curr_node->get_child( node_t::side_t::right);
 // calculate p_left
-			size_t N_l = l_node.get_data().size1();
-			double V_l = l_node.get_volume();
+			size_t N_l = l_node->get_data().size1();
+			double V_l = l_node->get_volume();
 			double p_l = N_l / (N * V_l);
 // calculate p_right
-			size_t N_r = r_node.get_data().size1();
-			double V_r = r_node.get_volume();
+			size_t N_r = r_node->get_data().size1();
+			double V_r = r_node->get_volume();
 			double p_r = N_r / (N * V_r);
 // calculate p and q (normalised probabilities)
 			double p = p_l / (p_l + p_r);
@@ -332,7 +325,7 @@ image_data_t DensityTreeClassifier::generate(const size_t N, const short label)
 			}
 		}
 // sample uniformly from the leaf-node we ended up in 
-		const image_data_t & sample_data = curr_node.get_data();
+		const image_data_t & sample_data = curr_node->get_data();
 		for( size_t d = 0; d < mNum_dimensions; d++)
 		{
 			matrix_column<matrix<double> const> data_dim( sample_data, d );

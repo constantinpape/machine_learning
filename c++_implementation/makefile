@@ -1,11 +1,11 @@
 # ~/programming/machine_learning/project/c++_implementation/source
 
-#test/test_copula.cpp
-install : build test/test_readin.cpp test/test_bayes.cpp test/test_densitytree.cpp 
+install : build test/test_readin.cpp test/test_sortindex.cpp test/test_bayes.cpp test/test_densitytree.cpp test/test_copula.cpp
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-readin test/test_readin.cpp lib/common.o
+	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-sortindex test/test_sortindex.cpp lib/common.o
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-bayes test/test_bayes.cpp lib/BayesClassifier.o lib/test_template.o lib/common.o
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-densitytree test/test_densitytree.cpp lib/DensityTreeClassifier.o lib/test_template.o lib/common.o lib/node_t.o
-	#g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-copula test/test_copula.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/test_template.o lib/common.o lib/node_t.o
+	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-copula test/test_copula.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/test_template.o lib/common.o lib/node_t.o
 
 build : BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o test_template.o common.o node_t.o
 

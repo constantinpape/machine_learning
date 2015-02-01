@@ -1,6 +1,4 @@
 #include "CopulaClassifier.h"
-#include "BayesClassifier.h"
-#include "DensityTreeClassifier.h"
 
 using namespace boost::numeric::ublas;
 	
@@ -9,8 +7,8 @@ CopulaClassifier::CopulaClassifier() : mTrained(false),
 									   mNum_classes(0),
 									   mNum_dimensions(0),
 									   mPriors(),
-									   mBayes(new BayesClassifier() ),
-									   mDensityTree(new DensityTreeClassifier() )
+									   mBayes(),
+									   mDensityTree()
 {}
 
 void CopulaClassifier::train(const image_data_t & train_data, const label_data_t & train_label)
@@ -30,11 +28,11 @@ void CopulaClassifier::train(const image_data_t & train_data, const label_data_t
 		mPriors.push_back( N_class/static_cast<double>(mNum_instances) );
 	}
 // train the BayesClassifier on the original data
-	mBayes->train(train_data, train_label);
+	mBayes.train(train_data, train_label);
 // calculate the copula of the data
 	image_data_t data_copula = get_copula(train_data);
 // train the DensityTree on the copula data
-	mDensityTree->train(data_copula, train_label);
+	mDensityTree.train(data_copula, train_label);
 	mTrained = true;
 }
 
@@ -78,11 +76,11 @@ label_data_t CopulaClassifier::predict(const image_data_t & test_data)
 		{
 			double likelihood = 1.;
 // get the likelihood for the data from the bayes classifier
-			likelihood *= mBayes->get_likelihood( data_instance, c ); 
+			likelihood *= mBayes.get_likelihood( data_instance, c ); 
 // calculate the cdf of the data
-			vector<double> data_cdf = mBayes->get_cdf( data_instance, c );
+			vector<double> data_cdf = mBayes.get_cdf( data_instance, c );
 // get the likelihood for the cdf_data from the density tree classifier
-			likelihood *= mDensityTree->get_likelihood( data_cdf, c );
+			likelihood *= mDensityTree.get_likelihood( data_cdf, c );
 // multiply with the prior
 			likelihood *= mPriors[c];
 			probabilities.push_back(likelihood);
@@ -103,13 +101,13 @@ image_data_t CopulaClassifier::generate(const size_t N, const short label)
 	}
 	image_data_t data_return(N, mNum_dimensions);
 // generate N instances of class given by label
-	image_data_t copula_generated = mDensityTree->generate(N,label);
+	image_data_t copula_generated = mDensityTree.generate(N,label);
 	assert( N == copula_generated.size1() );
 // convert the copula data to the original values with the inveres cdf of the Bayes classfier
 	for(size_t i = 0; i < N; i++ )
 	{
 		const matrix_row<matrix<double> > data_instance( copula_generated, i );
-		vector<double> data_orig = mBayes->inverse_cdf( data_instance, label );
+		vector<double> data_orig = mBayes.inverse_cdf( data_instance, label );
 		matrix_row<matrix<double> > cpy_trgt( data_return, i );
 		std::copy( data_orig.begin(), data_orig.end(), cpy_trgt.begin() );
 	}
@@ -118,10 +116,10 @@ image_data_t CopulaClassifier::generate(const size_t N, const short label)
 
 void CopulaClassifier::set_maximal_depth(const size_t max_depth)
 {
-	mDensityTree->set_maximal_depth(max_depth);
+	mDensityTree.set_maximal_depth(max_depth);
 }
 
 size_t CopulaClassifier::get_maximal_depth() const
 {
-	return mDensityTree->get_maximal_depth();
+	return mDensityTree.get_maximal_depth();
 }

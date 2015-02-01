@@ -14,7 +14,7 @@ bool comparator(const pair_t & l, const pair_t & r)
 	return l.first < r.first;
 }
 
-// TODO check if this works properly! -> write a test
+// tested in test/test_sortindex
 vector<double> get_sorted_indices(const matrix_column<matrix<double> const> & data )
 {
 	std::vector<pair_t> to_sort;

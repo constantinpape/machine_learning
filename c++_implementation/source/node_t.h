@@ -13,9 +13,9 @@ public:
 	node_t();
 	void 	set_data(const image_data_t & data);
 	const image_data_t & get_data() const;
-	void	add_child(node_t* child);
-	const node_t & get_child( const side_t side ) const;
-	node_t & get_child( const side_t side );
+	void	add_child(node_t * child);
+	const node_t * get_child( const side_t side ) const;
+	node_t * get_child( const side_t side );
 	void 	calculate_probability( const size_t N_class );
 	double 	get_probability() const;
 	double 	get_volume() const;
