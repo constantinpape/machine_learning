@@ -81,8 +81,8 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 				node_t & child_right = children[1];
 				child_left.set_depth(curr_node.get_depth() + 1);
 				child_right.set_depth(curr_node.get_depth() + 1);
-				curr_node.add_child( new node_t(child_left)  );
-				curr_node.add_child( new node_t(child_right) );
+				curr_node.add_child( child_left);
+				curr_node.add_child( child_right);
 				stack.push_back( child_left  );
 				stack.push_back( child_right );
 			}
@@ -234,6 +234,7 @@ label_data_t DensityTreeClassifier::predict(const image_data_t & test_data)
 		throw std::runtime_error("DensityTreeClassifier::predict: called before calling train!");
 	}
 	label_data_t label_return;
+	std::cout << "BBB" << std::endl;
 // iterate over the test data
 	for(size_t i = 0; i < test_data.size1(); i++)
 	{
@@ -241,7 +242,9 @@ label_data_t DensityTreeClassifier::predict(const image_data_t & test_data)
 // iterate over the classes to find the class with highest probability
 		for(size_t c = 0; c < mNum_classes; c++)
 		{
-			matrix_row<matrix<double> const> data_point(test_data,i);
+			matrix_row<matrix<double> const> data_aux(test_data,i);
+			vector<double> data_point( data_aux.size() );
+			std::copy(data_aux.begin(), data_aux.end(), data_point.begin() );
 // find the leaf-node for this data point
 			const node_t & node = search_tree(data_point,c);
 			probabilities.push_back( mPriors[c] * node.get_probability() );
@@ -251,11 +254,12 @@ label_data_t DensityTreeClassifier::predict(const image_data_t & test_data)
 		size_t max_class = std::distance( 	 probabilities.begin(), max_element );
 		label_return.push_back(max_class);
 	}
+	std::cout << "BBB" << std::endl;
 	return label_return;
 }
 
 // search the tree for the leaf-node which has the data_point
-node_t DensityTreeClassifier::search_tree(const matrix_row<matrix<double> const> & data_point, const size_t c )
+node_t DensityTreeClassifier::search_tree(const vector<double> & data_point, const size_t c )
 {
 // get the root node of the tree belonging to this class
 	node_t & curr_node = mTrees[c];
@@ -265,13 +269,18 @@ node_t DensityTreeClassifier::search_tree(const matrix_row<matrix<double> const>
 		size_t dim 		= curr_node.get_split_dimension();
 		double thresh 	= curr_node.get_split_threshold();
 // look whether this data_point is left or right of the split boundary
+		std::cout << dim << std::endl;
 		if( data_point(dim) < thresh )
 		{
+			std::cout << "BBB" << std::endl;
 			curr_node = curr_node.get_child( node_t::side_t::left );
+			std::cout << "BBB" << std::endl;
 		}
 		else
 		{
+			std::cout << "BBB" << std::endl;
 			curr_node = curr_node.get_child( node_t::side_t::right );
+			std::cout << "BBB" << std::endl;
 		}
 	}
 	return curr_node;
@@ -280,6 +289,10 @@ node_t DensityTreeClassifier::search_tree(const matrix_row<matrix<double> const>
 // generate N instances of class given by label
 image_data_t DensityTreeClassifier::generate(const size_t N, const short label)
 {
+	if( !mTrained )
+	{
+		throw std::runtime_error("DensityTreeClassifier::generate: called before calling train!");
+	}
 	image_data_t data_return( N, mNum_dimensions );
 // instantiate and seed random generator
 	unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -330,6 +343,16 @@ image_data_t DensityTreeClassifier::generate(const size_t N, const short label)
 		}
 	}
 	return data_return;
+}
+	
+double DensityTreeClassifier::get_likelihood(const vector<double> & data, const short label)
+{
+	if( !mTrained )
+	{
+		throw std::runtime_error("DensityTreeClassifier::get_likelihood: called before calling train!");
+	}
+	const node_t & node = search_tree(data,label);
+	return node.get_probability();
 }
 	
 void DensityTreeClassifier::set_maximal_depth(const size_t max_depth)

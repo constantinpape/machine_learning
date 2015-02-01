@@ -25,7 +25,9 @@ public:
 private:
 	bool mTrained;
 	size_t mNum_instances;
+	size_t mNum_classes;
 	size_t mNum_dimensions;
+	std::vector<double>	mPriors;
 // pointer to BayesClassifier
 	std::unique_ptr<BayesClassifier>		mBayes;
 // pointer to DensityTreeClassifier

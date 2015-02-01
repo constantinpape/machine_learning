@@ -6,7 +6,9 @@ using namespace boost::numeric::ublas;
 	
 CopulaClassifier::CopulaClassifier() : mTrained(false),
 									   mNum_instances(0),
+									   mNum_classes(0),
 									   mNum_dimensions(0),
+									   mPriors(),
 									   mBayes(new BayesClassifier() ),
 									   mDensityTree(new DensityTreeClassifier() )
 {}
@@ -18,7 +20,15 @@ void CopulaClassifier::train(const image_data_t & train_data, const label_data_t
 		std::cout << "CopulaClassifier::train: retraining the classifier!" << std::endl;	
 	}
 	mNum_instances  = train_data.size1();
+	auto min_max	= std::minmax_element( train_label.begin(), train_label.end() );
+	mNum_classes    = (*min_max.second - *min_max.first) + 1;
 	mNum_dimensions = train_data.size2();
+// calculate the priors
+	for( size_t c = 0; c < mNum_classes; c++)
+	{
+		size_t N_class = std::count( train_label.begin(), train_label.end(), c);
+		mPriors.push_back( N_class/static_cast<double>(mNum_instances) );
+	}
 // train the BayesClassifier on the original data
 	mBayes->train(train_data, train_label);
 // calculate the copula of the data
@@ -51,7 +61,6 @@ image_data_t CopulaClassifier::get_copula(const image_data_t & data)
 	return data_copula;
 }
 
-// TODO How does the training algorithm work?
 label_data_t CopulaClassifier::predict(const image_data_t & test_data)
 {
 	if(!mTrained)
@@ -59,7 +68,30 @@ label_data_t CopulaClassifier::predict(const image_data_t & test_data)
 		throw("CopulaClassifier::predict: Trying to predict without having trained the classifier!");
 	}
 	label_data_t label_return( test_data.size1() );
-
+// iterate over the test data
+	for( size_t i = 0; i < test_data.size1(); i++ )
+	{
+		std::vector<double> probabilities;
+		matrix_row<matrix<double> const> data_instance( test_data, i );	
+// iterate over the classes
+		for( size_t c = 0; c < mNum_classes; c++ )
+		{
+			double likelihood = 1.;
+// get the likelihood for the data from the bayes classifier
+			likelihood *= mBayes->get_likelihood( data_instance, c ); 
+// calculate the cdf of the data
+			vector<double> data_cdf = mBayes->get_cdf( data_instance, c );
+// get the likelihood for the cdf_data from the density tree classifier
+			likelihood *= mDensityTree->get_likelihood( data_cdf, c );
+// multiply with the prior
+			likelihood *= mPriors[c];
+			probabilities.push_back(likelihood);
+		}
+// find class with highest probability
+		auto max_elem 	 = std::max_element( probabilities.begin(), probabilities.end() );
+		short max_class = std::distance( probabilities.begin(), max_elem);
+		label_return.push_back(max_class);
+	}
 	return label_return;
 }
 

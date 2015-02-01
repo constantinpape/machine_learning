@@ -132,11 +132,11 @@ label_data_t BayesClassifier::predict(const image_data_t & test_data)
 					{
 						bin = bins[d].num_bins - 1;
 					}
-// debug output
-					//std::cout << "Dim " << d << " instance " << i << " bin " << bin << " bin-max " << bins[d].num_bins << std::endl;
 					likelihood *=  histograms[d](bin,c);
 				}
 			}
+// multiply with the prior
+			likelihood *= priors[c];
 			class_likelihoods.push_back(likelihood);
 		}
 // find the class with biggest likelihood
@@ -245,6 +245,59 @@ vector<double> BayesClassifier::inverse_cdf(const matrix_row<matrix<double> > & 
 		}
 	}
 	return data_return;
+}
+	
+double BayesClassifier::get_likelihood(const matrix_row<matrix<double> const> & data, const short label)
+{
+	if( !trained )
+	{
+		throw std::runtime_error("BayesClassifier::get_likelihood: called before calling train!");
+	}	
+	double likelihood = 1.0;
+		for( size_t d = 0; d < num_dimensions; d++)
+		{
+			double val = data(d);
+// check if this dimension is irrelevant and continue if it is
+			if( std::find( irrelevant_dims.begin(), irrelevant_dims.end(), d) != irrelevant_dims.end() )
+			{
+				continue;
+			}
+			else
+			{
+				size_t bin = static_cast<size_t>( ( (val - bins[d].lowest_val) / bins[d].val_range) * bins[d].num_bins );
+// set bin to binmax if it is bigger than binmax, this may happen because we havent seen the test_data yet
+				if( bin >= bins[d].num_bins)
+				{
+					bin = bins[d].num_bins - 1;
+				}
+				likelihood *=  histograms[d](bin,label);
+			}
+		}
+	return likelihood;
+}
+	
+vector<double> BayesClassifier::get_cdf(const matrix_row<matrix<double> const> & data, const short label)
+{
+	if( !trained )
+	{
+		throw std::runtime_error("BayesClassifier::get_cdf: called before calling train!");
+	}	
+	assert(data.size() == num_dimensions);
+	vector<double> cdf_return(num_dimensions);
+	for( size_t d = 0; d < num_dimensions; d++)
+	{
+		if( std::find( irrelevant_dims.begin(), irrelevant_dims.end(), d) != irrelevant_dims.end() )
+		{
+			cdf_return(d) = 0.;
+		}
+		else
+		{
+			double val = data(d);
+			size_t bin = static_cast<size_t>( ( (val - bins[d].lowest_val) / bins[d].val_range) * bins[d].num_bins );
+			cdf_return(d) = cdfs[label][d][bin];	
+		}
+	}
+	return cdf_return;
 }
 
 void BayesClassifier::compute_cdf()

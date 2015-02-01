@@ -17,6 +17,8 @@ public:
 
 	image_data_t generate(const size_t N, const short label);
 
+	double get_likelihood(const boost::numeric::ublas::vector<double> & data, const short label);
+
 	void   set_maximal_depth(const size_t max_depth);
 	size_t get_maximal_depth() const;
 
@@ -35,5 +37,5 @@ private:
 	bool terminate_depth(const node_t & node);
 	double calc_gain(const node_t & node, const double threshold, const size_t N, const size_t dimension);
 	std::array<node_t, 2> split_node(node_t & node);
-	node_t search_tree(const boost::numeric::ublas::matrix_row<boost::numeric::ublas::matrix<double> const> & data_point, const size_t c );
+	node_t search_tree(const boost::numeric::ublas::vector<double> & data_point, const size_t c );
 };

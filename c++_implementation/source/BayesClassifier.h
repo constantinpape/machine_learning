@@ -15,6 +15,12 @@ public:
 
 	boost::numeric::ublas::vector<double> inverse_cdf(
 			const boost::numeric::ublas::matrix_row<boost::numeric::ublas::matrix<double> > & data, const short label);
+
+	double get_likelihood(
+			const boost::numeric::ublas::matrix_row<boost::numeric::ublas::matrix<double> const> & data, const short label);
+
+	boost::numeric::ublas::vector<double> get_cdf(
+			const boost::numeric::ublas::matrix_row<boost::numeric::ublas::matrix<double> const> & data, const short label);
 	
 private:
 	//private variables
