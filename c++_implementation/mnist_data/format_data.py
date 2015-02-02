@@ -90,3 +90,13 @@ if __name__ == '__main__':
 	# save reduced data
 	np.savetxt("original/images_train_reduced.out", reduced_train, fmt='%f')
 	np.savetxt("original/images_test_reduced.out",  reduced_test,  fmt='%f')
+	
+	# only save 50 instances for debugging purposes
+	# save to read in via c++
+	#np.savetxt("original/images_train.out", images_train[0:50], fmt='%f')
+	#np.savetxt("original/labels_train.out", labels_train[0:50], fmt='%i')
+	#np.savetxt("original/images_test.out",   images_test[0:50],  fmt='%f')
+	#np.savetxt("original/labels_test.out",   labels_test[0:50],  fmt='%i')
+	## save reduced data
+	#np.savetxt("original/images_train_reduced.out", reduced_train[0:50], fmt='%f')
+	#np.savetxt("original/images_test_reduced.out",   reduced_test[0:50],  fmt='%f')

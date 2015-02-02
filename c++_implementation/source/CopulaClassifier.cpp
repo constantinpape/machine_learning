@@ -65,7 +65,7 @@ label_data_t CopulaClassifier::predict(const image_data_t & test_data)
 	{
 		throw("CopulaClassifier::predict: Trying to predict without having trained the classifier!");
 	}
-	label_data_t label_return( test_data.size1() );
+	label_data_t label_return;
 // iterate over the test data
 	for( size_t i = 0; i < test_data.size1(); i++ )
 	{
