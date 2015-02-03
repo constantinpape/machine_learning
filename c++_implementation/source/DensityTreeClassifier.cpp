@@ -35,6 +35,8 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 		std::cout << "DensityTreeClassfier::train: start building tree for class " << c << std::endl;
 // number of instances beloniging to this class
 		size_t N_class = std::count( train_label.begin(), train_label.end(), c);
+// minimal number of instnaces in a node
+		size_t N_min  = std::cbrt(N_class);
 // calculate the prior for this class
 		mPriors.push_back( N_class/static_cast<double>(mNum_instances) );
 // extract the data belonging to this class
@@ -66,8 +68,7 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 // pop the last node from the stack
 			node_t* curr_node = *(stack.end() - 1);
 			stack.pop_back();
-// check whether this node is terminal - TODO try different termination criterion, currently using depth criterion
-			//if( terminate_num(curr_node, N_class) )
+// check whether this node is terminal
 			if( terminate_depth(curr_node) )
 			{
 				curr_node->calculate_probability(N_class);
@@ -76,7 +77,7 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 // esle split the node, assign the children nodes and put them on the stack
 			else
 			{
-				std::array<node_t*, 2> children = split_node(curr_node); 	// TODO try different split criterion
+				std::array<node_t*, 2> children = split_node(curr_node, N_min); 	// TODO try different split criterion
 				node_t * child_left  = children[0];
 				node_t * child_right = children[1];
 				child_left->set_depth(curr_node->get_depth() + 1);
@@ -94,17 +95,6 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 	mTrained = true;
 }
 
-// Termination criterion depending on number of instances in the node
-bool DensityTreeClassifier::terminate_num(const node_t * node, const size_t N_class)
-{
-	size_t N_node = node->get_data().size1();
-	size_t N_min  = std::cbrt(N_class);
-	if( N_node > N_min )
-	{
-		return false;
-	}
-	return true;
-}
 
 // Termination criterion depending on depth of node
 bool DensityTreeClassifier::terminate_depth(const node_t * node)
@@ -122,89 +112,94 @@ bool DensityTreeClassifier::terminate_depth(const node_t * node)
 	return false;
 }
 
-// calculate the gain of the current split
-double DensityTreeClassifier::calc_gain(const node_t & node, const double threshold, const size_t N, const size_t dimension)
-{
-	matrix_column<matrix<double> const> data_dim( node.get_data(), dimension );
-	size_t N_l = std::count_if(data_dim.begin(), data_dim.end(), LessThreshold(threshold)  );
-	size_t N_r = std::count_if(data_dim.begin(), data_dim.end(), GreaterThreshold(threshold) );
-// no splits with 0 or 1 datapoints, because this would lead to diverging gains
-	if( N_l <= 1 || N_r <= 1)
-	{
-		return 0.;
-	}
-// calculate volumes
-	double Vol = node.get_volume();
-// diviide by the volume of this dimension
-	double min_dim = *( std::min_element( data_dim.begin(), data_dim.end() ) );
-	double max_dim = *( std::max_element( data_dim.begin(), data_dim.end() ) );
-	Vol /= (max_dim - min_dim);
-	double V_l = Vol * ( threshold - min_dim );
-	double V_r = Vol * ( max_dim - threshold );
-	return std::pow( (static_cast<double>(N_l) / N), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N), 2 ) / V_r; 
-}
-
 // split node and return the two children nodes
-std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node)
+std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const size_t N_min)
 {
+// epsilon for the thresholds
 	double eps 	= 0.01;
+// get number of instances in this node
 	size_t N_node = node->get_data().size1();
-	std::vector<double> thresholds;
-	std::vector<double> gains;
+	double best_thresh = 0.;
+	double best_gain   = 0.; 
+	size_t best_dim	   = 0;
 // iterate all dimensions to find the best possible split
 	for( size_t d = 0; d < mNum_dimensions; d++)
 	{
-		std::vector<double> thresholds_dim;
-		std::vector<double> gains_dim;
 // sort the data in this dimension
 		matrix_column<matrix<double> const> data_aux(node->get_data(), d);
 		vector<double> data_dim( data_aux.size() );
 		std::copy( data_aux.begin(), data_aux.end(), data_dim.begin() );
 		std::sort( data_dim.begin(), data_dim.end() );
-// iterate over the data and calculate the gain for every possible split
-// TODO we need to speed this up somehow!
-		for( size_t i = 0; i < N_node; i++)
+		assert( data_dim.size() == N_node );
+// precompute the volume in this dimension
+		double V_dim = node->get_volume();
+// divide by the volume of this dimension
+		double min_dim = *( std::min_element( data_dim.begin(), data_dim.end() ) );
+		double max_dim = *( std::max_element( data_dim.begin(), data_dim.end() ) );
+		V_dim /= (max_dim - min_dim);
+// calculate all threshold
+		std::vector<double> thresholds;
+        double min_thresh = *data_dim.begin() + eps;
+        double max_thresh = *(data_dim.end()-1) - eps;
+		for( size_t i = 1; i < N_node; i++ )
 		{
-			if( i!= 0 ) // dont look left for the leftmost instance
+			if( data_dim[i] - eps > min_thresh )
 			{
-				double thresh 	= data_dim(i) - eps;
-				double gain 	= calc_gain(*node, thresh, N_node, d);
-				thresholds_dim.push_back( thresh );
-				gains_dim.push_back( gain );
+				thresholds.push_back(data_dim[i] - eps);
+			}	 
+		}
+		for( size_t i = 0; i < N_node; i++ )
+		{
+			if( data_dim[i] + eps < max_thresh )
+			{
+				thresholds.push_back(data_dim[i] + eps);
+			}	 
+		}
+// iterate over the thresholds
+		for( double t : thresholds)
+		{
+            auto split_iter = std::lower_bound(data_dim.begin(), data_dim.end(), t);
+            size_t N_l 		= std::distance(data_dim.begin(), split_iter);
+            size_t N_r 		= N_node - N_l;
+// we don't want too small splits
+			if( N_l < N_min || N_r < N_min)
+			{
+				continue;
 			}
-			if( i!= N_node ) // dont look right for the rightmost instance
+			else
 			{
-				double thresh 	= data_dim(i) + eps;
-				double gain 	= calc_gain(*node, thresh, N_node, d);
-				thresholds_dim.push_back( thresh );
-				gains_dim.push_back( gain );
+// calculate volumes
+				double V_l = V_dim * ( t - min_dim );
+				double V_r = V_dim * ( max_dim - t );
+				double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
+// check whether this is the best gain so far
+				if( gain > best_gain )
+				{
+					best_gain 	= gain;
+					best_thresh = t;
+					best_dim 	= d; 
+				}
 			}
 		}
-// look for the best split in this dimension 
-		auto max_gain_elem 	= std::max_element( gains_dim.begin(), gains_dim.end() );
-		size_t max_index	= std::distance( gains_dim.begin(), max_gain_elem );
-		thresholds.push_back( thresholds_dim[max_index] );
-		gains.push_back( *max_gain_elem );
 	}
-// look for the overall best split	
-	auto max_gain_elem 	= std::max_element( gains.begin(), gains.end() );
-	size_t d_opt		= std::distance( gains.begin(), max_gain_elem );
-	double thresh_opt	= thresholds[d_opt];
 // store dimension and threshold in the node	
-	node->set_split_dimension(d_opt);
-	node->set_split_threshold(thresh_opt);
-// split the data coordingly	
-	matrix_column<matrix<double> const> data_dim( node->get_data(), d_opt );
-	size_t N_l = std::count_if(data_dim.begin(), data_dim.end(), LessThreshold(thresh_opt) );
-	size_t N_r = std::count_if(data_dim.begin(), data_dim.end(), GreaterThreshold(thresh_opt) );
-	assert(N_l + N_r == N_node);
+	node->set_split_dimension(best_dim);
+	node->set_split_threshold(best_thresh);
+// split the data accordingly	
+	matrix_column<matrix<double> const> data_dim( node->get_data(), best_dim );
+	vector<double> data_sort( data_dim.size() );
+	std::copy( data_dim.begin(), data_dim.end(), data_sort.begin() );
+	std::sort( data_sort.begin(), data_sort.end() );
+	auto split_iter = std::lower_bound(data_sort.begin(), data_sort.end(), best_thresh);
+    size_t N_l 		= std::distance(data_sort.begin(), split_iter);
+	size_t N_r		= N_node - N_l;
 	image_data_t data_l( N_l, mNum_dimensions);
 	image_data_t data_r( N_r, mNum_dimensions);
 	size_t count_l = 0;
 	size_t count_r = 0;
 	for( size_t i = 0; i < N_node; i++)
 	{
-		if( node->get_data()(i,d_opt) < thresh_opt ) // datapoint is on the left
+		if( node->get_data()(i,best_dim) < best_thresh ) // datapoint is on the left
 		{
 			matrix_row<matrix<double> const> 	copy_source( node->get_data(), i );
 			matrix_row<matrix<double> >			copy_target( data_l, count_l );

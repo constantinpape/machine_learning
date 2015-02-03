@@ -24,30 +24,6 @@ struct bin_t
 	size_t num_bins;
 };
 
-struct GreaterThreshold
-{
-	GreaterThreshold(const double & threshold) : mThresh(threshold)
-	{}
-	bool operator()(const double & val)
-	{
-		return val > mThresh; 
-	}
-private:
-	double mThresh;
-};
-
-struct LessThreshold
-{
-	LessThreshold(const double & threshold) : mThresh(threshold)
-	{}
-	bool operator()(const double & val)
-	{
-		return val < mThresh; 
-	}
-private:
-	double mThresh;
-};
-
 typedef std::pair<double,size_t> pair_t;
 
 bool comparator(const pair_t & l, const pair_t & r);
