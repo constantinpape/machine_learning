@@ -1,6 +1,11 @@
 # ~/programming/machine_learning/project/c++_implementation/source
 
-install : build test/test_readin.cpp test/test_sortindex.cpp test/test_bayes.cpp test/test_densitytree.cpp test/test_copula.cpp
+install : build basic_tests
+
+test_depth : build test/test_depth.cpp
+	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-depth test/test_depth.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/test_template.o lib/common.o lib/node_t.o
+
+basic_tests : test/test_readin.cpp test/test_sortindex.cpp test/test_bayes.cpp test/test_densitytree.cpp test/test_copula.cpp
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-readin test/test_readin.cpp lib/common.o
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-sortindex test/test_sortindex.cpp lib/common.o
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-bayes test/test_bayes.cpp lib/BayesClassifier.o lib/test_template.o lib/common.o
@@ -16,7 +21,7 @@ CopulaClassifier.o : source/CopulaClassifier.cpp source/CopulaClassifier.h
 	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/CopulaClassifier.o source/CopulaClassifier.cpp
 
 DensityTreeClassifier.o : source/DensityTreeClassifier.cpp source/DensityTreeClassifier.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/DensityTreeClassifier.o source/DensityTreeClassifier.cpp
+	g++ -I -O3 ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/DensityTreeClassifier.o source/DensityTreeClassifier.cpp
 
 BayesClassifier.o : source/BayesClassifier.cpp source/BayesClassifier.h
 	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/BayesClassifier.o source/BayesClassifier.cpp

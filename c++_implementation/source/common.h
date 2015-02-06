@@ -31,6 +31,9 @@ bool comparator(const pair_t & l, const pair_t & r);
 boost::numeric::ublas::vector<double> get_sorted_indices(
 		const boost::numeric::ublas::matrix_column<boost::numeric::ublas::matrix<double> const> & data );
 
+std::vector<size_t> get_sorted_indices(
+		const boost::numeric::ublas::vector<double>& data );
+
 image_data_t read_mnist_data(const std::string & fname);
 label_data_t read_mnist_label(const std::string & fname);
 

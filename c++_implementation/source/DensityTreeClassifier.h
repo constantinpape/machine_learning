@@ -35,5 +35,8 @@ private:
 // private functions
 	bool terminate_depth(const node_t * node);
 	std::array<node_t*, 2> split_node(node_t * node, const size_t N_min);
-	node_t search_tree(const boost::numeric::ublas::vector<double> & data_point, const size_t c );
+	std::array<node_t*, 2> split_node_gradient(node_t * node, size_t k);
+	node_t search_tree(
+			const boost::numeric::ublas::vector<double> & data_point,
+			const size_t c );
 };

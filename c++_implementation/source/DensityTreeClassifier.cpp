@@ -69,7 +69,7 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 			node_t* curr_node = *(stack.end() - 1);
 			stack.pop_back();
 // check whether this node is terminal
-			if( terminate_depth(curr_node) )
+			if( terminate_depth(curr_node) || curr_node->get_data().size1() < N_min )
 			{
 				curr_node->calculate_probability(N_class);
 				curr_node->set_terminal(true);
@@ -77,7 +77,8 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 // esle split the node, assign the children nodes and put them on the stack
 			else
 			{
-				std::array<node_t*, 2> children = split_node(curr_node, N_min); 	// TODO try different split criterion
+				//std::array<node_t*, 2> children = split_node(curr_node, N_min); 	// TODO try different split criterion
+				std::array<node_t*, 2> children = split_node_gradient(curr_node, 15, N_min);
 				node_t * child_left  = children[0];
 				node_t * child_right = children[1];
 				child_left->set_depth(curr_node->get_depth() + 1);
@@ -139,8 +140,8 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const si
 		V_dim /= (max_dim - min_dim);
 // calculate all threshold
 		std::vector<double> thresholds;
-        double min_thresh = *data_dim.begin() + eps;
-        double max_thresh = *(data_dim.end()-1) - eps;
+		double min_thresh = *data_dim.begin() + eps;
+		double max_thresh = *(data_dim.end()-1) - eps;
 		for( size_t i = 1; i < N_node; i++ )
 		{
 			if( data_dim[i] - eps > min_thresh )
@@ -158,9 +159,9 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const si
 // iterate over the thresholds
 		for( double t : thresholds)
 		{
-            auto split_iter = std::lower_bound(data_dim.begin(), data_dim.end(), t);
-            size_t N_l 		= std::distance(data_dim.begin(), split_iter);
-            size_t N_r 		= N_node - N_l;
+			auto split_iter = std::lower_bound(data_dim.begin(), data_dim.end(), t);
+			size_t N_l 		= std::distance(data_dim.begin(), split_iter);
+			size_t N_r 		= N_node - N_l;
 // we don't want too small splits
 			if( N_l < N_min || N_r < N_min)
 			{
@@ -169,9 +170,9 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const si
 			else
 			{
 // calculate volumes
-				double V_l = V_dim * ( t - min_dim );
-				double V_r = V_dim * ( max_dim - t );
-				double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
+			double V_l = V_dim * ( t - min_dim );
+			double V_r = V_dim * ( max_dim - t );
+			double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
 // check whether this is the best gain so far
 				if( gain > best_gain )
 				{
@@ -191,7 +192,116 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const si
 	std::copy( data_dim.begin(), data_dim.end(), data_sort.begin() );
 	std::sort( data_sort.begin(), data_sort.end() );
 	auto split_iter = std::lower_bound(data_sort.begin(), data_sort.end(), best_thresh);
-    size_t N_l 		= std::distance(data_sort.begin(), split_iter);
+	size_t N_l 		= std::distance(data_sort.begin(), split_iter);
+	size_t N_r		= N_node - N_l;
+	image_data_t data_l( N_l, mNum_dimensions);
+	image_data_t data_r( N_r, mNum_dimensions);
+	size_t count_l = 0;
+	size_t count_r = 0;
+	for( size_t i = 0; i < N_node; i++)
+	{
+		if( node->get_data()(i,best_dim) < best_thresh ) // datapoint is on the left
+		{
+			matrix_row<matrix<double> const> 	copy_source( node->get_data(), i );
+			matrix_row<matrix<double> >			copy_target( data_l, count_l );
+			std::copy( copy_source.begin(), copy_source.end(), copy_target.begin() );
+			count_l++;
+		}
+		else	// datapoint is on the right
+		{
+			matrix_row<matrix<double> const> 	copy_source( node->get_data(), i );
+			matrix_row<matrix<double> >			copy_target( data_r, count_r );
+			std::copy( copy_source.begin(), copy_source.end(), copy_target.begin() );
+			count_r++;
+		}
+	}
+	std::cout << "Splitted " << N_node << " data points: Points to the left: " << N_l << " points to the right: " << N_r << std::endl;
+	node_t* node_l(new node_t);
+	node_l->set_data(data_l);
+	node_t* node_r(new node_t);
+	node_r->set_data(data_r);
+	return std::array<node_t*, 2>{ {node_l, node_r} };  
+}
+	
+std::array<node_t*, 2> DensityTreeClassifier::split_node_gradient(node_t * node, size_t k)
+{
+// get number of instances in this node
+	size_t N_node = node->get_data().size1();
+	double best_gradient = 0.;
+	size_t best_instance = 0;
+	size_t best_dim		 = 0;
+// iterate over the instances
+	for( size_t i = 0; i < N_node; i++ )
+	{
+// center the data around the i-th instance and then calculate its norm
+		matrix<double> data( node->get_data() );
+		matrix_row<matrix<double> > instance(data,i);
+		vector<double> data_norm(N_node);
+		for( size_t j = 0; j < N_node; j++ )
+		{
+			matrix_row<matrix<double> > instance_j(data,j);
+// center around current instance
+			instance_j -= instance;
+// calculate the norm
+			data_norm(j) = norm_2(instance_j);
+		}
+// sort-indices to find the k - nearest neighbors
+		std::vector<size_t> sorted_indices = get_sorted_indices(data_norm);
+// calculate the gradient and the density approximations
+// the density is approximated by the mean distance to the k - nearest neighbors
+		double density  = 0.;
+// the gradient is approximated by the displacement of the instance to the cms of its k-nearest neighbors
+		vector<double> cms( data.size2() );
+		if( k >= N_node )
+		{
+			k = N_node - 1;
+		}
+		for( size_t j = 1; j < k+1; j++)
+		{
+			size_t indx = sorted_indices[j];
+			density += data_norm(indx);
+			matrix_row<matrix<double> > instance_j(data,j);
+			cms += instance_j;
+		}
+		density /= k;
+		cms /= k;
+// TODO which one shall we use ??
+		//double gradient = norm_2(cms);
+		double gradient = norm_2(cms) / density;
+		if( gradient > best_gradient)
+		{
+// find the dimension where the gradient changes the most
+			auto iter = std::max_element( cms.begin(), cms.end() );
+			size_t split_dim  = std::distance( cms.begin(), iter );
+// make sure that this split is not trivial
+			matrix_column<matrix<double> const> data_dim(node->get_data(), split_dim);
+			vector<double> data_sort( data_dim.size() );
+			std::copy( data_dim.begin(), data_dim.end(), data_sort.begin() );
+			std::sort( data_sort.begin(), data_sort.end() );
+			auto split_iter = std::lower_bound( data_sort.begin(), data_sort.end(), node->get_data()(i,split_dim) -0.01 );
+			size_t N_l 		= std::distance(data_sort.begin(), split_iter);
+			size_t N_r		= N_node - N_l;
+			if(N_l >= 1 && N_r >= 1)
+			{
+				//std::cout << "New best gradient: " << gradient << " old: " << best_gradient << " instance: " << i << std::endl;
+				best_gradient = gradient;
+				best_instance = i;
+				best_dim = split_dim;
+			}
+		}
+	}
+// store dimension and threshold in the node	
+	node->set_split_dimension(best_dim);
+// TODO where do we set the threshold, right or left of the split point ???
+	double best_thresh = node->get_data()(best_instance,best_dim) - 0.01;
+	node->set_split_threshold(best_thresh);
+// split the data accordingly	
+	matrix_column<matrix<double> const> data_dim( node->get_data(), best_dim );
+	vector<double> data_sort( data_dim.size() );
+	std::copy( data_dim.begin(), data_dim.end(), data_sort.begin() );
+	std::sort( data_sort.begin(), data_sort.end() );
+	auto split_iter = std::lower_bound(data_sort.begin(), data_sort.end(), best_thresh);
+	size_t N_l 		= std::distance(data_sort.begin(), split_iter);
 	size_t N_r		= N_node - N_l;
 	image_data_t data_l( N_l, mNum_dimensions);
 	image_data_t data_r( N_r, mNum_dimensions);

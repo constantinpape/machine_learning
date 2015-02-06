@@ -33,6 +33,24 @@ vector<double> get_sorted_indices(const matrix_column<matrix<double> const> & da
 	return returnval;
 }
 
+std::vector<size_t> get_sorted_indices( const vector<double>& data )
+{
+	std::vector<pair_t> to_sort;
+	for(size_t i = 0; i < data.size(); i++)
+	{
+		double val = data(i);
+		pair_t pair(val,i);
+		to_sort.push_back(pair);
+	}
+	std::sort(to_sort.begin(), to_sort.end(), comparator);
+	std::vector<size_t> returnval( to_sort.size() );
+	for(size_t i = 0; i < to_sort.size(); i++)
+	{
+		returnval[i] = to_sort[i].second;
+	}
+	return returnval;
+}
+
 image_data_t read_mnist_data(const std::string & fname)
 {
 // open filestream to read in the data
