@@ -11,23 +11,18 @@ int main(int argc, char* argv[])
 	image_data_t train_data  = read_mnist_data( argv[1] );
 	label_data_t train_label = read_mnist_label(argv[2] );
 	image_data_t test_data   = read_mnist_data( argv[3] );
-// make sure data has full dimension
-	assert( test_data.size2() == 81 );
-// init Copula Classifier and test it
+// init classifier	
 	CopulaClassifier classifier;
-	std::vector<size_t> depths{ {4,8,10,20} };
+	std::vector<size_t> k_values{ {5,10,15,30} };
 	std::string fpath = argv[4];
 // iterate over the depths and test for each
-	for(size_t depth : depths)
+	for(size_t k : k_values)
 	{
-		classifier.set_maximal_depth(depth);
+		classifier.set_nearest_neighbors(k);
 		classifier.train(train_data, train_label);
 		label_data_t results = classifier.predict(test_data);
-		image_data_t data_generated = classifier.generate(50,0);
-		std::string res_name = fpath + "_results_" + std::to_string(depth);
-		std::string gen_name = fpath + "_generated_" + std::to_string(depth);
+		std::string res_name = fpath + "_results_" + std::to_string(k);
 		save_label(res_name, results);
-		save_data(gen_name, data_generated);
 	}
 	return 0;
 }

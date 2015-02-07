@@ -20,7 +20,8 @@ int main(int argc, char* argv[])
 	}
 // init Bayes classifier and test it
 	CopulaClassifier copula_classifier;
-//	tree_classifier.set_maximal_depth(5);
+	classifier.set_maximal_depth(5);
+	classifier.set_nearest_neighbors(5);
 	test_classifier(copula_classifier, train_data, train_label, test_data, argv[4], gen);
 	return 0;
 }

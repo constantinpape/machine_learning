@@ -16,6 +16,9 @@ public:
 
 	void set_maximal_depth(const size_t max_depth);
 	size_t get_maximal_depth() const;
+	
+	void   set_nearest_neighbors(const size_t num_nbrs);
+	size_t get_nearest_neighbors() const;
 private:
 	bool mTrained;
 	size_t mNum_instances;

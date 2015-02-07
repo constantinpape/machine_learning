@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
 
 #include "Classifier.h"
 #include "node_t.h"
@@ -21,6 +20,9 @@ public:
 
 	void   set_maximal_depth(const size_t max_depth);
 	size_t get_maximal_depth() const;
+	
+	void   set_nearest_neighbors(const size_t num_nbrs);
+	size_t get_nearest_neighbors() const;
 
 private:
 // private data member
@@ -29,13 +31,14 @@ private:
 	size_t 	mNum_classes;
 	size_t 	mNum_dimensions;
 	size_t  mDepth_max;
+	size_t  mNearest_neighbors;
 // 1 tree for every class
 	std::vector<node_t*> mTrees;
 	std::vector<double>	mPriors;
 // private functions
 	bool terminate_depth(const node_t * node);
 	std::array<node_t*, 2> split_node(node_t * node, const size_t N_min);
-	std::array<node_t*, 2> split_node_gradient(node_t * node, size_t k);
+	std::array<node_t*, 2> split_node_gradient(node_t * node);
 	node_t search_tree(
 			const boost::numeric::ublas::vector<double> & data_point,
 			const size_t c );

@@ -12,6 +12,7 @@ DensityTreeClassifier::DensityTreeClassifier() : 	mTrained(false),
 												 	mNum_classes(0),
 													mNum_dimensions(0),
 													mDepth_max(4),		// 4 == default value for maximal depth of the tree
+													mNearest_neighbors(15), // 15 == default value for nearest neighbors in gradient approx.
 													mTrees(),
 													mPriors()
 {}
@@ -78,7 +79,7 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 			else
 			{
 				//std::array<node_t*, 2> children = split_node(curr_node, N_min); 	// TODO try different split criterion
-				std::array<node_t*, 2> children = split_node_gradient(curr_node, 15, N_min);
+				std::array<node_t*, 2> children = split_node_gradient(curr_node);
 				node_t * child_left  = children[0];
 				node_t * child_right = children[1];
 				child_left->set_depth(curr_node->get_depth() + 1);
@@ -223,7 +224,7 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const si
 	return std::array<node_t*, 2>{ {node_l, node_r} };  
 }
 	
-std::array<node_t*, 2> DensityTreeClassifier::split_node_gradient(node_t * node, size_t k)
+std::array<node_t*, 2> DensityTreeClassifier::split_node_gradient(node_t * node)
 {
 // get number of instances in this node
 	size_t N_node = node->get_data().size1();
@@ -252,6 +253,7 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node_gradient(node_t * node,
 		double density  = 0.;
 // the gradient is approximated by the displacement of the instance to the cms of its k-nearest neighbors
 		vector<double> cms( data.size2() );
+		size_t k = mNearest_neighbors;
 		if( k >= N_node )
 		{
 			k = N_node - 1;
@@ -265,8 +267,6 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node_gradient(node_t * node,
 		}
 		density /= k;
 		cms /= k;
-// TODO which one shall we use ??
-		//double gradient = norm_2(cms);
 		double gradient = norm_2(cms) / density;
 		if( gradient > best_gradient)
 		{
@@ -461,4 +461,14 @@ void DensityTreeClassifier::set_maximal_depth(const size_t max_depth)
 size_t DensityTreeClassifier::get_maximal_depth() const
 {
 	return mDepth_max;
+}
+	
+void DensityTreeClassifier::set_nearest_neighbors(const size_t num_nbrs)
+{
+	mNearest_neighbors = num_nbrs;
+}
+	
+size_t DensityTreeClassifier::get_nearest_neighbors() const
+{
+	return mNearest_neighbors;
 }

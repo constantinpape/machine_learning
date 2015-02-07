@@ -123,3 +123,13 @@ size_t CopulaClassifier::get_maximal_depth() const
 {
 	return mDensityTree.get_maximal_depth();
 }
+	
+void CopulaClassifier::set_nearest_neighbors(const size_t num_nbrs)
+{
+	mDensityTree.set_nearest_neighbors(num_nbrs);
+}
+	
+size_t CopulaClassifier::get_nearest_neighbors() const
+{
+	return mDensityTree.get_nearest_neighbors();
+}
