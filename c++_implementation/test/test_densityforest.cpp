@@ -1,4 +1,4 @@
-#include "../source/CopulaClassifier.h"
+#include "../source/DensityForestClassifier.h"
 #include "test_template.h"
 
 int main(int argc, char* argv[])
@@ -18,10 +18,10 @@ int main(int argc, char* argv[])
 	{
 		gen = true;
 	}
-// init copula classifier and test it
-	CopulaClassifier copula_classifier;
-	//copula_classifier.set_maximal_depth(5);
-	//copula_classifier.set_nearest_neighbors(5);
-	test_classifier(copula_classifier, train_data, train_label, test_data, argv[4], gen);
+// init classifier and test it
+	DensityForestClassifier classifier;
+	//classifier.set_maximal_depth(5);
+	//classifier.set_nearest_neighbors(5);
+	test_classifier(classifier, train_data, train_label, test_data, argv[4], gen);
 	return 0;
 }

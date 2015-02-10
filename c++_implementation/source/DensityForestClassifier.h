@@ -3,7 +3,7 @@
 #include "Classifier.h" 
 #include "DensityTreeClassifier.h" 
 
-class DensityForestClassifier
+class DensityForestClassifier : public Classifier
 {
 public:
 	DensityForestClassifier();
@@ -13,6 +13,8 @@ public:
 	label_data_t predict(const image_data_t & test_data);
 
 	image_data_t generate(const size_t N, const short label);
+	
+	double get_likelihood(const boost::numeric::ublas::vector<double> & data, const short label);
 	
 	void   set_maximal_depth(const size_t max_depth);
 	size_t get_maximal_depth() const;
@@ -26,6 +28,7 @@ public:
 private:
 	bool mTrained;
 	size_t mNumInstances;
+	size_t mNumDimensions;
 	size_t mNumClasses;
 	size_t mNumTrees;
 	std::vector<DensityTreeClassifier> mTrees;
