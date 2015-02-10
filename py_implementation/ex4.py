@@ -165,7 +165,7 @@ if __name__ == '__main__':
 	images_test_red  = reduce_dimension(images_test)
 	images_train_1d = images_train.reshape( (images_train.shape[0], images_train[1]*images_train[2]) )
 
-	naive = True
+	naive = False
 	if naive:
 		# Naive Bayes Classifier
 		naive_classifier = BayesClassifier(wanted)
@@ -210,11 +210,13 @@ if __name__ == '__main__':
 			plot.close()
 
 
-	combined = False
+	combined = True
 	if combined:
 		#need to  use less data to make this feasible...
-		images_train_1d = images_train_1d[0:2500]
-		labels_train    = labels_train[0:2500]
+		#images_train_1d = images_train_1d[0:2500]
+		#labels_train    = labels_train[0:2500]
+		images_train_1d = images_train_1d
+		labels_train    = labels_train
 		# combining Density Tree Classifier and Bayes Classifier
 		naive_classifier_c = BayesClassifier(wanted)
 		tree_classifier_c  = DensityTreeClassifier(wanted)

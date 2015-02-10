@@ -13,6 +13,9 @@
 # data types
 *.out
 
+# image types
+*.png
+
 # bin and lib folder, data folder
 results
 c++_implementation/bin

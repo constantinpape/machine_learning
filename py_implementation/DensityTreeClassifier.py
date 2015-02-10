@@ -86,64 +86,50 @@ class DensityTreeClassifier:
 	# split the node according to the optimal scheme
 	def split_node_optimal(self, node):
 		
-		# calculate the gain
-		def calc_gain(node, t, N, d):
-			N_l = float(np.where(node.data[:,d] < t)[0].shape[0])
-			N_r = float(np.where(node.data[:,d] > t)[0].shape[0])
-			
-			# we don t want splits w/ 0 or 1 datapoints, because this leads to diverging gains
-			if N_l <= 1 or N_r <= 1:
-				return 0.
-			
-			else:
-				#calculate the volumina
-				V = node.volume
-				V /= ( max(node.data[:,d]) - min(node.data[:,d]) )
-				V_l = V * ( t - np.min(node.data[:,d]) )
-				V_r = V * ( np.max(node.data[:,d]) - t )
-
-				return ( N_l / N )**2 / V_l + ( N_r / N )**2 / V_r
-
-		eps 	= 0.01
-		N_node 	= node.data.shape[0]
-		threshs = []
-		gain 	= []
+		eps 	  	= 0.01
+		N_node 	  	= node.data.shape[0]
+		best_gain 	= 0.
+		best_thresh = 0.
+		best_dim 	= 0
 		
 		# iterate over all feature dimensions to look for the best split
 		for d in range(self.num_dimensions):
-			threshs_d 	= []
-			gain_d 		= []
 			# sort the data in dimension d
 			data = node.data[node.data[:,d].argsort()]
+			#calculate the volume
+			V = node.volume
+			V /= data[-1,d] - data[0,d]
+			thresholds = []
+			# make list of all thresholds
 			for i in range(N_node):
 				if i != 0:	# dont look left of leftmost instance
-					t = data[i,d] - eps
-					gain_d.append( calc_gain(node,t,N_node,d) )
-					threshs_d.append( t )
+					thresholds.append( data[i,d] - eps )
 				if i != N_node:	# dont look right of rightmost instance
-					t = data[i,d] + eps
-					gain_d.append( calc_gain(node,t,N_node,d) )
-					threshs_d.append( t )
-			
-			gain_d = np.array( gain_d )
-			# look for the best split in this dimension
-			i_opt = np.argmax(gain_d)
-			gain.append(gain_d[i_opt])
-			threshs.append(threshs_d[i_opt])
-		
-		# look for the overall best split
-		# optimal dimension
-		d_opt = np.argmax(gain)
-		# optimal threshold in the dimension
-		t_opt = threshs[d_opt]
-		
+					thresholds.append( data[i,d] + eps )
+			# iterate over the thresolds
+			for t in thresholds:
+				N_l = float(np.where(data[:,d] < t)[0].shape[0])
+				N_r = float(np.where(data[:,d] > t)[0].shape[0])
+				# we don t want splits w/ 0 or 1 datapoints, because this leads to diverging gains
+				if N_l <= 1 or N_r <= 1:
+					continue
+				else:
+					V_l = V * ( t - data[0,d] )
+					V_r = V * ( data[-1,d] - t )
+					# caclulate the gain of this split
+					gain = ( N_l / N_node )**2 / V_l + ( N_r / N_node )**2 / V_r
+					if gain > best_gain:
+						best_gain 	= gain
+						best_thresh = t
+						best_dim 	= d
+				
 		# store dimension and threshold in the node
-		node.split_dim 		= d_opt
-		node.split_thresh 	= t_opt
+		node.split_dim 		= best_dim
+		node.split_thresh 	= best_thresh
 		
 		# split the data accordingly
-		mask_l = np.where(node.data[:,d_opt] < t_opt)
-		mask_r = np.where(node.data[:,d_opt] > t_opt)
+		mask_l = np.where(node.data[:,best_dim] < best_thresh)
+		mask_r = np.where(node.data[:,best_dim] > best_thresh)
 		
 		N_l    = mask_l[0].shape[0]
 		N_r    = mask_r[0].shape[0]
