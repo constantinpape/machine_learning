@@ -32,7 +32,7 @@ void DensityForestClassifier::train(const image_data_t & train_data, const label
 	mTrees.clear();
 	mTrees.resize(mNumTrees);
 // Calculate the bootstrap size
-	size_t bootstrap_size = mNumInstances / mNumTrees; // TODO is this reasonable ??
+	size_t bootstrap_size = 0.9 * mNumInstances;	// take 90 % of the data
 // instantiate uniform int distribution (0 to data size)
 	std::uniform_int_distribution<size_t> distr( 0, mNumInstances - 1 );
 // Train the individual trees
@@ -50,6 +50,7 @@ void DensityForestClassifier::train(const image_data_t & train_data, const label
 			bootstrap_label[i] = train_label[indx];  
 		}
 // train the tree on the bootstrap sample
+		mTrees[t].set_shuffle(true, 5);
 		mTrees[t].train(bootstrap_data, bootstrap_label);
 	}
 	mTrained = true;

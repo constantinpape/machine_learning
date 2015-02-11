@@ -8,10 +8,12 @@
 using namespace boost::numeric::ublas;
 	
 DensityTreeClassifier::DensityTreeClassifier() : 	mTrained(false),
+													mDim_shuffle(false),
 													mNum_instances(0),
 												 	mNum_classes(0),
 													mNum_dimensions(0),
 													mDepth_max(4),		// 4 == default value for maximal depth of the tree
+													mNum_shuffle(5),
 													mNearest_neighbors(15), // 15 == default value for nearest neighbors in gradient approx.
 													mTrees(),
 													mPriors()
@@ -78,8 +80,8 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 // esle split the node, assign the children nodes and put them on the stack
 			else
 			{
-				//std::array<node_t*, 2> children = split_node(curr_node, N_min); 	// TODO try different split criterion
-				std::array<node_t*, 2> children = split_node_gradient(curr_node);
+				std::array<node_t*, 2> children = split_node(curr_node, N_min); 	// TODO try different split criterion
+				//std::array<node_t*, 2> children = split_node_gradient(curr_node);
 				node_t * child_left  = children[0];
 				node_t * child_right = children[1];
 				child_left->set_depth(curr_node->get_depth() + 1);
@@ -124,8 +126,21 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const si
 	double best_thresh = 0.;
 	double best_gain   = 0.; 
 	size_t best_dim	   = 0;
-// iterate all dimensions to find the best possible split
+	std::vector<size_t> dimensions;
 	for( size_t d = 0; d < mNum_dimensions; d++)
+	{
+		dimensions.push_back(d);
+	}
+// if mDim_shuffle == true shuffle the dimensions and only iterate over the first mNum_shuffle entries
+	if( mDim_shuffle )
+	{
+		std::random_device rd;
+		std::mt19937 g( rd() );
+		std::shuffle( dimensions.begin(), dimensions.end(), g );
+		dimensions.resize(mNum_shuffle);
+	}
+// iterate all dimensions to find the best possible split
+	for( size_t d : dimensions )
 	{
 // sort the data in this dimension
 		matrix_column<matrix<double> const> data_aux(node->get_data(), d);
@@ -223,7 +238,7 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const si
 	node_r->set_data(data_r);
 	return std::array<node_t*, 2>{ {node_l, node_r} };  
 }
-	
+
 std::array<node_t*, 2> DensityTreeClassifier::split_node_gradient(node_t * node)
 {
 // get number of instances in this node
@@ -471,4 +486,10 @@ void DensityTreeClassifier::set_nearest_neighbors(const size_t num_nbrs)
 size_t DensityTreeClassifier::get_nearest_neighbors() const
 {
 	return mNearest_neighbors;
+}
+	
+void DensityTreeClassifier::set_shuffle(const bool enable, const size_t num_shuffle)
+{
+	mDim_shuffle = enable;
+	mNum_shuffle = num_shuffle;
 }

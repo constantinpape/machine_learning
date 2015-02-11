@@ -24,13 +24,17 @@ public:
 	void   set_nearest_neighbors(const size_t num_nbrs);
 	size_t get_nearest_neighbors() const;
 
+	void   set_shuffle(const bool enable, const size_t num_shuffle);
+
 private:
 // private data member
 	bool 	mTrained;
+	bool 	mDim_shuffle;
 	size_t  mNum_instances;
 	size_t 	mNum_classes;
 	size_t 	mNum_dimensions;
 	size_t  mDepth_max;
+	size_t  mNum_shuffle;
 	size_t  mNearest_neighbors;
 // 1 tree for every class
 	std::vector<node_t*> mTrees;
@@ -39,6 +43,7 @@ private:
 	bool terminate_depth(const node_t * node);
 	std::array<node_t*, 2> split_node(node_t * node, const size_t N_min);
 	std::array<node_t*, 2> split_node_gradient(node_t * node);
+	std::array<node_t*, 2> split_node_dimshuffle(node_t * node, const size_t N_min, const size_t dims);
 	node_t search_tree(
 			const boost::numeric::ublas::vector<double> & data_point,
 			const size_t c );
