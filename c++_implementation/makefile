@@ -1,4 +1,4 @@
-# ~/programming/machine_learning/project/c++_implementation/source
+# ~/machine_learning/c++_implementation/source
 
 install : build classifier_tests
 

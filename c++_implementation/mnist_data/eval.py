@@ -8,7 +8,6 @@ import argparse
 def evaluate_result(data, target, result):
 	assert(data.shape[0] == target.shape[0])
 	assert(target.shape[0] == result.shape[0])
-	
 	correct = np.where( result == target )
 	miss 	= np.where( result != target )
 	
