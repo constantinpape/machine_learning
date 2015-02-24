@@ -29,3 +29,9 @@ c++_implementation/*_data/test_copulaforest
 c++_implementation/*_data/test_densityforest
 
 data/mnist
+
+# latex folder, except for .tex and .pdf
+latex/*
+!latex/*.tex
+!latex/*.pdf
+
