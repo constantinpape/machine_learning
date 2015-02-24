@@ -18,10 +18,12 @@ def evaluate_result(target, result):
     print("Correct classification rate:", class_rate)
 
 def iround(fnumber):
+    #check whether in alphabet
+    assert math.floor(fnumber) >= 0
+    assert math.ceil(fnumber) < 26
+    
     residum = fnumber - math.floor(fnumber)
     if residum > 0.5:
-        #check whether in alphabet
-        assert math.ceil(fnumber) <= 25
         return math.ceil(fnumber)
     else:
         return math.floor(fnumber)
@@ -42,7 +44,7 @@ if __name__ == '__main__':
     gen_path = args[1] + "_generated"
     if os.path.isfile(gen_path):
         gen_data = np.genfromtxt(gen_path)
-        words = get_words(len(gen_data[0]))
+        words = get_words(gen_data.shape[1])
         
         print("list of generated words + true in case of existance")
         for dat in gen_data:

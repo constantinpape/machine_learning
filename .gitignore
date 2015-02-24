@@ -25,5 +25,7 @@ c++_implementation/*_data/test_bayes
 c++_implementation/*_data/test_readin
 c++_implementation/*_data/test_densitytree
 c++_implementation/*_data/test_copula
+c++_implementation/*_data/test_copulaforest
+c++_implementation/*_data/test_densityforest
 
 data/mnist

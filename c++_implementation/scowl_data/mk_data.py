@@ -51,14 +51,14 @@ def make_data(words, size):
     
     #fill one half with existing words...
     for i in range(size):
-        data[i][-1] = 1                                 #label
+        data[i][-1] = 0                                 #label 0 will be generated
         for j in range(len(words[i])):
             data[i][j] = ord(words[i][j]) - ord('a')    #code: 'a' = 0
     
     #...the other half with random character strings (notwords)
     gen = str_generator(len(words[0]))
     for i in range(size, 2*size):
-        data[i][-1] = 0
+        data[i][-1] = 1
         notword = next(gen)
         while notword in words:
             notword = next(gen)
@@ -94,12 +94,13 @@ if __name__ == '__main__':
     print(len(words), "words of length", length, "loaded.")
     
     #set up training data
-    size = input("Choose size of training data (default = 3000): ")
+    default = len(words)//2
+    size = input("Choose size of training data (default = " + str(default) + "): ")
     if size == '':
-        size = 3000
+        size = default
     train_data, train_labels = make_data(words, int(size))
     test_data, test_labels = make_data(words, len(words))
-    print("easy")
+    print("eeeaasy")
     
     #save data to files
     path="original/"
