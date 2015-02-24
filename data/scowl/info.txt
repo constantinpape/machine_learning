@@ -1,0 +1,11 @@
+Hey Consti,
+habe die Wortlisten mit SCOWL erstellen lassen,
+
+http://wordlist.aspell.net/
+
+Die Zahlen geben die Größe der Datenbank an,
+also wie viele Worte mit einbezogen wurden.
+35 is eine gängige Größe für Spracherkennungstools.
+70 beinhaltet bietet weitaus mehr (ca. 35 000)!!
+
+für mehr Infos >> siehe README
