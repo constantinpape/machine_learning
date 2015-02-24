@@ -20,9 +20,10 @@
 results
 c++_implementation/bin
 c++_implementation/lib
-c++_implementation/mnist_data/original
-c++_implementation/mnist_data/test_bayes
-c++_implementation/mnist_data/test_readin
-c++_implementation/mnist_data/test_densitytree
-c++_implementation/mnist_data/test_copula
+c++_implementation/*_data/original
+c++_implementation/*_data/test_bayes
+c++_implementation/*_data/test_readin
+c++_implementation/*_data/test_densitytree
+c++_implementation/*_data/test_copula
+
 data/mnist

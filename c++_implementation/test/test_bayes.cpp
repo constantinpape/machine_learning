@@ -9,12 +9,13 @@ int main(int argc, char* argv[])
 			  << "testdata, filename for results [-g] (set generation on)" << std::endl;
 		return 1;
 	}
-// check for command line flag for generation
-// NOTE: yet no need to invoke parser library
+// check for command line flag (for scowl data)
+// NOTE: yet no need to invoke parser library, I guess
 	bool gen = false;
 	if (argc == 6)
 	{
-		if (std::string(argv[5]) == "-g")         
+		if (std::string(argv[5]) == "-g")    
+                {
 	            	gen = true;
 		}
 	}
@@ -22,7 +23,7 @@ int main(int argc, char* argv[])
 	image_data_t train_data  = read_mnist_data( argv[1] );
 	label_data_t train_label = read_mnist_label(argv[2] );
 	image_data_t test_data   = read_mnist_data( argv[3] );
-// set bit for generating data to true, if data has full dimension
+// set bit for generating data to true, if mnist data has full dimension
 	if(train_data.size2() == 81)
 	{
 		gen = true;

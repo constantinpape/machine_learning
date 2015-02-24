@@ -49,6 +49,8 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 	for( size_t d = 0; d < num_dimensions; d++ )
 	{
 		bin_t current_bin = get_optimal_bins(train_data,d);
+// debug output
+                //std::cout << "dimension: " << d << "\twidth: " << current_bin.width << "\tnumber: " << current_bin.num_bins << std::endl;
 		if( current_bin.width == 0.0)
 		{
 			irrelevant_dims.push_back(d); 
