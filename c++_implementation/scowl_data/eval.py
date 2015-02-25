@@ -24,9 +24,9 @@ def iround(fnumber):
     
     residum = fnumber - math.floor(fnumber)
     if residum > 0.5:
-        return math.ceil(fnumber)
+        return int(math.ceil(fnumber))
     else:
-        return math.floor(fnumber)
+        return int(math.floor(fnumber))
 
 
 if __name__ == '__main__':
@@ -49,10 +49,9 @@ if __name__ == '__main__':
         print("list of generated words + true in case of existance")
         for dat in gen_data:
             word = ''.join(chr(iround(i) + ord('a')) for i in dat)
-            print(word, end='')
+            print(word)
             if word in words:
-                print("\ttrue", end='')
-            print()
+                print("\ttrue")
         
     else:
         print("generated data was not found.")

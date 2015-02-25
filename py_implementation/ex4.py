@@ -122,8 +122,9 @@ def get_copula(data):
 	data_copula = np.zeros( (N,dims) )
 	for j in range(dims):
 		data_j 		= data[:,j]
-		arguments_sorted = np.argsort(data_j) + 1
-		data_copula[:,j] = arguments_sorted / float(N + 1)
+		arguments_sorted = np.argsort(data_j)
+		arguments_ranked = np.argsort(arguments_sorted) + 1
+		data_copula[:,j] = arguments_ranked / float(N + 1)
 	return data_copula
 
 
@@ -228,14 +229,5 @@ if __name__ == '__main__':
 		# train the tree classifier on the copula
 		tree_classifier_c.train(data_copula, labels_train, (True,3) )
 		# generate the threes (10)
-		generated_3s_c = generate_threes_combined(naive_classifier_c,tree_classifier_c, 50)
-		for three in generated_3s_c:
-			three = three.reshape( (np.sqrt(three.shape[0]), np.sqrt(three.shape[0])) ) 
-			plot.figure()
-			plot.gray()
-			plot.imshow(three, interpolation = "nearest")
-			plot.show()
-			plot.close()
-		
-
-
+		generated_3s_c = generate_threes_combined(naive_classifier_c,tree_classifier_c, 200)
+		np.save("copula_generated", generated_3s_c)

@@ -19,6 +19,15 @@ public:
 	
 	void   set_nearest_neighbors(const size_t num_nbrs);
 	size_t get_nearest_neighbors() const;
+	
+	void set_record_split(const bool enable);
+	bool get_record_split();
+
+	void set_split(const DensityTreeClassifier::split_t split);
+	DensityTreeClassifier::split_t get_split() const;
+	
+	image_data_t get_copula(const image_data_t & data);
+
 private:
 	bool mTrained;
 	size_t mNum_instances;
@@ -29,6 +38,4 @@ private:
 	BayesClassifier	mBayes;
 // DensityTreeClassifier
 	DensityTreeClassifier mDensityTree;
-// private functions
-	image_data_t get_copula(const image_data_t & data);
 };

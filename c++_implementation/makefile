@@ -2,6 +2,9 @@
 
 install : build classifier_tests
 
+test_getcopula : build test/test_getcopula.cpp
+	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-getcopula test/test_getcopula.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/common.o lib/node_t.o
+
 test_depth : build test/test_depth.cpp
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-depth test/test_depth.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/common.o lib/node_t.o
 
@@ -13,6 +16,9 @@ test_readin : test/test_readin.cpp
 
 test_sortindex: test/test_sortindex.cpp
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-sortindex test/test_sortindex.cpp lib/common.o
+
+test_horses_copula: build test/test_horses_copula.cpp
+	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-horses test/test_horses_copula.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/test_template.o lib/common.o lib/node_t.o
 
 classifier_tests : test/test_bayes.cpp test/test_densitytree.cpp test/test_copula.cpp test/test_densityforest.cpp test/test_copulaforest.cpp
 	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-bayes test/test_bayes.cpp lib/BayesClassifier.o lib/test_template.o lib/common.o
@@ -30,10 +36,10 @@ CopulaForestClassifier.o : source/CopulaForestClassifier.cpp source/CopulaForest
 	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/CopulaForestClassifier.o source/CopulaForestClassifier.cpp
 
 DensityForestClassifier.o : source/DensityForestClassifier.cpp source/DensityForestClassifier.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/DensityForestClassifier.o source/DensityForestClassifier.cpp
+	g++ -I ~/programming/boost/boost_1_57_0 -I ~/programming/boost/bindings/include/boost-numeric-bindings -std=c++0x -c -o lib/DensityForestClassifier.o source/DensityForestClassifier.cpp
 
 CopulaClassifier.o : source/CopulaClassifier.cpp source/CopulaClassifier.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/CopulaClassifier.o source/CopulaClassifier.cpp
+	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -c -o lib/CopulaClassifier.o source/CopulaClassifier.cpp
 
 DensityTreeClassifier.o : source/DensityTreeClassifier.cpp source/DensityTreeClassifier.h
 	g++ -O3 -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/DensityTreeClassifier.o source/DensityTreeClassifier.cpp
@@ -41,11 +47,11 @@ DensityTreeClassifier.o : source/DensityTreeClassifier.cpp source/DensityTreeCla
 BayesClassifier.o : source/BayesClassifier.cpp source/BayesClassifier.h
 	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/BayesClassifier.o source/BayesClassifier.cpp
 
-node_t.o : source/node_t.cpp source/node_t.h 
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/node_t.o source/node_t.cpp
+node_t.o : source/utility/node_t.cpp source/utility/node_t.h 
+	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/node_t.o source/utility/node_t.cpp
 
-common.o : source/common.cpp source/common.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/common.o source/common.cpp
+common.o : source/utility/common.cpp source/utility/common.h
+	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/common.o source/utility/common.cpp
 
 clean :
 	rm lib/*.o bin/*

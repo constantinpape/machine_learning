@@ -3,11 +3,12 @@
 #include <array>
 
 #include "Classifier.h"
-#include "node_t.h"
+#include "utility/node_t.h"
 
 class DensityTreeClassifier : public Classifier
 {
 public:
+	enum split_t { def, gradient, graph};
 	DensityTreeClassifier();
 	
 	void train(const image_data_t & train_data, const label_data_t & train_label);
@@ -18,6 +19,9 @@ public:
 
 	double get_likelihood(const boost::numeric::ublas::vector<double> & data, const short label);
 
+	void 	set_split(const split_t split);
+	split_t get_split() const;
+
 	void   set_maximal_depth(const size_t max_depth);
 	size_t get_maximal_depth() const;
 	
@@ -26,24 +30,30 @@ public:
 
 	void   set_shuffle(const bool enable, const size_t num_shuffle);
 
+	void set_record_split(const bool enable);
+	bool get_record_split() const;
+	
+	void set_radius(const double radius);
+	double get_radius() const;
+
 private:
 // private data member
 	bool 	mTrained;
-	bool 	mDim_shuffle;
 	size_t  mNum_instances;
 	size_t 	mNum_classes;
 	size_t 	mNum_dimensions;
 	size_t  mDepth_max;
+	split_t mSplits;
+	bool 	mRecord_splits;
+	bool 	mDim_shuffle;
 	size_t  mNum_shuffle;
 	size_t  mNearest_neighbors;
+	double  mRadius;
 // 1 tree for every class
 	std::vector<node_t*> mTrees;
 	std::vector<double>	mPriors;
 // private functions
 	bool terminate_depth(const node_t * node);
-	std::array<node_t*, 2> split_node(node_t * node, const size_t N_min);
-	std::array<node_t*, 2> split_node_gradient(node_t * node);
-	std::array<node_t*, 2> split_node_dimshuffle(node_t * node, const size_t N_min, const size_t dims);
 	node_t search_tree(
 			const boost::numeric::ublas::vector<double> & data_point,
 			const size_t c );
