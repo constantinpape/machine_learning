@@ -1,6 +1,7 @@
 #python3.4.2
 import random
 import string
+import os
 import numpy as np
 
 def get_words(length):
@@ -104,6 +105,8 @@ if __name__ == '__main__':
     
     #save data to files
     path="original/"
+    if not os.path.exists(path):
+        os.makedirs(path)
     np.savetxt(path + "data_train.out", train_data, fmt='%i')
     np.savetxt(path + "labels_train.out", train_labels, fmt='%i')
     np.savetxt(path + "data_test.out", test_data, fmt='%i')

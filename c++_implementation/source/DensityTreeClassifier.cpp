@@ -48,7 +48,7 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 		for(size_t i = 0; i < mNum_instances; i++)
 		{
 // copy the data if it has the correct class
-			if( train_label[i] == c )
+			if( train_label[i] == c )    //WARNING: comparison of int and unsigned int
 			{
 				matrix_row<matrix<double> const> orig_instance(train_data, i);
 				matrix_row<matrix<double> >		 to_copy(data_class, class_count);
@@ -433,7 +433,7 @@ image_data_t DensityTreeClassifier::generate(const size_t N, const short label)
 			double p_r = N_r / (N * V_r);
 // calculate p and q (normalised probabilities)
 			double p = p_l / (p_l + p_r);
-			double q = p_r / (p_l + p_r);
+			double q = p_r / (p_l + p_r);    //WARNING: unused variable q
 // go left with prob p, right with prob q
 			if( p < distr(gen) )
 			{

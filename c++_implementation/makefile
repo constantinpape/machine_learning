@@ -1,51 +1,98 @@
-# ~/machine_learning/c++_implementation/source
+# see http://www.gnu.org/prep/standards/html_node/Makefile-Conventions.html
+SHELL = /bin/sh
 
-install : build classifier_tests
+#### System Configuration ####
 
-test_depth : build test/test_depth.cpp
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-depth test/test_depth.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/common.o lib/node_t.o
+VERSION	 = ` date "+%Y.%m%d" `
 
-test_nearestneighbors : build test/test_nearestneighbors.cpp
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-nearestneighbors test/test_nearestneighbors.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/common.o lib/node_t.o
 
-test_readin : test/test_readin.cpp 
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-readin test/test_readin.cpp lib/common.o
+BOOST = ~/programming/boost/boost_1_57_0
+CC = g++
+CDEBUG = -g3 -Wall
+CFLAGS = $(CDEBUG) -O -std=c++0x
+ALL_CFLAGS = -I$(BOOST) $(CFLAGS)
 
-test_sortindex: test/test_sortindex.cpp
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-sortindex test/test_sortindex.cpp lib/common.o
+#defining paths
+prefix = ~/machine_learning/c++_implementation
+bindir = $(prefix)/bin
+libdir = $(prefix)/lib
+srcdir = $(prefix)/source
+testdir = $(prefix)/test
 
-classifier_tests : test/test_bayes.cpp test/test_densitytree.cpp test/test_copula.cpp test/test_densityforest.cpp test/test_copulaforest.cpp
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-bayes test/test_bayes.cpp lib/BayesClassifier.o lib/test_template.o lib/common.o
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-densitytree test/test_densitytree.cpp lib/DensityTreeClassifier.o lib/test_template.o lib/common.o lib/node_t.o
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-copula test/test_copula.cpp lib/DensityTreeClassifier.o lib/BayesClassifier.o lib/CopulaClassifier.o lib/test_template.o lib/common.o lib/node_t.o
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-densityforest test/test_densityforest.cpp lib/DensityForestClassifier.o lib/test_template.o lib/common.o lib/node_t.o lib/DensityTreeClassifier.o
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -o bin/test-copulaforest test/test_copulaforest.cpp lib/DensityForestClassifier.o lib/BayesClassifier.o lib/DensityTreeClassifier.o lib/CopulaForestClassifier.o lib/test_template.o lib/common.o lib/node_t.o
+#### End of system configuration section ####
 
-build : BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o DensityForestClassifier.o CopulaForestClassifier.o test_template.o common.o node_t.o
 
-test_template.o : test/test_template.cpp
-	g++ -I ~/programming/boost/boost_1_57_0  -std=c++0x -c -o lib/test_template.o test/test_template.cpp
+#the programs to be created
+_PROGRAM1 = test_bayes test_densitytree test_densityforest \
+            test_copula test_copulaforest
+_PROGRAM2 = test_depth test_nearestneighbors test_readin test_sortindex
+_PROGRAM3 = $(_PROGRAM1) $(_PROGRAM2)
+PROGRAM = $(patsubst %,$(bindir)/%,$(_PROGRAM3))
 
-CopulaForestClassifier.o : source/CopulaForestClassifier.cpp source/CopulaForestClassifier.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/CopulaForestClassifier.o source/CopulaForestClassifier.cpp
+#gather source files
+_SRC1 = BayesClassifier.cpp DensityTreeClassifier.cpp CopulaClassifier.cpp \
+        DensityForestClassifier.cpp CopulaForestClassifier.cpp \
+        common.cpp node_t.cpp
+_SRC2 = test_bayes.cpp test_densitytree.cpp test_copula.cpp \
+        test_densityforest.cpp test_copulaforest.cpp test_template.cpp \
+        test_depth.cpp test_nearestneighbors.cpp test_readin.cpp \
+        test_sortindex.cpp
+SRC = $(patsubst %,$(srcdir)/%,$(_SRC1)) $(patsubst %,$(testdir)/%,$(_SRC2))
 
-DensityForestClassifier.o : source/DensityForestClassifier.cpp source/DensityForestClassifier.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/DensityForestClassifier.o source/DensityForestClassifier.cpp
+#gather header files
+_DEP1 = BayesClassifier.h DensityTreeClassifier.h CopulaClassifier.h \
+        DensityForestClassifier.h CopulaForestClassifier.h \
+        Classifier.h common.h node_t.h
+_DEP2 = test_template.h
+DEP = $(patsubst %,$(srcdir)/%,$(_DEP1)) $(patsubst %,$(testdir)/%,$(_DEP2))
 
-CopulaClassifier.o : source/CopulaClassifier.cpp source/CopulaClassifier.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/CopulaClassifier.o source/CopulaClassifier.cpp
+#gather object files
+_OBJ1 = BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o \
+        DensityForestClassifier.o CopulaForestClassifier.o \
+        common.o node_t.o
+_OBJ2 = test_template.o
+_OBJ3 = $(_OBJ1) $(_OBJ2)
+OBJ = $(patsubst %,$(libdir)/%,$(_OBJ3))
 
-DensityTreeClassifier.o : source/DensityTreeClassifier.cpp source/DensityTreeClassifier.h
-	g++ -O3 -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/DensityTreeClassifier.o source/DensityTreeClassifier.cpp
 
-BayesClassifier.o : source/BayesClassifier.cpp source/BayesClassifier.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/BayesClassifier.o source/BayesClassifier.cpp
+#use overloading of MACROs from the command line to determine the PROGRAM
 
-node_t.o : source/node_t.cpp source/node_t.h 
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/node_t.o source/node_t.cpp
+# target: all - Default target. Install everything.
+all: _installdirs install
 
-common.o : source/common.cpp source/common.h
-	g++ -I ~/programming/boost/boost_1_57_0 -std=c++0x -c -o lib/common.o source/common.cpp
+# target: install - Install the package.
+install: $(SRC) $(DEP) $(OBJ) $(PROGRAM)
 
-clean :
-	rm lib/*.o bin/*
+# Make sure all installation directories (e.g. $(bindir))
+# actually exist by making them if necessary.
+_installdirs: mkinstalldirs
+	@mkinstalldirs $(bindir) $(libdir)
+
+	
+# $@ LHS of : i.e. target
+# $< $^ RHS of : i.e. 1 prerequesite or all
+
+#compilation rule for objects from source
+$(libdir)/%.o: $(srcdir)/%.cpp
+	$(CC) $(ALL_CFLAGS) -c -o $@ $<
+
+#compile objects from test
+$(libdir)/%.o: $(testdir)/%.cpp
+	$(CC) $(ALL_CFLAGS) -c -o $@ $<
+
+#create executable binaries
+$(bindir)/%: $(testdir)/%.cpp
+	$(CC) $(ALL_CFLAGS) -o $@ $< $(OBJ)
+
+# target: compile program
+#$(PROGRAM): $(testdir)/$(PROGRAM).cpp $(OBJ)
+#	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $< $(OBJ)
+
+# target: help - Display callable targets.
+help:
+	@egrep "^# target:" [Mm]akefile
+	@echo $(VERSION)
+
+# target: clean - Delete created files.
+clean: $(SRC) $(DEP)
+	rm -f $(libdir)/*.o $(bindir)/*
