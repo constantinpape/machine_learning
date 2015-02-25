@@ -50,7 +50,7 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 	{
 		bin_t current_bin = get_optimal_bins(train_data,d);
 // debug output
-                //std::cout << "dimension: " << d << "\twidth: " << current_bin.width << "\tnumber: " << current_bin.num_bins << std::endl;
+		//std::cout << "dimension: " << d << "\twidth: " << current_bin.width << "\tnumber: " << current_bin.num_bins << std::endl;
 		if( current_bin.width == 0.0)
 		{
 			irrelevant_dims.push_back(d); 
@@ -242,8 +242,7 @@ vector<double> BayesClassifier::inverse_cdf(const matrix_row<matrix<double> > & 
 				b++;
 			}
 // the value of the inverse cdf corresponds to the position of the middle of the bin
-// TODO + 0.5 or - 0.5 ??? I think it is correct this way, but not quite sure
-			data_return(d) = bins[d].width * (b - 0.5);
+			data_return(d) = bins[d].val_range / bins[d].num_bins * b + bins[d].lowest_val;
 		}
 	}
 	return data_return;

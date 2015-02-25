@@ -2,21 +2,27 @@
 #include <chrono>
 #include <iterator>
 #include <random>
+#include <fstream>
+#include <string>
 
 #include "DensityTreeClassifier.h"
+#include "utility/splits.h"
 
 using namespace boost::numeric::ublas;
 	
 DensityTreeClassifier::DensityTreeClassifier() : 	mTrained(false),
-							mDim_shuffle(false),
-							mNum_instances(0),
-							mNum_classes(0),
-							mNum_dimensions(0),
-							mDepth_max(4),		// 4 == default value for maximal depth of the tree
-							mNum_shuffle(5),
-							mNearest_neighbors(15), // 15 == default value for nearest neighbors in gradient approx.
-							mTrees(),
-							mPriors()
+													mNum_instances(0),
+												 	mNum_classes(0),
+													mNum_dimensions(0),
+													mDepth_max(4),				// 4 == default value for maximal depth of the tree
+													mSplits(split_t::def),
+													mRecord_splits(false),
+													mDim_shuffle(false),
+													mNum_shuffle(5),
+													mNearest_neighbors(15), // 15 == default value for nearest neighbors in gradient approx.
+													mRadius(10.),
+													mTrees(),
+													mPriors()
 {}
 
 void DensityTreeClassifier::train(const image_data_t & train_data, const label_data_t & train_label)
@@ -80,8 +86,17 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 // esle split the node, assign the children nodes and put them on the stack
 			else
 			{
-				std::array<node_t*, 2> children = split_node(curr_node, N_min); 	// TODO try different split criterion
-//				std::array<node_t*, 2> children = split_node_gradient(curr_node);
+				std::array<node_t*,2> children;
+				switch( mSplits )
+				{
+					case def 		: children = split_node_default( curr_node, mDim_shuffle, mNum_shuffle, mRecord_splits);  
+									  break;
+					case gradient	: children = split_node_gradient(curr_node, mNearest_neighbors, mRecord_splits);
+									  break;
+					case graph		: children = split_node_graph(	 curr_node, mRadius, mRecord_splits);
+									  break;
+					default 		: throw std::runtime_error("Flag for split not valid");
+				}
 				node_t * child_left  = children[0];
 				node_t * child_right = children[1];
 				child_left->set_depth(curr_node->get_depth() + 1);
@@ -347,7 +362,7 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node_gradient(node_t * node)
 	node_r->set_data(data_r);
 	return std::array<node_t*, 2>{ {node_l, node_r} };  
 }
-	
+
 label_data_t DensityTreeClassifier::predict(const image_data_t & test_data)
 {
 	if( !mTrained )
@@ -469,6 +484,16 @@ double DensityTreeClassifier::get_likelihood(const vector<double> & data, const 
 	return node.get_probability();
 }
 	
+void DensityTreeClassifier::set_split(const split_t split)
+{
+	mSplits = split;
+}
+	
+DensityTreeClassifier::split_t DensityTreeClassifier::get_split() const
+{
+	return mSplits;
+}
+	
 void DensityTreeClassifier::set_maximal_depth(const size_t max_depth)
 {
 	mDepth_max = max_depth;
@@ -493,4 +518,24 @@ void DensityTreeClassifier::set_shuffle(const bool enable, const size_t num_shuf
 {
 	mDim_shuffle = enable;
 	mNum_shuffle = num_shuffle;
+}
+
+void DensityTreeClassifier::set_record_split(const bool enable)
+{
+	mRecord_splits = enable;
+}
+
+bool DensityTreeClassifier::get_record_split() const
+{
+	return mRecord_splits;
+}
+	
+void DensityTreeClassifier::set_radius(const double radius)
+{
+	mRadius = radius;
+}
+
+double DensityTreeClassifier::get_radius() const
+{
+	return mRadius;
 }

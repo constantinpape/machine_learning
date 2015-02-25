@@ -13,17 +13,12 @@ int main(int argc, char* argv[])
 	label_data_t train_label = read_mnist_label(argv[2] );
 	image_data_t test_data   = read_mnist_data( argv[3] );
 // mnist: set bit for generating data to true, if data has full dimension
-// scowl: set generating flag to true
-// NOTE: yet no need to invoke parser library, I guess
-	bool gen = true;
-	if( train_data.size2() == 81)
-	{
-		gen = true;
-	}
 // init copula classifier and test it
 	CopulaClassifier copula_classifier;
-	//copula_classifier.set_maximal_depth(5);
-	//copula_classifier.set_nearest_neighbors(5);
-	test_classifier(copula_classifier, train_data, train_label, test_data, argv[4], gen);
+	copula_classifier.set_maximal_depth(5);
+	copula_classifier.set_nearest_neighbors(5);
+	copula_classifier.set_split(DensityTreeClassifier::split_t::gradient);
+	//copula_classifier.set_record_split(true);
+	test_classifier(copula_classifier, train_data, train_label, test_data, argv[4]);
 	return 0;
 }

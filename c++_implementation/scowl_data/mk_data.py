@@ -5,32 +5,34 @@ import os
 import numpy as np
 
 def get_words(length):
-    """returns array of valid british words with given length
-    """
-    
-    path = "../../data/scowl/"
-    #initalize containing array
-    words = []
-    
-    #read in the scowl data file
-    with open(path + "english.70", encoding='iso-8859-1') as dic:
-        for word in dic:
-            try:                        #skip non-ascii words
-                word.encode('ascii')
-            except UnicodeEncodeError:
-                continue
-            
-            word=word[:-1]              #removing \n
-            
-            if not word.islower():      #skip names
-                continue
-            if not word.isalpha():      #skip apostrophes, hyphens etc.
-                continue
-            if len(word) == length:
-                words.append(word)
-    
-    random.shuffle(words)
-    return words
+	"""returns array of valid british words with given length
+	"""
+	
+	path = "../../data/scowl/"
+	#initalize containing array
+	words = []
+	
+	#read in the scowl data file
+	file = open(path + "english.55")
+	for word in file:
+		try:                        #skip non-ascii words
+		    word.encode('ascii')
+		except UnicodeDecodeError:
+		    continue
+		
+		word=word[:-1]              #removing \n
+		
+		if not word.islower():      #skip names
+		    continue
+		if not word.isalpha():      #skip apostrophes, hyphens etc.
+		    continue
+		if len(word) == length:
+			words.append(word)
+	
+	file.close()#.encode('iso-8859-1') as dic:
+	
+	random.shuffle(words)
+	return words
 
 
 def str_generator(length):
