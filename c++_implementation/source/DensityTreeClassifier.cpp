@@ -91,6 +91,8 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 				{
 					case def 		: children = split_node_default( curr_node, mDim_shuffle, mNum_shuffle, mRecord_splits);  
 									  break;
+					case def_alt 	: children = split_node_alt( curr_node, mDim_shuffle, mNum_shuffle, mRecord_splits);  
+									  break;
 					case gradient	: children = split_node_gradient(curr_node, mNearest_neighbors, mRecord_splits);
 									  break;
 					case graph		: children = split_node_graph(	 curr_node, mRadius, mRecord_splits);

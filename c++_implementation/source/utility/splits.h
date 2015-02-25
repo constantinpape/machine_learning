@@ -134,6 +134,132 @@ std::array<node_t*, 2> split_node_default(node_t * node, const bool dim_shuffle,
 	return std::array<node_t*, 2>{ {node_l, node_r} };  
 }
 
+// split node and return the two children nodes
+std::array<node_t*, 2> split_node_alt(node_t * node, const bool dim_shuffle, const size_t num_shuffle, const bool record)
+{
+// epsilon for the thresholds
+	double eps 	= 0.01;
+// get number of instances in this node
+	size_t N_node = node->get_data().size1();
+	size_t num_dimensions = node->get_data().size2();
+	double best_thresh = 0.;
+	double best_gain   = 0.; 
+	size_t best_dim	   = 0;
+	std::vector<size_t> dimensions;
+	std::string fname = "split" + std::to_string(node->get_depth());
+	std::fstream stream(fname, std::fstream::out);
+	for( size_t d = 0; d < num_dimensions; d++)
+	{
+		dimensions.push_back(d);
+	}
+// if mDim_shuffle == true shuffle the dimensions and only iterate over the first mNum_shuffle entries
+	if( dim_shuffle )
+	{
+		std::random_device rd;
+		std::mt19937 g( rd() );
+		std::shuffle( dimensions.begin(), dimensions.end(), g );
+		dimensions.resize(num_shuffle);
+	}
+// iterate all dimensions to find the best possible split
+	for( size_t d : dimensions )
+	{
+// sort the data in this dimension
+		matrix_column<matrix<double> const> data_aux(node->get_data(), d);
+		vector<double> data_dim( data_aux.size() );
+		std::copy( data_aux.begin(), data_aux.end(), data_dim.begin() );
+		std::sort( data_dim.begin(), data_dim.end() );
+		assert( data_dim.size() == N_node );
+// precompute the volume in this dimension
+		double V_dim = node->get_volume();
+// divide by the volume of this dimension
+		double min_dim = *( std::min_element( data_dim.begin(), data_dim.end() ) );
+		double max_dim = *( std::max_element( data_dim.begin(), data_dim.end() ) );
+		V_dim /= (max_dim - min_dim);
+// calculate all threshold
+		std::vector<double> thresholds;
+		double min_thresh = *data_dim.begin() + eps;
+		double max_thresh = *(data_dim.end()-1) - eps;
+		for( size_t i = 1; i < N_node; i++ )
+		{
+			if( data_dim[i] - eps > min_thresh )
+			{
+				thresholds.push_back(data_dim[i] - eps);
+			}	 
+		}
+		for( size_t i = 0; i < N_node; i++ )
+		{
+			if( data_dim[i] + eps < max_thresh )
+			{
+				thresholds.push_back(data_dim[i] + eps);
+			}	 
+		}
+// iterate over the thresholds
+		for( double t : thresholds)
+		{
+			auto split_iter = std::lower_bound(data_dim.begin(), data_dim.end(), t);
+			size_t N_l 		= std::distance(data_dim.begin(), split_iter);
+			size_t N_r 		= N_node - N_l;
+// calculate volumes
+			double V_l = V_dim * ( t - min_dim );
+			double V_r = V_dim * ( max_dim - t );
+			double gain = fabs( N_l * V_r - N_r * V_l); 
+			if( record )
+			{
+				stream << gain << " "; 
+			}
+// check whether this is the best gain so far, but exclude too small splits
+			if( gain > best_gain && N_l > 1 && N_r > 1 )
+			{
+				best_gain 	= gain;
+				best_thresh = t;
+				best_dim 	= d; 
+			}
+		}
+		if( record )
+		{
+			stream << "\n"; 
+		}
+	}
+// store dimension and threshold in the node	
+	node->set_split_dimension(best_dim);
+	node->set_split_threshold(best_thresh);
+// split the data accordingly	
+	matrix_column<matrix<double> const> data_dim( node->get_data(), best_dim );
+	vector<double> data_sort( data_dim.size() );
+	std::copy( data_dim.begin(), data_dim.end(), data_sort.begin() );
+	std::sort( data_sort.begin(), data_sort.end() );
+	auto split_iter = std::lower_bound(data_sort.begin(), data_sort.end(), best_thresh);
+	size_t N_l 		= std::distance(data_sort.begin(), split_iter);
+	size_t N_r		= N_node - N_l;
+	image_data_t data_l( N_l, num_dimensions);
+	image_data_t data_r( N_r, num_dimensions);
+	size_t count_l = 0;
+	size_t count_r = 0;
+	for( size_t i = 0; i < N_node; i++)
+	{
+		if( node->get_data()(i,best_dim) < best_thresh ) // datapoint is on the left
+		{
+			matrix_row<matrix<double> const> 	copy_source( node->get_data(), i );
+			matrix_row<matrix<double> >			copy_target( data_l, count_l );
+			std::copy( copy_source.begin(), copy_source.end(), copy_target.begin() );
+			count_l++;
+		}
+		else	// datapoint is on the right
+		{
+			matrix_row<matrix<double> const> 	copy_source( node->get_data(), i );
+			matrix_row<matrix<double> >			copy_target( data_r, count_r );
+			std::copy( copy_source.begin(), copy_source.end(), copy_target.begin() );
+			count_r++;
+		}
+	}
+	std::cout << "Splitted " << N_node << " data points: Points to the left: " << N_l << " points to the right: " << N_r << std::endl;
+	node_t* node_l(new node_t);
+	node_l->set_data(data_l);
+	node_t* node_r(new node_t);
+	node_r->set_data(data_r);
+	return std::array<node_t*, 2>{ {node_l, node_r} };  
+}
+
 std::array<node_t*, 2> split_node_gradient(node_t * node, const size_t nearest_neighbors, const bool record)
 {
 // get number of instances in this node
