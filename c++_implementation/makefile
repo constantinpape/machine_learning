@@ -14,6 +14,8 @@ ALL_CFLAGS = -I$(BOOST) $(CFLAGS)
 
 #defining paths
 prefix = ~/machine_learning/c++_implementation
+#prefix = $(shell pwd) 
+#prefix = /. 
 bindir = $(prefix)/bin
 libdir = $(prefix)/lib
 srcdir = $(prefix)/source
@@ -22,14 +24,14 @@ testdir = $(prefix)/test
 #### End of system configuration section ####
 
 
-#the programs to be created
+# the programs to be created
 _PROGRAM1 = test_bayes test_densitytree test_densityforest \
             test_copula test_copulaforest
 _PROGRAM2 = test_depth test_nearestneighbors test_readin test_sortindex
-_PROGRAM3 = $(_PROGRAM1) $(_PROGRAM2)
-PROGRAM = $(patsubst %,$(bindir)/%,$(_PROGRAM3))
+PROGRAM = $(_PROGRAM1) $(_PROGRAM2)
+PROGRAMS = $(patsubst %,$(bindir)/%,$(PROGRAM))
 
-#gather source files
+# gather source files
 _SRC1 = BayesClassifier.cpp DensityTreeClassifier.cpp CopulaClassifier.cpp \
         DensityForestClassifier.cpp CopulaForestClassifier.cpp \
         common.cpp node_t.cpp
@@ -39,14 +41,14 @@ _SRC2 = test_bayes.cpp test_densitytree.cpp test_copula.cpp \
         test_sortindex.cpp
 SRC = $(patsubst %,$(srcdir)/%,$(_SRC1)) $(patsubst %,$(testdir)/%,$(_SRC2))
 
-#gather header files
+# collect header files
 _DEP1 = BayesClassifier.h DensityTreeClassifier.h CopulaClassifier.h \
         DensityForestClassifier.h CopulaForestClassifier.h \
         Classifier.h common.h node_t.h
 _DEP2 = test_template.h
 DEP = $(patsubst %,$(srcdir)/%,$(_DEP1)) $(patsubst %,$(testdir)/%,$(_DEP2))
 
-#gather object files
+# collect object files
 _OBJ1 = BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o \
         DensityForestClassifier.o CopulaForestClassifier.o \
         common.o node_t.o
@@ -55,44 +57,44 @@ _OBJ3 = $(_OBJ1) $(_OBJ2)
 OBJ = $(patsubst %,$(libdir)/%,$(_OBJ3))
 
 
-#use overloading of MACROs from the command line to determine the PROGRAM
 
 # target: all - Default target. Install everything.
 all: _installdirs install
 
 # target: install - Install the package.
-install: $(SRC) $(DEP) $(OBJ) $(PROGRAM)
+install: $(SRC) $(DEP) $(OBJ) $(PROGRAMS)
 
 # Make sure all installation directories (e.g. $(bindir))
 # actually exist by making them if necessary.
 _installdirs: mkinstalldirs
-	@mkinstalldirs $(bindir) $(libdir)
+	@./mkinstalldirs $(bindir) $(libdir)
 
-	
+
 # $@ LHS of : i.e. target
 # $< $^ RHS of : i.e. 1 prerequesite or all
 
-#compilation rule for objects from source
-$(libdir)/%.o: $(srcdir)/%.cpp
+# compilation rule for objects from source
+$(libdir)/%.o: $(srcdir)/%.cpp $(srcdir)/%.h
 	$(CC) $(ALL_CFLAGS) -c -o $@ $<
 
-#compile objects from test
-$(libdir)/%.o: $(testdir)/%.cpp
+# compile objects from test
+$(libdir)/%.o: $(testdir)/%.cpp $(testdir)/%.h
 	$(CC) $(ALL_CFLAGS) -c -o $@ $<
 
-#create executable binaries
-$(bindir)/%: $(testdir)/%.cpp
+# create executable binaries
+$(bindir)/%: $(testdir)/%.cpp $(OBJ)
 	$(CC) $(ALL_CFLAGS) -o $@ $< $(OBJ)
 
-# target: compile program
-#$(PROGRAM): $(testdir)/$(PROGRAM).cpp $(OBJ)
-#	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $< $(OBJ)
-
+# use overloading of MACROs from the command line to determine the PROGRAM
 # target: help - Display callable targets.
 help:
 	@egrep "^# target:" [Mm]akefile
-	@echo $(VERSION)
+	@echo '\
+NOTE: to install a single program overload it\
+to the macro using the -e PROGRAM="" option.\
+Available programs are:'
+	@echo $(PROGRAM)
 
 # target: clean - Delete created files.
 clean: $(SRC) $(DEP)
-	rm -f $(libdir)/*.o $(bindir)/*
+	@rm -f $(libdir)/*.o $(bindir)/*

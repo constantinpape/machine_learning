@@ -8,15 +8,15 @@
 using namespace boost::numeric::ublas;
 	
 DensityTreeClassifier::DensityTreeClassifier() : 	mTrained(false),
-													mDim_shuffle(false),
-													mNum_instances(0),
-												 	mNum_classes(0),
-													mNum_dimensions(0),
-													mDepth_max(4),		// 4 == default value for maximal depth of the tree
-													mNum_shuffle(5),
-													mNearest_neighbors(15), // 15 == default value for nearest neighbors in gradient approx.
-													mTrees(),
-													mPriors()
+							mDim_shuffle(false),
+							mNum_instances(0),
+							mNum_classes(0),
+							mNum_dimensions(0),
+							mDepth_max(4),		// 4 == default value for maximal depth of the tree
+							mNum_shuffle(5),
+							mNearest_neighbors(15), // 15 == default value for nearest neighbors in gradient approx.
+							mTrees(),
+							mPriors()
 {}
 
 void DensityTreeClassifier::train(const image_data_t & train_data, const label_data_t & train_label)
@@ -81,7 +81,7 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 			else
 			{
 				std::array<node_t*, 2> children = split_node(curr_node, N_min); 	// TODO try different split criterion
-				//std::array<node_t*, 2> children = split_node_gradient(curr_node);
+//				std::array<node_t*, 2> children = split_node_gradient(curr_node);
 				node_t * child_left  = children[0];
 				node_t * child_right = children[1];
 				child_left->set_depth(curr_node->get_depth() + 1);
@@ -151,13 +151,14 @@ std::array<node_t*, 2> DensityTreeClassifier::split_node(node_t * node, const si
 // precompute the volume in this dimension
 		double V_dim = node->get_volume();
 // divide by the volume of this dimension
-		double min_dim = *( std::min_element( data_dim.begin(), data_dim.end() ) );
-		double max_dim = *( std::max_element( data_dim.begin(), data_dim.end() ) );
+		double min_dim = *( data_dim.begin() );
+		double max_dim = *( data_dim.end() - 1 );
 		V_dim /= (max_dim - min_dim);
 // calculate all threshold
 		std::vector<double> thresholds;
 		double min_thresh = *data_dim.begin() + eps;
 		double max_thresh = *(data_dim.end()-1) - eps;
+// almost superfluous since data_dim 
 		for( size_t i = 1; i < N_node; i++ )
 		{
 			if( data_dim[i] - eps > min_thresh )
