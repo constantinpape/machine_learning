@@ -9,7 +9,7 @@
 class DensityTreeClassifier : public Classifier
 {
 public:
-	enum split_t { def, gradient, graph};
+	enum split_t { def, def_alt, gradient, graph};
 	DensityTreeClassifier();
 	
 	void train(const image_data_t & train_data, const label_data_t & train_label);
