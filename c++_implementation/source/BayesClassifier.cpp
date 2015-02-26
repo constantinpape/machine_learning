@@ -5,6 +5,7 @@
 #include <iterator>
 #include <math.h>
 #include <random>
+#include <numeric>
 
 #include "BayesClassifier.h"
 
@@ -62,6 +63,12 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 	for( size_t d = 0; d < num_dimensions; d++)
 	{
 		histogram_t histo_dim = histogram_t(bins[d].num_bins, num_classes);
+// make sure that all histogrms are empty - apparently we have to do this !
+		for( size_t c = 0; c < num_classes; c++)
+		{
+			matrix_column<matrix<double> > histo_view( histo_dim, c);
+			std::fill(histo_view.begin(), histo_view.end(), 0.);
+		}
 		histograms.push_back(histo_dim);
 	}
 // calculate the histograms from the data
@@ -93,7 +100,10 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 // normalise the histogram
 			for( size_t c = 0; c < num_classes; c++)
 			{
-				row( histograms[d], c ) /= instances_per_class[c]; // TODO also divide by bin width ???
+				matrix_column<matrix<double> > col_histo( histograms[d], c );
+				size_t sum = std::accumulate(col_histo.begin(), col_histo.end(), 0);
+				assert( sum == instances_per_class[c] );
+				col_histo /= instances_per_class[c];
 			}
 		}
 	}
@@ -230,6 +240,7 @@ vector<double> BayesClassifier::inverse_cdf(const matrix_row<matrix<double> > & 
 		{
 // get the CDF of this dimension and class
 			const std::vector<double> & cdf_dim = cdfs[d][label]; 
+			assert(cdf_dim.size() == bins[d].num_bins);
 			double val_dim = data(d);
 // find the bin that val_dim is in	
 			size_t b = 0;
@@ -326,13 +337,22 @@ void BayesClassifier::compute_cdf()
 			assert(histo.size1() == n_bins);
 			for(size_t c = 0; c < num_classes; c++)
 			{
+				matrix_column<matrix<double> const> histo_c(histo,c);
 				std::vector<double> cdf_c;
+				// TODO get partial sum to work !
+				// build the cdf via partial sum, which does exactly what we want!
+				//std::partial_sum( histo_c.begin(), histo_c.end(), cdf_c.begin() );
+				//std::cout << "xxx" << std::endl;
+				//assert( histo_c.size() == cdf_c.size() );
+// For now: Compute the CDF by hand
 				cdf_c.push_back( histo(0,c) );
 				for(size_t b = 1; b < n_bins; b++)
 				{
 					double val = cdf_c[b-1] + histo(b,c);
 					cdf_c.push_back(val);	
 				}	
+// make sure that the CDF adds up to 1!
+				assert( fabs( cdf_c.back() - 1. )  < 1e-6 );
 				cdf_d.push_back(cdf_c);
 			}
 		}
