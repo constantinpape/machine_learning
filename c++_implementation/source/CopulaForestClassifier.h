@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Classifier.h"
 #include "BayesClassifier.h"
 #include "DensityForestClassifier.h"
 

@@ -11,7 +11,7 @@
 using namespace boost::numeric::ublas;
 
 BayesClassifier::BayesClassifier() : 	trained(false),
-   										num_instances(0),
+   									num_instances(0),
 										num_dimensions(0),
 										num_classes(0),
 										instances_per_class(),

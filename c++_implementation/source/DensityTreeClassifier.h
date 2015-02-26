@@ -4,6 +4,7 @@
 
 #include "Classifier.h"
 #include "utility/node_t.h"
+#include "utility/splits.h"
 
 class DensityTreeClassifier : public Classifier
 {

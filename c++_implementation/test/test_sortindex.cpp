@@ -1,7 +1,7 @@
 // test for the function get_sorted_indices from common 
 // TODO test corner cases
 
-#include "../source/common.h"
+#include "../source/utility/common.h"
 
 using namespace boost::numeric::ublas;
 

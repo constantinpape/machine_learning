@@ -150,7 +150,7 @@ void CopulaClassifier::set_record_split(const bool enable)
 {
 	mDensityTree.set_record_split(enable);
 }
-
+ 
 bool CopulaClassifier::get_record_split()
 {
 	return mDensityTree.get_record_split();

@@ -3,9 +3,6 @@ SHELL = /bin/sh
 
 #### System Configuration ####
 
-VERSION	 = ` date "+%Y.%m%d" `
-
-
 BOOST = ~/programming/boost/boost_1_57_0
 CC = g++
 CDEBUG = -g3 -Wall
@@ -13,89 +10,115 @@ CFLAGS = $(CDEBUG) -O -std=c++0x
 ALL_CFLAGS = -I$(BOOST) $(CFLAGS)
 
 #defining paths
-prefix = ~/machine_learning/c++_implementation
-#prefix = $(shell pwd) 
-#prefix = /. 
-bindir = $(prefix)/bin
-libdir = $(prefix)/lib
-srcdir = $(prefix)/source
-testdir = $(prefix)/test
+prefix := .
+bindir := $(prefix)/bin
+libdir := $(prefix)/lib
+srcdir := $(prefix)/source
 
 #### End of system configuration section ####
 
 
-# the programs to be created
-_PROGRAM1 = test_bayes test_densitytree test_densityforest \
-            test_copula test_copulaforest
-_PROGRAM2 = test_depth test_nearestneighbors test_readin test_sortindex
-PROGRAM = $(_PROGRAM1) $(_PROGRAM2)
-PROGRAMS = $(patsubst %,$(bindir)/%,$(PROGRAM))
+# find all .cpp files using GNU wildcard
+_SRC1 := $(wildcard $(srcdir)/*.cpp)
+_SRC2 := $(wildcard $(srcdir)/utility/*.cpp)
+_SRC3 := $(wildcard $(prefix)/test/*.cpp)
+# collect source files
+SRC := $(_SRC1) $(_SRC2) $(_SCR3)
 
-# gather source files
-_SRC1 = BayesClassifier.cpp DensityTreeClassifier.cpp CopulaClassifier.cpp \
-        DensityForestClassifier.cpp CopulaForestClassifier.cpp \
-        common.cpp node_t.cpp
-_SRC2 = test_bayes.cpp test_densitytree.cpp test_copula.cpp \
-        test_densityforest.cpp test_copulaforest.cpp test_template.cpp \
-        test_depth.cpp test_nearestneighbors.cpp test_readin.cpp \
-        test_sortindex.cpp
-SRC = $(patsubst %,$(srcdir)/%,$(_SRC1)) $(patsubst %,$(testdir)/%,$(_SRC2))
+# templates and (virtual) base classes (.h files)
+HEAD := $(prefix)/test/test_template.h $(srcdir)/Classifier.h
 
-# collect header files
-_DEP1 = BayesClassifier.h DensityTreeClassifier.h CopulaClassifier.h \
-        DensityForestClassifier.h CopulaForestClassifier.h \
-        Classifier.h common.h node_t.h
-_DEP2 = test_template.h
-DEP = $(patsubst %,$(srcdir)/%,$(_DEP1)) $(patsubst %,$(testdir)/%,$(_DEP2))
-
-# collect object files
-_OBJ1 = BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o \
+# collect object files and prepand library path
+_OBJ := BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o \
         DensityForestClassifier.o CopulaForestClassifier.o \
-        common.o node_t.o
-_OBJ2 = test_template.o
-_OBJ3 = $(_OBJ1) $(_OBJ2)
-OBJ = $(patsubst %,$(libdir)/%,$(_OBJ3))
+        common.o node_t.o test_template.o splits.o
+# prepand path
+OBJ  := $(patsubst %,$(libdir)/%,$(_OBJ))
 
 
+# phony targets can always be called
+.PHONY: all help clean
 
 # target: all - Default target. Install everything.
-all: _installdirs install
+all: install test
 
-# target: install - Install the package.
-install: $(SRC) $(DEP) $(OBJ) $(PROGRAMS)
+# target: install - Install the classifier package.
+install: _installdirs build classifier
+
 
 # Make sure all installation directories (e.g. $(bindir))
 # actually exist by making them if necessary.
 _installdirs: mkinstalldirs
 	@./mkinstalldirs $(bindir) $(libdir)
 
+# target: build - Compile object files.
+build: $(SRC) $(OBJ)
 
+# automatic variables, e.g.:
 # $@ LHS of : i.e. target
-# $< $^ RHS of : i.e. 1 prerequesite or all
+# $< $^ RHS of : i.e. 1 prerequisite or all
 
-# compilation rule for objects from source
+# pull in dependency info for *existing* .o files
+-include $(OBJ:.o=.d)
+
+# compilation rule for objects from source using pattern matching i.e. %
+# creating mkfiles whith dependency info via -MM
 $(libdir)/%.o: $(srcdir)/%.cpp $(srcdir)/%.h
 	$(CC) $(ALL_CFLAGS) -c -o $@ $<
+	$(CC) $(ALL_CFLAGS) -MM $< > $(libdir)/$*.d
 
-# compile objects from test
-$(libdir)/%.o: $(testdir)/%.cpp $(testdir)/%.h
+# compile objects from source/utitlity
+$(libdir)/%.o: $(srcdir)/utility/%.cpp $(srcdir)/utility/%.h
 	$(CC) $(ALL_CFLAGS) -c -o $@ $<
+	$(CC) $(ALL_CFLAGS) -MM $< > $(libdir)/$*.d
 
-# create executable binaries
-$(bindir)/%: $(testdir)/%.cpp $(OBJ)
-	$(CC) $(ALL_CFLAGS) -o $@ $< $(OBJ)
+# compile objects from test, i.e. test_template
+$(libdir)/%.o: $(prefix)/test/%.cpp $(prefix)/test/%.h
+	$(CC) $(ALL_CFLAGS) -c -o $@ $<
+	$(CC) $(ALL_CFLAGS) -MM $< > $(libdir)/$*.d
 
-# use overloading of MACROs from the command line to determine the PROGRAM
-# target: help - Display callable targets.
+# target: test - Test suit.
+test: test_depth test_nearestneighbors test_readin test_sortindex \
+      test_getcopula
+
+# target: classifier - Classifier suit.
+classifier: $(HEAD) test_bayes test_densitytree test_densityforest \
+            test_copula test_copulaforest
+
+# general rule for creating executable binaries
+$(bindir)/%: $(prefix)/test/%.cpp $(OBJ)
+	$(CC) $(ALL_CFLAGS) -o $@ $^
+
+# general rule for creating executable binaries
+test_%: $(prefix)/test/test_%.cpp $(OBJ)
+	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
+
+# target: test_bayes - Naive BayesClassifier & Generator.
+test_bayes: $(prefix)/test/test_bayes.cpp $(OBJ)
+	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
+
+# target: test_densitytree - DensityTreeClassifier & Generator.
+test_densitytree: $(prefix)/test/test_densitytree.cpp $(OBJ)
+	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
+
+# target: test_copula - CopulaClassifier & Generator.
+test_copula: $(prefix)/test/test_copula.cpp $(OBJ)
+	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
+
+# target: test_densityforest - DensityForestClassifier & Generator.
+test_densityforest: $(prefix)/test/test_densityforest.cpp $(OBJ)
+	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
+
+# target: test_copulaforest - CopulaForestClassifier & Generator.
+test_copulaforest: $(prefix)/test/test_copulaforest.cpp $(OBJ)
+	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
+
+# target: help - Display callable targets. Debug Output.
 help:
 	@egrep "^# target:" [Mm]akefile
-	@echo '\
-NOTE: to install a single program overload it\
-to the macro using the -e PROGRAM="" option.\
-Available programs are:'
-	@echo $(PROGRAM)
+	@echo Objects: $(OBJ)
 
 # target: clean - Delete created files.
-clean: $(SRC) $(DEP)
-	@rm -f $(libdir)/*.o $(bindir)/*
+clean:
+	@rm -f $(libdir)/* $(bindir)/*
 

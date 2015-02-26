@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Classifier.h" 
+#include "Classifier.h"
 #include "DensityTreeClassifier.h" 
 
 class DensityForestClassifier : public Classifier
