@@ -60,7 +60,7 @@ build: $(HEAD) $(SRC) $(OBJ)
 # $< $^ RHS of : i.e. 1 prerequisite or all
 
 # pull in dependency info for *existing* .o files
-#-include $(OBJ:.o=.d)
+-include $(OBJ:.o=.d)
 
 # compilation rule for objects from source using pattern matching i.e. %
 # creating mkfiles whith dependency info via -MM
