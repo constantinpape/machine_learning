@@ -10,7 +10,7 @@
 
 //typedefs for the datastructures
 typedef boost::numeric::ublas::matrix<double>  	image_data_t;
-typedef std::vector<short> 						label_data_t;
+typedef std::vector<unsigned short> 			label_data_t;
 typedef boost::numeric::ublas::matrix<double>  	histogram_t;
 typedef std::vector<std::vector<double> >		cdf_t;
 
@@ -26,12 +26,16 @@ struct bin_t
 
 typedef std::pair<double,size_t> pair_t;
 
-bool comparator(const pair_t & l, const pair_t & r);
-
 boost::numeric::ublas::vector<double> get_sorted_indices(
 		const boost::numeric::ublas::matrix_column<boost::numeric::ublas::matrix<double> const> & data );
 
 boost::numeric::ublas::vector<double> get_sorted_indices(
+		const boost::numeric::ublas::vector<double>& data );
+
+boost::numeric::ublas::vector<double> get_ranked_indices(
+		const boost::numeric::ublas::matrix_column<boost::numeric::ublas::matrix<double> const> & data );
+
+boost::numeric::ublas::vector<double> get_ranked_indices(
 		const boost::numeric::ublas::vector<double>& data );
 
 image_data_t read_mnist_data(const std::string & fname, size_t buff_size = 1024);

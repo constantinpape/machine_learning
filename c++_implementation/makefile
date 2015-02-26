@@ -7,7 +7,7 @@ BOOST = ~/programming/boost/boost_1_57_0
 CC = g++
 CDEBUG = -g3 -Wall
 CFLAGS = $(CDEBUG) -O -std=c++0x
-ALL_CFLAGS = -I$(BOOST) $(CFLAGS)
+ALL_CFLAGS = -I $(BOOST) $(CFLAGS)
 
 #defining paths
 prefix := .

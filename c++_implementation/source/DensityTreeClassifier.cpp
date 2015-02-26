@@ -218,7 +218,6 @@ image_data_t DensityTreeClassifier::generate(const size_t N, const short label)
 			double p_r = N_r / (N * V_r);
 // calculate p and q (normalised probabilities)
 			double p = p_l / (p_l + p_r);
-			double q = p_r / (p_l + p_r);    //WARNING: unused variable q
 // go left with prob p, right with prob q
 			if( p < distr(gen) )
 			{

@@ -292,8 +292,8 @@ std::array<node_t*, 2> split_node_gradient(node_t * node, const size_t nearest_n
 // calculate the norm
 			data_norm(j) = norm_2(instance_j);
 		}
-// sort-indices to find the k - nearest neighbors
-		vector<double> sorted_indices = get_sorted_indices( get_sorted_indices(data_norm) );
+// rank indices to find the k - nearest neighbors
+		vector<double> sorted_indices = get_ranked_indices( data_norm );
 // calculate the gradient and the density approximations
 // the density is approximated by the mean distance to the k - nearest neighbors
 		double density  = 0.;
