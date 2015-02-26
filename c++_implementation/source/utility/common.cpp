@@ -9,9 +9,14 @@
 	
 using namespace boost::numeric::ublas;
 
-bool comparator(const pair_t & l, const pair_t & r)
+bool compare_first(const pair_t & l, const pair_t & r)
 {
 	return l.first < r.first;
+}
+
+bool compare_deref(const double* l, const double* r  )
+{
+	return *(l) < *(r);
 }
 
 // tested in test/test_sortindex
@@ -24,7 +29,7 @@ vector<double> get_sorted_indices(const matrix_column<matrix<double> const> & da
 		pair_t pair(val,i);
 		to_sort.push_back(pair);
 	}
-	std::sort(to_sort.begin(), to_sort.end(), comparator);
+	std::sort(to_sort.begin(), to_sort.end(), compare_first);
 	vector<double> returnval( to_sort.size() );
 	for(size_t i = 0; i < to_sort.size(); i++)
 	{
@@ -42,11 +47,53 @@ vector<double> get_sorted_indices(const vector<double> & data )
 		pair_t pair(val,i);
 		to_sort.push_back(pair);
 	}
-	std::sort(to_sort.begin(), to_sort.end(), comparator);
+	std::sort(to_sort.begin(), to_sort.end(), compare_first);
 	vector<double> returnval( to_sort.size() );
 	for(size_t i = 0; i < to_sort.size(); i++)
 	{
 		returnval(i) = to_sort[i].second;
+	}
+	return returnval;
+}
+
+vector<double> get_ranked_indices(
+		const matrix_column<matrix<double> const> & data )
+{
+	const size_t len = data.size();
+	vector<double> returnval(len);
+	std::copy( data.begin(), data.end(), returnval.begin() );
+// make array of double pointers pointing to data 
+	std::vector<double*> pointer_array(len);
+   	for( size_t i = 0; i < len; i++)
+	{
+		pointer_array[i] = &returnval(i);
+	}	
+// sort the pointers according to the value they point at
+	std::sort(pointer_array.begin(), pointer_array.end(), compare_deref);
+   	for( size_t i = 0; i < len; i++)
+	{
+		*pointer_array[i] = i;
+	}
+	return returnval;
+}
+
+vector<double> get_ranked_indices(
+		const vector<double>& data )
+{
+	size_t len = data.size();
+	vector<double> returnval(len);
+	std::copy( data.begin(), data.end(), returnval.begin() );
+// make array of double pointers pointing to data 
+	std::vector<double*> pointer_array(len);
+   	for( size_t i = 0; i < len; i++)
+	{
+		pointer_array[i] = &returnval(i);
+	}	
+// sort the pointers according to the value they point at
+	std::sort(pointer_array.begin(), pointer_array.end(), compare_deref);
+   	for( size_t i = 0; i < len; i++)
+	{
+		*pointer_array[i] = i;
 	}
 	return returnval;
 }

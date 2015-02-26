@@ -44,10 +44,8 @@ image_data_t CopulaClassifier::get_copula(const image_data_t & data)
 	for( size_t d = 0; d < data.size2(); d++)
 	{
 		matrix_column<matrix<double> const> data_dim( data, d );
-// get the indices that would sort the data in this dimension
-		vector<double> arguments_sorted = get_sorted_indices(data_dim);
-// sort these to get the ranked indiced
-		vector<double> arguments_ranked = get_sorted_indices(arguments_sorted);
+// get the ranked indices
+		vector<double> arguments_ranked = get_ranked_indices(data_dim);
 // add one to the sorted data
 		vector<double> ones( data.size1() );
 		std::fill(ones.begin(), ones.end(), 1.);
