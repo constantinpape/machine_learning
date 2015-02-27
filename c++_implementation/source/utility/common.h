@@ -1,6 +1,8 @@
 #pragma once
 
 #include <fstream>
+//#include <iostream>
+#include <iomanip>
 #include <string>
 #include <utility>
 #include <vector>
@@ -25,20 +27,28 @@ struct bin_t
 	size_t num_bins;
 };
 
-// format output for ofstream etc.
-class formatted_output
+class formatted_ostream
 {
-public:
-  formatted_output(ostream & obj, int w);
-
-  template<typename T>
-  formatted_output& operator<<(const T& output);
-
-  formatted_output& operator<<(ostream& (*func)(ostream&));
-
 private:
-  int width;
-  ostream& stream_obj;
+	int precision;
+	std::ostream& stream_obj;
+
+public:
+	formatted_ostream(std::ostream& obj, int p): precision(p), stream_obj(obj) {}
+
+	template<typename T>
+	formatted_ostream& operator<<(const T& output)
+	{
+		stream_obj << std::setw(precision+6) << std::setprecision(precision) << std::left << output;
+
+		return *this;
+	}
+
+	formatted_ostream& operator<<(std::ostream& (*func)(std::ostream&))
+	{
+		func(stream_obj);
+		return *this;
+	}
 };
 
 typedef std::pair<double,size_t> pair_t;
