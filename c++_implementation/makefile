@@ -7,6 +7,8 @@ BOOST = ~/programming/boost/boost_1_57_0
 CC = g++
 CDEBUG = -g3 -Wall
 CFLAGS = $(CDEBUG) -O -std=c++0x
+GTEST_INCLUDE  = ~/programming/gtest/gtest-1.7.0/include
+GTEST_FLAG = -I $(GTEST)
 ALL_CFLAGS = -I $(BOOST) $(CFLAGS)
 
 #defining paths
@@ -34,6 +36,7 @@ _OBJ := BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o \
         DensityForestClassifier.o CopulaForestClassifier.o \
         common.o node_t.o test_template.o splits.o
 OBJ  := $(patsubst %,$(libdir)/%,$(_OBJ))
+GTEST_OBJ := ~/programming/gtest/gtest-1.7.0/make/gtest-all.o
 
 
 # phony targets can always be called
@@ -79,16 +82,15 @@ $(libdir)/%.o: $(testdir)/%.cpp $(testdir)/%.h
 	$(CC) $(ALL_CFLAGS) -MM $< > $(libdir)/$*.d
 
 # target: test - Test suit.
-test: test_depth test_nearestneighbors test_readin test_sortindex \
-      test_getcopula
+test: test_depth test_nearestneighbors test_unit
 
 # target: classifier - Classifier suit.
 classifier: test_bayes test_densitytree test_densityforest \
             test_copula test_copulaforest
 
 # general rule for creating executable binaries
-test_%: $(testdir)/test_%.cpp $(OBJ)
-	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
+test_%: $(testdir)/test_%.cpp $(OBJ) 
+	$(CC) $(ALL_CFLAGS) $(GTEST_FLAG) -o $(bindir)/$@ $^ $(GTEST_OBJ)
 
 # target: test_bayes - Naive BayesClassifier & Generator.
 test_bayes: $(testdir)/test_bayes.cpp $(OBJ)
