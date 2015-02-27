@@ -1,6 +1,7 @@
 # c++ object files
 *.o
 *.obj
+*.p
 
 # python object files
 *.pyc
@@ -21,12 +22,7 @@ results
 c++_implementation/bin
 c++_implementation/lib
 c++_implementation/*_data/original
-c++_implementation/*_data/test_bayes
-c++_implementation/*_data/test_readin
-c++_implementation/*_data/test_densitytree
-c++_implementation/*_data/test_copula
-c++_implementation/*_data/test_copulaforest
-c++_implementation/*_data/test_densityforest
+c++_implementation/*_data/test_*
 
 data/mnist
 

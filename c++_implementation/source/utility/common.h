@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -22,6 +23,22 @@ struct bin_t
 	double highest_val;
 	double val_range;
 	size_t num_bins;
+};
+
+// format output for ofstream etc.
+class formatted_output
+{
+public:
+  formatted_output(ostream & obj, int w);
+
+  template<typename T>
+  formatted_output& operator<<(const T& output);
+
+  formatted_output& operator<<(ostream& (*func)(ostream&));
+
+private:
+  int width;
+  ostream& stream_obj;
 };
 
 typedef std::pair<double,size_t> pair_t;

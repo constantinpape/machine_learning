@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream> 
 
 #include "splits.h"
 
@@ -10,7 +11,8 @@ using namespace boost::numeric::ublas;
 
 
 // split node and return the two children nodes
-std::array<node_t*, 2> split_node_default(node_t * node, const bool dim_shuffle, const size_t num_shuffle, const bool record)
+std::array<node_t*, 2> split_node_default(
+    node_t * node, const bool dim_shuffle, const size_t num_shuffle, const bool record)
 {
 // epsilon for the thresholds
 	double eps 	= 0.01;
@@ -51,23 +53,18 @@ std::array<node_t*, 2> split_node_default(node_t * node, const bool dim_shuffle,
 // precompute the volume in this dimension
 		double V_dim = node->get_volume();
 // divide by the volume of this dimension
-		double min_dim = *( std::min_element( data_dim.begin(), data_dim.end() ) );
-		double max_dim = *( std::max_element( data_dim.begin(), data_dim.end() ) );
-		V_dim /= (max_dim - min_dim);
+		double min_thres = *( data_dim.begin() ) + eps;
+		double max_thres = *( data_dim.end() - 1) - eps;
+		V_dim /= ( *(data_dim.end()-1) - *(data_dim.begin()) );
 // calculate all threshold
 		std::vector<double> thresholds;
-		double min_thresh = *data_dim.begin() + eps;
-		double max_thresh = *(data_dim.end()-1) - eps;
-		for( size_t i = 1; i < N_node; i++ )
+		for( size_t i = 0; i < N_node; i++ )
 		{
-			if( data_dim[i] - eps > min_thresh )
+			if( data_dim[i] - eps > min_thres )
 			{
 				thresholds.push_back(data_dim[i] - eps);
 			}	 
-		}
-		for( size_t i = 0; i < N_node; i++ )
-		{
-			if( data_dim[i] + eps < max_thresh )
+			if( data_dim[i] + eps < max_thres )
 			{
 				thresholds.push_back(data_dim[i] + eps);
 			}	 
@@ -79,12 +76,12 @@ std::array<node_t*, 2> split_node_default(node_t * node, const bool dim_shuffle,
 			size_t N_l 		= std::distance(data_dim.begin(), split_iter);
 			size_t N_r 		= N_node - N_l;
 // calculate volumes
-			double V_l = V_dim * ( t - min_dim );
-			double V_r = V_dim * ( max_dim - t );
+			double V_l = V_dim * ( t - min_thres );
+			double V_r = V_dim * ( max_thres - t );
 			double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
 			if( record )
 			{
-				stream << gain << " "; 
+				stream  << gain << V_l << V_r << N_l << N_r << std::endl; 
 			}
 // check whether this is the best gain so far, but exclude too small splits
 			if( gain > best_gain && N_l > 1 && N_r > 1 )
@@ -96,7 +93,7 @@ std::array<node_t*, 2> split_node_default(node_t * node, const bool dim_shuffle,
 		}
 		if( record )
 		{
-			stream << "\n"; 
+			stream << std::endl; 
 		}
 	}
 // store dimension and threshold in the node	
@@ -131,6 +128,8 @@ std::array<node_t*, 2> split_node_default(node_t * node, const bool dim_shuffle,
 			count_r++;
 		}
 	}
+  assert ( count_l == N_l );
+  assert ( count_r == N_r );
 	std::cout << "Splitted " << N_node << " data points: Points to the left: " << N_l << " points to the right: " << N_r << std::endl;
 	node_t* node_l(new node_t);
 	node_l->set_data(data_l);
