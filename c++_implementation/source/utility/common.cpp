@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <exception>
-#include <fstream>
-#include <iostream>
+#include <iostream>  // std::left
+#include <iomanip>   // std::setw std::setprecision
 
 #include <boost/numeric/ublas/io.hpp>
 
@@ -17,6 +17,25 @@ bool compare_first(const pair_t & l, const pair_t & r)
 bool compare_deref(const double* l, const double* r  )
 {
 	return *(l) < *(r);
+}
+
+// format output for ofstream etc.
+formatted_output::formatted_output(ostream& obj, int w):
+          width(w),
+          stream_obj(obj)
+{}
+
+template<typename T>
+formatted_output& formatted_output::operator<<(const T& output)
+{
+  stream_obj << std::setw(width) << std::setprecision(width-1) << std::left << output;
+  return *this;
+}
+
+formatted_output& formatted_output::operator<<(ostream& (*func)(ostream&))
+{
+  func(stream_obj);
+  return *this;
 }
 
 // tested in test/test_sortindex

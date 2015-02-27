@@ -1,6 +1,5 @@
 #include <fstream>
-#include <iostream>
-#include <iomanip>  /* setw */
+#include <iostream> 
 
 #include "splits.h"
 
@@ -26,9 +25,8 @@ std::array<node_t*, 2> split_node_default(
   std::vector<size_t> dimensions;
   
   std::string fname = "split" + std::to_string(node->get_depth());
-  std::fstream stream(fname, std::fstream::out);
-  stream.precision(16);
-  stream << std::setw(50) << "#gain" << "V_left" << "V_right" << std::endl;
+  formatted_output stream(new std::ofstream(fname, std::fstream::out);
+  stream << "#gain" << "V_left"  << "V_right" << "N_left" << "N_right" << std::endl;
 
   for( size_t d = 0; d < num_dimensions; d++)
 	{
@@ -82,7 +80,7 @@ std::array<node_t*, 2> split_node_default(
 			double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
 			if( record )
 			{
-				stream << std::setw(50) << gain << V_l << V_r << std::endl; 
+				stream  << gain << V_l << V_r << N_l << N_r << std::endl; 
 			}
 // check whether this is the best gain so far, but exclude too small splits
 			if( gain > best_gain && N_l > 1 && N_r > 1 )
@@ -94,7 +92,7 @@ std::array<node_t*, 2> split_node_default(
 		}
 		if( record )
 		{
-			stream << "\n"; 
+			stream << std::endl; 
 		}
 	}
 // store dimension and threshold in the node	
@@ -129,8 +127,8 @@ std::array<node_t*, 2> split_node_default(
 			count_r++;
 		}
 	}
-  assert ( ++count_l == N_l );
-  assert ( ++count_r == N_r );
+  assert ( count_l == N_l );
+  assert ( count_r == N_r );
 	std::cout << "Splitted " << N_node << " data points: Points to the left: " << N_l << " points to the right: " << N_r << std::endl;
 	node_t* node_l(new node_t);
 	node_l->set_data(data_l);

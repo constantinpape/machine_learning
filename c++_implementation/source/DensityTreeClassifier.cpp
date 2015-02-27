@@ -13,7 +13,7 @@ DensityTreeClassifier::DensityTreeClassifier() : 	mTrained(false),
 													mNum_instances(0),
 												 	mNum_classes(0),
 													mNum_dimensions(0),
-													mDepth_max(10),				// 4 == default value for maximal depth of the tree
+													mDepth_max(5),				// 4 == default value for maximal depth of the tree
 													mSplits(split_t::def),
 													mRecord_splits(true),
 													mDim_shuffle(false),
