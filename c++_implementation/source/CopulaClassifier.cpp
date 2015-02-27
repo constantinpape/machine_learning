@@ -154,3 +154,12 @@ bool CopulaClassifier::get_record_split()
 	return mDensityTree.get_record_split();
 }
 
+void CopulaClassifier::set_fixed_bins(const bool enable, const size_t n)
+{
+	mBayes.set_fixed_bins(enable, n);
+}
+	
+size_t CopulaClassifier::get_fixed_bins() const
+{
+	return mBayes.get_fixed_bins();
+}

@@ -12,9 +12,11 @@
 using namespace boost::numeric::ublas;
 
 BayesClassifier::BayesClassifier() : 	trained(false),
-   									num_instances(0),
+   										fixed_bins(false),	
+										num_instances(0),
 										num_dimensions(0),
 										num_classes(0),
+										num_fixed_bins(0),
 										instances_per_class(),
 										priors(),
 										bins(),
@@ -49,7 +51,15 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 	irrelevant_dims.clear();
 	for( size_t d = 0; d < num_dimensions; d++ )
 	{
-		bin_t current_bin = get_optimal_bins(train_data,d);
+		bin_t current_bin;
+		if( fixed_bins)
+		{
+			current_bin = get_fixed_bins();
+		}
+		else
+		{
+			current_bin = get_optimal_bins(train_data,d);
+		}
 // debug output
 		//std::cout << "dimension: " << d << "\twidth: " << current_bin.width << "\tnumber: " << current_bin.num_bins << std::endl;
 		if( current_bin.width == 0.0)
@@ -398,4 +408,33 @@ bin_t BayesClassifier::get_optimal_bins(const image_data_t & train_data, const s
 		std::cout << "Changing number of bins to: " << bin.num_bins << std::endl;
 	}
 	return bin;
+}
+
+bin_t BayesClassifier::get_fixed_bins()
+{
+	bin_t bin;
+// divide this dimension into num_fixed_bins bins
+// first get the correct dimension == column
+	bin.num_bins = num_fixed_bins;
+// set the rest
+	bin.lowest_val 	= 0.;
+	bin.highest_val = static_cast<double>(num_fixed_bins); 
+	bin.val_range   = bin.highest_val - bin.lowest_val;
+	bin.width		= bin.val_range / bin.num_bins; 
+	return bin;
+}
+	
+void BayesClassifier::set_fixed_bins(const bool enable, const size_t n)
+{
+	fixed_bins = enable;
+	num_fixed_bins = n;
+}
+	
+size_t BayesClassifier::get_fixed_bins() const
+{
+	if( fixed_bins )
+	{
+		return num_fixed_bins;
+	}
+	return 0;
 }
