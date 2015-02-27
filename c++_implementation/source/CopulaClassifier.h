@@ -27,6 +27,9 @@ public:
 	void set_split(const DensityTreeClassifier::split_t split);
 	DensityTreeClassifier::split_t get_split() const;
 	
+	void set_fixed_bins(const bool enable, const size_t n);
+	size_t get_fixed_bins() const;
+	
 	image_data_t get_copula(const image_data_t & data);
 
 private:

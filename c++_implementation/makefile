@@ -82,7 +82,9 @@ $(libdir)/%.o: $(testdir)/%.cpp $(testdir)/%.h
 	$(CC) $(ALL_CFLAGS) -MM $< > $(libdir)/$*.d
 
 # target: test - Test suit.
-test: test_depth test_nearestneighbors test_unit
+test: test_depth test_nearestneighbors
+
+unittest: test_unit
 
 # target: classifier - Classifier suit.
 classifier: test_bayes test_densitytree test_densityforest \
@@ -90,7 +92,10 @@ classifier: test_bayes test_densitytree test_densityforest \
 
 # general rule for creating executable binaries
 test_%: $(testdir)/test_%.cpp $(OBJ) 
-	$(CC) $(ALL_CFLAGS) $(GTEST_FLAG) -o $(bindir)/$@ $^ $(GTEST_OBJ)
+	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
+
+test_unit: $(testdir)/test_unit.cpp $(OBJ) $(GTEST_OBJ)
+	$(CC) $(ALL_CFLAGS) $(GTEST_FLAG) -o $(bindir)/$@ $^
 
 # target: test_bayes - Naive BayesClassifier & Generator.
 test_bayes: $(testdir)/test_bayes.cpp $(OBJ)

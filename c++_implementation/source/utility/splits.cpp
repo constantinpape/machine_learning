@@ -21,8 +21,12 @@ std::array<node_t*, 2> split_node_default(node_t * node, const bool dim_shuffle,
 	double best_gain   = 0.; 
 	size_t best_dim	   = 0;
 	std::vector<size_t> dimensions;
-	std::string fname = "split" + std::to_string(node->get_depth());
-	std::fstream stream(fname, std::fstream::out);
+	std::fstream stream;
+	if( record )
+	{
+		std::string fname = "split" + std::to_string(node->get_depth());
+		stream.open(fname, std::fstream::out);
+	}
 	for( size_t d = 0; d < num_dimensions; d++)
 	{
 		dimensions.push_back(d);
@@ -148,8 +152,12 @@ std::array<node_t*, 2> split_node_alt(node_t * node, const bool dim_shuffle, con
 	double best_gain   = 0.; 
 	size_t best_dim	   = 0;
 	std::vector<size_t> dimensions;
-	std::string fname = "split" + std::to_string(node->get_depth());
-	std::fstream stream(fname, std::fstream::out);
+	std::fstream stream;
+	if( record )
+	{
+		std::string fname = "split" + std::to_string(node->get_depth());
+		stream.open(fname, std::fstream::out);
+	}
 	for( size_t d = 0; d < num_dimensions; d++)
 	{
 		dimensions.push_back(d);
@@ -271,8 +279,12 @@ std::array<node_t*, 2> split_node_gradient(node_t * node, const size_t nearest_n
 	double best_gradient = 0.;
 	size_t best_instance = 0;
 	size_t best_dim		 = 0;
-	std::string fname = "split" + std::to_string(node->get_depth());
-	std::fstream stream(fname, std::fstream::out);
+	std::fstream stream;
+	if( record )
+	{
+		std::string fname = "split" + std::to_string(node->get_depth());
+		stream.open(fname, std::fstream::out);
+	}
 // iterate over the instances
 	for( size_t i = 0; i < N_node; i++ )
 	{
