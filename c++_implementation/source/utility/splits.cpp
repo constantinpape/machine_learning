@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream> 
+#include <array>
 
 #include "splits.h"
 
@@ -28,6 +29,8 @@ std::array<node_t*, 2> split_node_default(
 	{
 		std::string fname = "split" + std::to_string(node->get_depth());
 		stream.open(fname, std::fstream::out);
+		formatted_ostream output(stream, 10);
+		output << "#gain" << "V_left" << "V_right" << "N_left" << "N_right" << std::endl;
 	}
 	for( size_t d = 0; d < num_dimensions; d++)
 	{
@@ -60,7 +63,7 @@ std::array<node_t*, 2> split_node_default(
 		std::vector<double> thresholds;
 		for( size_t i = 0; i < N_node; i++ )
 		{
-			if( data_dim[i] - eps > min_thres )
+			if (data_dim[i] - eps > min_thres )
 			{
 				thresholds.push_back(data_dim[i] - eps);
 			}	 
@@ -78,10 +81,15 @@ std::array<node_t*, 2> split_node_default(
 // calculate volumes
 			double V_l = V_dim * ( t - min_thres );
 			double V_r = V_dim * ( max_thres - t );
+			if ( (V_l == 0) || (V_r == 0) )
+			{
+				continue;
+			}
 			double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
 			if( record )
 			{
-				stream  << gain << V_l << V_r << N_l << N_r << std::endl; 
+				formatted_ostream output(stream, 10);
+				output << gain << V_l << V_r << N_l << N_r << std::endl; 
 			}
 // check whether this is the best gain so far, but exclude too small splits
 			if( gain > best_gain && N_l > 1 && N_r > 1 )
@@ -128,9 +136,11 @@ std::array<node_t*, 2> split_node_default(
 			count_r++;
 		}
 	}
-  assert ( count_l == N_l );
-  assert ( count_r == N_r );
-	std::cout << "Splitted " << N_node << " data points: Points to the left: " << N_l << " points to the right: " << N_r << std::endl;
+	assert ( count_l == N_l );
+	assert ( count_r == N_r );
+	std::cout << "Splitted " << N_node << " data points: "
+		  <<  N_l << " to the left "
+		  <<  N_r << " to the right" << std::endl;
 	node_t* node_l(new node_t);
 	node_l->set_data(data_l);
 	node_t* node_r(new node_t);
@@ -156,6 +166,8 @@ std::array<node_t*, 2> split_node_alt(node_t * node, const bool dim_shuffle, con
 	{
 		std::string fname = "split" + std::to_string(node->get_depth());
 		stream.open(fname, std::fstream::out);
+		formatted_ostream output(stream, 10);
+		output << "#gain" << "V_left" << "V_right" << "N_left" << "N_right" << std::endl;
 	}
 	for( size_t d = 0; d < num_dimensions; d++)
 	{
@@ -211,10 +223,15 @@ std::array<node_t*, 2> split_node_alt(node_t * node, const bool dim_shuffle, con
 // calculate volumes
 			double V_l = V_dim * ( t - min_dim );
 			double V_r = V_dim * ( max_dim - t );
+			if ( (V_l == 0) || (V_r == 0) )
+			{
+				continue;
+			}
 			double gain = fabs( N_l * V_r - N_r * V_l); 
 			if( record )
 			{
-				stream << gain << " "; 
+				formatted_ostream output(stream, 10);
+				output << gain << V_l << V_r << N_l << N_r << std::endl; 
 			}
 // check whether this is the best gain so far, but exclude too small splits
 			if( gain > best_gain && N_l > 1 && N_r > 1 )
@@ -226,7 +243,7 @@ std::array<node_t*, 2> split_node_alt(node_t * node, const bool dim_shuffle, con
 		}
 		if( record )
 		{
-			stream << "\n"; 
+			stream << std::endl; 
 		}
 	}
 // store dimension and threshold in the node	
@@ -261,7 +278,11 @@ std::array<node_t*, 2> split_node_alt(node_t * node, const bool dim_shuffle, con
 			count_r++;
 		}
 	}
-	std::cout << "Splitted " << N_node << " data points: Points to the left: " << N_l << " points to the right: " << N_r << std::endl;
+	assert ( count_l == N_l );
+	assert ( count_r == N_r );
+	std::cout << "Splitted " << N_node << " data points: "
+		  <<  N_l << " to the left "
+		  <<  N_r << " to the right" << std::endl;
 	node_t* node_l(new node_t);
 	node_l->set_data(data_l);
 	node_t* node_r(new node_t);
@@ -283,6 +304,8 @@ std::array<node_t*, 2> split_node_gradient(node_t * node, const size_t nearest_n
 	{
 		std::string fname = "split" + std::to_string(node->get_depth());
 		stream.open(fname, std::fstream::out);
+		formatted_ostream output(stream, 10);
+		output << "#gradient" << std::endl;
 	}
 // iterate over the instances
 	for( size_t i = 0; i < N_node; i++ )
@@ -323,7 +346,8 @@ std::array<node_t*, 2> split_node_gradient(node_t * node, const size_t nearest_n
 		double gradient = norm_2(cms) / density;
 		if( record )
 		{
-			stream << gradient << " "; 
+			formatted_ostream output(stream, 10);
+			output << gradient << std::endl; 
 		}
 		if( gradient > best_gradient)
 		{
@@ -381,7 +405,11 @@ std::array<node_t*, 2> split_node_gradient(node_t * node, const size_t nearest_n
 			count_r++;
 		}
 	}
-	std::cout << "Splitted " << N_node << " data points: Points to the left: " << N_l << " points to the right: " << N_r << std::endl;
+	assert ( count_l == N_l );
+	assert ( count_r == N_r );
+	std::cout << "Splitted " << N_node << " data points: "
+		  <<  N_l << " to the left "
+		  <<  N_r << " to the right" << std::endl;
 	node_t* node_l(new node_t);
 	node_l->set_data(data_l);
 	node_t* node_r(new node_t);
@@ -393,6 +421,14 @@ std::array<node_t*, 2> split_node_gradient(node_t * node, const size_t nearest_n
 std::array<node_t*, 2> split_node_graph(node_t * node, const size_t max_radius, const bool record )
 {
 	size_t N_node = node->get_data().size1(); 
+	std::fstream stream;
+	if( record )
+	{
+		std::string fname = "split" + std::to_string(node->get_depth());
+		stream.open(fname, std::fstream::out);
+		formatted_ostream output(stream, 10);
+		output << "#gain" << std::endl;
+	}
 // build the graph
 // Adjacency matrix
 	compressed_matrix<size_t> A( N_node, N_node );

@@ -27,18 +27,24 @@ public:
 	double 	get_split_threshold() const;
 	void 	set_terminal(const bool terminal);
 	bool 	get_terminal() const;
+	void 	set_features();
 // static member
 	static const size_t max_nodes = 2;
 private:
 // private data
-	image_data_t 	mData;
+	image_data_t 		mData;
 	std::vector<node_t*> mChildren;	// store the 2 childeren of this node 0 -> left child, 1 -> right child
 	bool 			mTerminal;
+	bool			mDiscrete;
+	size_t			mMax_features;
 	double 			mProbability;
 	double 			mVolume;
 	size_t 			mDepth;
 	size_t 			mSplit_dimension;
 	double 			mSplit_threshold;
+// contains the posible values of a discrete feature space
+	std::vector<double> mFeature_space;
 // private functions
-	void 	calculate_volume(); // this is called whithin set_data()
+	void 	calculate_volume();	// this is called whithin set_data()
+	void	calculate_features();	// same here
 };

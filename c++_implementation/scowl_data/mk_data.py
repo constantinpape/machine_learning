@@ -1,7 +1,6 @@
 #python3.4.2
 import random
 import string
-import os
 import numpy as np
 
 def get_words(length):

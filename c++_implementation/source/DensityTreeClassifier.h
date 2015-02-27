@@ -36,6 +36,9 @@ public:
 	
 	void set_radius(const double radius);
 	double get_radius() const;
+	
+	void set_discrete_features(const size_t num_features);
+	std::vector<double> get_feature_space() const;
 
 private:
 // private data member
@@ -43,6 +46,9 @@ private:
 	size_t  mNum_instances;
 	size_t 	mNum_classes;
 	size_t 	mNum_dimensions;
+// in case of discrete feature space, e.g alphabet
+	size_t	mNum_features;
+	std::vector<double> mFeature_space;
 	size_t  mDepth_max;
 	split_t mSplits;
 	bool 	mRecord_splits;

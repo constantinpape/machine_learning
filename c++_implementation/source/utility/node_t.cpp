@@ -4,19 +4,25 @@
 #include "node_t.h"
 
 node_t::node_t() : 	mData(),
-   					mChildren(),
-					mTerminal(false),
-					mProbability(0.),
-					mVolume(0.),
-				    mDepth(0),
-					mSplit_dimension(0),
-				   	mSplit_threshold(0.)
+			mChildren(),
+			mTerminal(false),
+			mDiscrete(false)
+			mProbability(0.),
+			mVolume(0.),
+			mDepth(0),
+			mSplit_dimension(0),
+			mSplit_threshold(0.)
 {}
 							
 void node_t::set_data(const image_data_t & data)
 {
 	mData = data;
 	calculate_volume();
+	if (mDiscrete)
+	{
+		mFeature_space.clear();
+		calculate_features();
+	}
 }
 	
 const image_data_t & node_t::get_data() const
@@ -101,7 +107,27 @@ void node_t::calculate_volume()
 		mVolume = vol;
 	}
 }
-	
+
+void	node_t::calculate_features()
+{
+	size_t i = 0;
+	size_t d = 0;
+	while (d < mData.size2())
+	{
+		if(std::find(mFeature_space.begin(), mFeature_space.end(), mData(i,d)) == mFeature_space.end())
+		{
+			mFeature_space.push_back(mData(i,d));
+		}
+		i++;
+		if(i == mNum_instances)
+		{
+			d++;
+			i=0;
+		}
+	}
+	std::sort( mFeature_space.begin(), mFeature_space.end() );
+}
+
 double node_t::get_volume() const
 {
 	return mVolume;

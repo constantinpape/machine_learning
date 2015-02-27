@@ -10,18 +10,20 @@
 using namespace boost::numeric::ublas;
 	
 DensityTreeClassifier::DensityTreeClassifier() : 	mTrained(false),
-													mNum_instances(0),
-												 	mNum_classes(0),
-													mNum_dimensions(0),
-													mDepth_max(5),				// 4 == default value for maximal depth of the tree
-													mSplits(split_t::def),
-													mRecord_splits(true),
-													mDim_shuffle(false),
-													mNum_shuffle(5),
-													mNearest_neighbors(15), // 15 == default value for nearest neighbors in gradient approx.
-													mRadius(10.),
-													mTrees(),
-													mPriors()
+							mNum_instances(0),
+							mNum_classes(0),
+							mNum_dimensions(0),
+							mNum_features(0),
+							mFeature_space(),
+							mDepth_max(4),				// 4 == default value for maximal depth of the tree
+							mSplits(split_t::def),
+							mRecord_splits(false),
+							mDim_shuffle(false),
+							mNum_shuffle(5),
+							mNearest_neighbors(15), // 15 == default value for nearest neighbors in gradient approx.
+							mRadius(10.),
+							mTrees(),
+							mPriors()
 {}
 
 void DensityTreeClassifier::train(const image_data_t & train_data, const label_data_t & train_label)
@@ -32,11 +34,41 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 	}
 	mTrees.clear();
 	mPriors.clear();
-// get number of instances, dimensions and classes
+	mFeature_space.clear();
+// get number of instances, dimensions and classes (labels start at 0)
 	mNum_instances	= train_data.size1();
 	mNum_dimensions = train_data.size2();	
 	auto min_max	= std::minmax_element( train_label.begin(), train_label.end() );
 	mNum_classes    = (*min_max.second - *min_max.first) + 1;
+// if discrete feature space, set it up
+	if (mNum_features)
+	{
+		size_t i = 0;
+		size_t d = 0;
+		while (d < mNum_dimensions)
+		{
+			if(std::find(mFeature_space.begin(), mFeature_space.end(), train_data(i,d)) == mFeature_space.end())
+			{
+				mFeature_space.push_back(train_data(i,d));
+			}
+			i++;
+			if(i == mNum_instances)
+			{
+				d++;
+				i=0;
+			}
+		}
+		assert (mFeature_space.size() == mNum_features);
+		std::sort( mFeature_space.begin(), mFeature_space.end() );
+		std::cout << "Discrete feature space of cardinatlity: "
+			  << mNum_features << "\nThe elements are: ";
+		for( double feature : mFeature_space)
+		{
+			std::cout << feature << ' ';
+		}
+		std::cout << std::endl;
+	}
+
 // build the tree for each class seperately
 	for( size_t c = 0; c < mNum_classes; c++)
 	{
@@ -306,4 +338,14 @@ void DensityTreeClassifier::set_radius(const double radius)
 double DensityTreeClassifier::get_radius() const
 {
 	return mRadius;
+}
+
+void DensityTreeClassifier::set_discrete_features(const size_t num_features)
+{
+	mNum_features = num_features;
+}
+
+std::vector<double> DensityTreeClassifier::get_feature_space() const
+{
+	return mFeature_space;
 }
