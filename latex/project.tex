@@ -1,12 +1,416 @@
-\documentclass{report}
+\documentclass{article}
 
-\title{Naive Bayes vs. Density Tree}
+\usepackage{caption}
+\usepackage[a4paper,margin=2.5cm,footskip=.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{placeins}
+\usepackage{subcaption}
+
+\title{Combining Bayes and Density Tree Classifier}
 \author{Constantin Pape\\
         Marcus Theisen}
 \date{\today}
 
-%vllt sollten wir uns mal Gedanken über unsere Ausarbeitung machen ;)
 \begin{document}
 \maketitle
+
+\section{Introduction}
+
+In this project we combine two different classifiers to adress the issue of generating new instances for data with interdependent feature dimensions. As basis we take the Naive Bayes Classifier, that treats feature dimensions as independent and the Density Tree Classifier, that captures the dependency between the feature dimensions. 
+\newline
+Both Classifiers share the concept of learning the data by learning the posterior $p(B|A)$ in Bayes Theorem 
+\begin{equation} \label{eq1}
+	p(A|B) = \frac{p(B|A) ~ P(A)}{P(B)} .
+\end{equation}
+As a reference dataset we use a downsampled version of the MNIST-dataset and filter it for the numerals 3 and 8. We test the classifiers on the full dataset and a version that is reduced to the two most relevant dimensions.
+For further applications we use more complex datasets: Words % TODO etc... 
+\newline
+The Classifiers are implemented in C++, the source code is available on GitHub: \newline
+\url{https://github.com/consti123/machine_learning}
+
+\section{Basis Classifiers}
+
+First we give a brief summary of the two underlying classifiers and present their results on the MNIST-dataset.
+
+\subsection{Bayes Classifier}
+
+The Naive Bayes Classifier treats all feature dimensions as independent. It learns the posterior by creating a histogram 
+for each dimension and class. The bin width (in each dimension) is chosen according to the formula
+\begin{equation}
+	\Delta X = \frac{2 ~ \mathrm{IQR}(X)}{N^{\frac{1}{3}}}
+\end{equation}
+where $X$ is the dataset, IQR the inter-quartile-range and $N = |X|$. However this 
+rule might lead to too small bins for data with a small spread. To counter this effect,
+we enforce a maximal bin number of $\sqrt{N}$, adjusting the bin width if necessary.
+After determining the bin width the histograms are constructed from the training data and normalised.
+\newline
+The Bayes Classifier predicts the labels for new data by calculating the likelihood according to
+\ref{eq1} for each class. The posterior $p(B|A)$ is given by the probability of the corresponding bin.
+The prior $p(A)$ is given by the fraction of class instances to total instances in the training data.
+Then the class with the biggest value for $p(B|A) ~ p(A)$ is predicted.
+\newline
+For generating the Bayes Classifier iterates over the dimensions.
+For each dimension one of the 5 most probable bins is chosen with its probability and 
+then it is sampled uniformly from this bin.
+
+\subsubsection{Results}
+
+The Bayes Classifier performs well on the full and reduced dataset, see table \ref{tab1} for details.
+	
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c}
+		Data	&	Classification Rate	\\
+		Full	&	0.8654				\\
+	 	Reduced & 	0.8376				\\
+	\end{tabular}
+	\caption{Results for the Bayes Classifier}
+	\label{tab1}
+\end{table}
+
+For the generation method chosen about 10 \% of the results can be identified as 3s.
+The results are quite sparse, because we only sample from the 5 most probable bins.
+See figure \ref{fig1} for examples.
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_bayes_3.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_bayes_4.png}
+	\end{subfigure}
+	\caption{Instances generated with the BayesClassifier.}
+	\label{fig1}
+\end{figure}
+
+\subsection{Density Tree Classifier} \label{dt}
+
+The Density Tree Classifier captures the interdependence of the feature dimensions. This is done by 
+building a binary tree from the data for each class.
+First all data is put in the root node of the tree. This node is splitted in two children nodes according to a split criterion.
+This is repeated for all nodes until a termnination criterion is met.
+\newline
+We started with a simple splitting criterion in the beginning:
+We iterate over the dimensions. For each dimension we create a set of thresholds. 
+The instances to the left of this threshold (in current dimension) belong to the left node, the ones to 
+the right to the right node. For each instance (except the two outer ones) two thresholds are created, one to the left
+of the instance and one to the right.
+Then a gain-function is calculated for each threshold. Finally the split that maximizes this gain is chosen.
+We implement the criterion with gain-function
+\begin{equation}
+	\mathrm{gain} ~ = ~ ( \frac{N_l}{N} )^2 ~ \frac{1}{V_l} ~ +  ~ ( \frac{N_r}{N} )^2 ~ \frac{1}{V_r} 
+\end{equation}
+where $N$ is the total number of instances in the node, $N_l$, $N_r$ the number of instances to the left / right
+and $V_l$, $V_r$ the volume to the left / right.
+From now on we will refer to this criterion as the standard criterion. We will introduce different split 
+criteria later.
+\newline
+To each node the probability $p_i = \frac{N_i}{N ~ V_i}$ is assigned. Here $N$ is the total number of instances
+and $N_i$, $V_i$ the values for the corresponding node.
+\newline
+A node is terminated if it has either reached a maximal depth in the tree or has fallen below the minmal number
+of instances $N_min = N^{\frac{1}{3}}$.
+\newline
+To predict the labels for new data the posterior is calculated for each class by finding the leave node in which this data point
+belongs. Then the posterior is identified with the probability of this node. The prior is calculated like in the
+Bayes Classifier. The class with the biggest product of posterior and prior is predicted.
+\newline
+New instances are generated by walking the tree: Starting at the root node the children nodes are selected with their
+probability until a leaf node is reached. Then the new data point is sampled uniformly from this node.
+
+\subsubsection{Results}
+
+This classifier performs considerably worse than the Bayes Classifier. For the reduced data it achieves a 
+classification rate of approximately 68 \%, which is 15 \% worse than the Bayes Classifier. 
+For the full dataset the classification rate is below 50 \%!
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c}
+		Data	&	Classification Rate	\\
+		Full	&	0.4928				\\
+	 	Reduced & 	0.6860				\\
+	\end{tabular}
+	\caption{Results for the Density Tree Classifier}
+	\label{tab2}
+\end{table}
+
+To test the generation ability we generate 50 new instances of data.
+Only in some of these 3s are barely discenible. In general all are noisy.
+See \ref{fig2} for examples.
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_dt_1.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_dt_2.png}
+	\end{subfigure}
+	\caption{Instances generated with the Density Tree.}
+	\label{fig2}
+\end{figure}
+
+\section{Copula Classifier}
+
+The main task of this project is to construct a classifier that exploits the ability of the Density Tree Classifier to capture the 
+interdependency of the feature dimensions while keeping the prediction performance of the Bayes Classifier.
+This way we hope to increase the generation power compared to Bayes Classifier and Density Tree Classifier.
+\newline
+This is achieved by combining both classifiers: We use the fact that the cumulative density function (CDF)
+can be calculated from the (normalised) histograms of the Bayes Classifier.
+This can be combined with a Density Tree Classifier that is trained of the rank order transformation of
+the training data (result is called copula).
+% TODO explain copula
+\newline
+The training of the new classifier can be summarized as follows:
+\begin{enumerate}
+\item Train the Bayes Classifier on the training data.
+\item Compute the copula of the training data.
+\item Train the Density Tree on the copula.
+\item Compute the CDF of the histograms of the Bayes Classifier. 
+\end{enumerate}
+Then labels can be predicted for new data via the following steps:
+\begin{enumerate}
+\item The posterior is calculated with the Bayes Classifier. 
+\item The CDF is applied to the data to transform it to copula space.
+\item The posterior of the Density Tree is calculated on the transformed data.
+\item The product of both posteriors and the prior is taken.
+\end{enumerate}
+This is done for each class and the class with the biggest resulting value is predicted.
+\newline
+New data is generated via:
+\begin{enumerate}
+\item Copula data is generated with the Density Tree.
+\item It is mapped back with the inverse CDF from the Bayes Classifier.
+\end{enumerate}
+In the following we call the resulting classifier the Copula Classifier.
+
+\subsection{Splits}
+
+To improve on the underlying Density Tree Classifier, we implement new split criteria.
+First we use the split criterion already discussed in \ref{dt}. 
+Then we implement a similar criterion, which uses a different gain function:
+\begin{equation}
+	\textrm{gain} ~  = ~ | ~ N_l ~ V_r ~ - ~ N_r ~ V_l ~ |
+\end{equation}
+This criterion is supposed to yield more balanced splits than the original, because it balances the 
+number of instances and the volumes of the splits. We will refer to it as alternative criterion.
+\newline
+Finally we implement a criterion based on the gradient of each datapoint.
+For this we need an estimation of the gradient. First we find the k nearest neighbors of
+the datapoint. Then we estimate the gradient as the displacement to the center of these neighbors.
+Additionally the density is estimated by the average distance of the datapoint to the neighbors.
+We choose to split at the datapoint, which has the biggest value for the gradient divided by density.
+Then we split along the dimension, where the gradient is biggest.
+
+For a first comparison of the criteria we plot the distribution of the values for the gains / gradient
+over the thresholds / instances. See figures \ref{fig2a}, \ref{fig2b} and \ref{fig2c}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.8\textwidth]{graphics/defsplit_dimimp2.png}
+	\caption{Distribution of the gain over the thresholds for the standard split.
+	Split for the 2nd most important dimension, top tree level.}
+	\label{fig2a}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.8\textwidth]{graphics/altsplit_dimimp1.png}
+	\caption{Distribution of the gain over the thresholds for the alternative split.
+	Split for the most important dimension, top tree level.}
+	\label{fig2b}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.8\textwidth]{graphics/gradsplit_full.png}
+	\caption{Distribution of the gradient over the instances for the gradient split.
+	Split for the full data, top tree level.}
+	\label{fig2c}
+\end{figure}
+
+One can see that the standard and alternative criterion yield a distribution  
+of gains with 2 peaks (this is also true for other dimensions).
+The distribution of the gradients is quite noisy and there is no clear structure discernible.
+
+\FloatBarrier
+
+To further examine the splits we also plot the binary tree produced for the reduced dataset.
+These are shown in figures \ref{fig2d}, \ref{fig2e} and \ref{fig2f}. 
+Here the label of the nodes corresponds to the number of instances assigned to them.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.8\textwidth]{graphics/tree_def_reduced.png}
+	\caption{Tree for the standard criterion on reduced dataset.}
+	\label{fig2d}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.8\textwidth]{graphics/tree_alt_reduced.png}
+	\caption{Tree for the alternative criterion on reduced dataset.}
+	\label{fig2e}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=.8\textwidth]{graphics/tree_grad_reduced.png}
+	\caption{Tree for the gradient criterion on reduced dataset.}
+	\label{fig2f}
+\end{figure}
+
+These trees suggest, that the alternative criterion produces the most balanced splits, whereas the 
+standard criterion produces the trees with the big leaves, but not too many very small leaves.
+The gradient criterion seems to produce splits with many big leaves and many very small leaves.
+
+\FloatBarrier
+
+\subsection{Results}
+
+To evaluate the split criteria thouroughly, we sweep the parameters they depend on.
+\newline
+First we sweep different tree depth values for the standard and alternative criterion.
+See table \ref{tab3} for the results. The performance of the standard criterion on the full data 
+is better by approximately 5 \% for the larger depth values.
+However the performance for the reduced data slightly with increasing depth.
+For the alternative criterion the performance decreases for full and reduced data with increasing depth.
+In addition we fear that overfitting effects might be stronger for too large depth values.
+Hence we continue with a maximal tree depth of 4 for the following tests.
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c c c c}
+				&   Standard  &					& 	Alternative	&				\\
+		Depth	&	Full Data & Reduced Data	& 	Full Data	& Reduced Data	\\
+		  4		&	0.5285	  &	0.8376			&	0.6372		&	0.8364		\\
+		  8 	& 	0.5285	  & 0.8363			&	0.5286		&	0.8355		\\
+		  10	&   0.5285	  & 0.8343			&	0.5285		&	0.8308		\\
+		  15	& 	0.5806	  & 0.8307			&	0.5285		&	0.8299		\\
+		  20	&   0.5823	  & 0.8298			&	0.5285		&	0.8299		\\
+		  40	&	0.5847	  & 0.8299			&	0.5285		&	0.8299		\\
+	\end{tabular}
+	\caption{Results for different tree depths for the standard and alternative criterion.}
+	\label{tab3}
+\end{table}
+
+Then we sweep the number of neareset neighbors k, that are taken into account for the calculation 
+of gradient and density in the gradient split criterion.
+\newline
+The results are shown in \ref{tab4}. In contrast to the standard criterion the gradient split 
+performs better on the full data. There it performs considerably better than the standard criterion.
+We further see, that the quality of the splits decrease drastically with too big k-value.
+We choose to continue with k = 10 for the following tests.
+\newline
+It should be noted that calculating this split criterion takes considerably longer than calculating
+the standard or alternative criterion.
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c c}
+		  k		&	Full Data & Reduced Data	\\
+		  5		&	0.8406	  &	0.8188			\\
+	 	  10 	& 	0.8447	  & 0.8245			\\
+		  15	&   0.8428	  & 0.8348			\\
+		  30	& 	0.5357	  & 0.8159			\\
+	\end{tabular}
+	\caption{Results for different numbers of nearest neighbors for the gradient criterion.}
+	\label{tab4}
+\end{table}
+
+Next we look at the generation of new instances with the Copula Classifier.
+Figures \ref{fig3}, \ref{fig4} and \ref{fig5} show instances generated with the three
+split criteria.
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_defsplit1.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_defsplit3.png}
+	\end{subfigure}
+	\caption{Instances generated with the Copula Classifier (default criterion).}
+	\label{fig3}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_altsplit1.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_altsplit2.png}
+	\end{subfigure}
+	\caption{Instances generated with the Copula Classifier (alternative criterion).}
+	\label{fig4}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_gradsplit2.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\includegraphics[width=\textwidth]{graphics/gen_gradsplit1.png}
+	\end{subfigure}
+	\caption{Instances generated with the Copula Classifier (gradient criterion).}
+	\label{fig5}
+\end{figure}
+
+\FloatBarrier
+
+About 10 to 15 \% of the instances generated with all three criteria are discernible as 3s.
+In comparison the results with the Bayes Classifier they look more noisy, but the shape of the 3 is 
+in general more distinct. Qualitatevely there is no difference between the generated data of the three criteria.
+
+Next we compare all three criteria and also compare them with the Bayes Classifier.
+Table \ref{tab5} shows all results. We see that the Bayes Classifier has the best classification
+results on full and reduced data. The only split criterion that yields good results on the full dataset is
+the gradient criterion. However it takes about 140 times longer for training than the other criteria.
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c c c c}
+		Split / Class.&	Bayes 	& Standard	& Alternative 	& Gradient	\\
+		Full		&	0.8654	&	0.5285	&	0.6372		& 0.8245	\\
+	 	t\_train	&   0.7 s	&	61.3 s	&	62.7 s		& 140 min	\\
+		Reduced 	& 	0.8376	&	0.8375	&	0.8364		& 0.8245	\\
+		t\_train	&   18.7 ms	&	1.6 s	&   1.6 s		& 573 s		\\
+   		Generating	& 	0.9391 $\pm$ 0.0265	&	0.8886 $\pm$ 0.0095		& 0.8158 $\pm$ 0.0123 & 0.7998 $\pm$ 0.0126 \\
+	\end{tabular}
+	\caption{Results for different numbers of nearest neighbors for the gradient criterion.}
+	\label{tab5}
+\end{table}
+
+We further evaluate the generating performances with the Random Forest Classifier from sklearn.
+For this we train it on the complete MNIST dataset (i.e. with all numerals not only 3 and 8).
+Then we predict the labels for 1000 instances generated with the different split criteria and 
+the Bayes Classifier. This is repeated 50 times to exclude randomness effects from the Random Forest Classifier.
+The forest is set up to consist of 30 trees.
+It achieves a classification rate of 0.9223 $\pm$ 0.0007.
+The classification for the generated data is reported in the last row of table \ref{tab5}. 
+The errors were estimated with the standard deviation of the 50 trials.
+\newline
+According to this classification the Bayes Classifier generates the best data. However this might
+be explained by the fact that it generates sparse images with the generation method we have chosen.
+This leads to less noise in the images and might increase the correct prediction of the Random Forest Classifier 
+also for generated data that is not discernible (by human standards) as 3.
+To investigate this hypothesis one could try to weaken the noise in the generated instances of the Copula Classifier,
+e.g. by introducing a threshold and test whether this way one obtains better generation results.
+\newline
+The split criterion that performs best in this validation is the standard criterion.
+It is better than the other two criteria, which perform at level, by nearly 8 \%.
+This is quite surprising, because this criterion performed worst with regard to prediction.
+\newline
+To further evaluate the generating performance of the Copula Classifier, we will turn to more complex data,
+begining with a dataset of words. We hope that the Copula Classifier will profit from its ability to take into 
+account feature dimension interdependency here.
+
+\section{Complex Data}
 
 \end{document}

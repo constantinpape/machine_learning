@@ -34,4 +34,5 @@ data/mnist
 latex/*
 !latex/*.tex
 !latex/*.pdf
+!latex/graphics
 

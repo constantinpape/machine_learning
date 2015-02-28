@@ -1,0 +1,142 @@
+tree_defsplit_reduced
+
+DensityTreeClassfier::train: start building tree for class 0  
+Splitted 12262 data points: Points to the left: 10388 points to the right: 1874
+DensityTreeClassifier::train: Building Tree for class 0 iteration 1
+Splitted 1874 data points: Points to the left: 1069 points to the right: 805
+DensityTreeClassifier::train: Building Tree for class 0 iteration 2
+Splitted 805 data points: Points to the left: 176 points to the right: 629
+DensityTreeClassifier::train: Building Tree for class 0 iteration 3
+Splitted 629 data points: Points to the left: 530 points to the right: 99
+DensityTreeClassifier::train: Building Tree for class 0 iteration 4
+DensityTreeClassifier::train: Building Tree for class 0 iteration 5
+DensityTreeClassifier::train: Building Tree for class 0 iteration 6
+Splitted 176 data points: Points to the left: 13 points to the right: 163
+DensityTreeClassifier::train: Building Tree for class 0 iteration 7
+DensityTreeClassifier::train: Building Tree for class 0 iteration 8
+DensityTreeClassifier::train: Building Tree for class 0 iteration 9
+Splitted 1069 data points: Points to the left: 409 points to the right: 660
+DensityTreeClassifier::train: Building Tree for class 0 iteration 10
+Splitted 660 data points: Points to the left: 358 points to the right: 302
+DensityTreeClassifier::train: Building Tree for class 0 iteration 11
+DensityTreeClassifier::train: Building Tree for class 0 iteration 12
+DensityTreeClassifier::train: Building Tree for class 0 iteration 13
+Splitted 409 data points: Points to the left: 76 points to the right: 333
+DensityTreeClassifier::train: Building Tree for class 0 iteration 14
+DensityTreeClassifier::train: Building Tree for class 0 iteration 15
+DensityTreeClassifier::train: Building Tree for class 0 iteration 16
+Splitted 10388 data points: Points to the left: 3647 points to the right: 6741
+DensityTreeClassifier::train: Building Tree for class 0 iteration 17
+Splitted 6741 data points: Points to the left: 4520 points to the right: 2221
+DensityTreeClassifier::train: Building Tree for class 0 iteration 18
+Splitted 2221 data points: Points to the left: 1379 points to the right: 842
+DensityTreeClassifier::train: Building Tree for class 0 iteration 19
+DensityTreeClassifier::train: Building Tree for class 0 iteration 20
+DensityTreeClassifier::train: Building Tree for class 0 iteration 21
+Splitted 4520 data points: Points to the left: 1123 points to the right: 3397
+DensityTreeClassifier::train: Building Tree for class 0 iteration 22
+DensityTreeClassifier::train: Building Tree for class 0 iteration 23
+DensityTreeClassifier::train: Building Tree for class 0 iteration 24
+Splitted 3647 data points: Points to the left: 1813 points to the right: 1834
+DensityTreeClassifier::train: Building Tree for class 0 iteration 25
+Splitted 1834 data points: Points to the left: 1620 points to the right: 214
+DensityTreeClassifier::train: Building Tree for class 0 iteration 26
+DensityTreeClassifier::train: Building Tree for class 0 iteration 27
+DensityTreeClassifier::train: Building Tree for class 0 iteration 28
+Splitted 1813 data points: Points to the left: 397 points to the right: 1416
+DensityTreeClassifier::train: Building Tree for class 0 iteration 29
+DensityTreeClassifier::train: Building Tree for class 0 iteration 30
+DensityTreeClassifier::train: Building Tree for class 0 iteration 31
+
+tree_altsplit_reduced
+
+Splitted 12262 data points: Points to the left: 10329 points to the right: 1933
+DensityTreeClassifier::train: Building Tree for class 0 iteration 1
+Splitted 1933 data points: Points to the left: 1262 points to the right: 671
+DensityTreeClassifier::train: Building Tree for class 0 iteration 2
+Splitted 671 data points: Points to the left: 520 points to the right: 151
+DensityTreeClassifier::train: Building Tree for class 0 iteration 3
+Splitted 151 data points: Points to the left: 54 points to the right: 97
+DensityTreeClassifier::train: Building Tree for class 0 iteration 4
+DensityTreeClassifier::train: Building Tree for class 0 iteration 5
+DensityTreeClassifier::train: Building Tree for class 0 iteration 6
+Splitted 520 data points: Points to the left: 382 points to the right: 138
+DensityTreeClassifier::train: Building Tree for class 0 iteration 7
+DensityTreeClassifier::train: Building Tree for class 0 iteration 8
+DensityTreeClassifier::train: Building Tree for class 0 iteration 9
+Splitted 1262 data points: Points to the left: 515 points to the right: 747
+DensityTreeClassifier::train: Building Tree for class 0 iteration 10
+Splitted 747 data points: Points to the left: 404 points to the right: 343
+DensityTreeClassifier::train: Building Tree for class 0 iteration 11
+DensityTreeClassifier::train: Building Tree for class 0 iteration 12
+DensityTreeClassifier::train: Building Tree for class 0 iteration 13
+Splitted 515 data points: Points to the left: 98 points to the right: 417
+DensityTreeClassifier::train: Building Tree for class 0 iteration 14
+DensityTreeClassifier::train: Building Tree for class 0 iteration 15
+DensityTreeClassifier::train: Building Tree for class 0 iteration 16
+Splitted 10329 data points: Points to the left: 3616 points to the right: 6713
+DensityTreeClassifier::train: Building Tree for class 0 iteration 17
+Splitted 6713 data points: Points to the left: 4520 points to the right: 2193
+DensityTreeClassifier::train: Building Tree for class 0 iteration 18
+Splitted 2193 data points: Points to the left: 1356 points to the right: 837
+DensityTreeClassifier::train: Building Tree for class 0 iteration 19
+DensityTreeClassifier::train: Building Tree for class 0 iteration 20
+DensityTreeClassifier::train: Building Tree for class 0 iteration 21
+Splitted 4520 data points: Points to the left: 1808 points to the right: 2712
+DensityTreeClassifier::train: Building Tree for class 0 iteration 22
+DensityTreeClassifier::train: Building Tree for class 0 iteration 23
+DensityTreeClassifier::train: Building Tree for class 0 iteration 24
+Splitted 3616 data points: Points to the left: 1633 points to the right: 1983
+DensityTreeClassifier::train: Building Tree for class 0 iteration 25
+Splitted 1983 data points: Points to the left: 940 points to the right: 1043
+DensityTreeClassifier::train: Building Tree for class 0 iteration 26
+
+tree_gradsplit_reduced
+
+Splitted 12262 data points: Points to the left: 2171 points to the right: 10091
+DensityTreeClassifier::train: Building Tree for class 0 iteration 1
+Splitted 10091 data points: Points to the left: 4050 points to the right: 6041
+DensityTreeClassifier::train: Building Tree for class 0 iteration 2
+Splitted 6041 data points: Points to the left: 53 points to the right: 5988
+DensityTreeClassifier::train: Building Tree for class 0 iteration 3
+Splitted 5988 data points: Points to the left: 3057 points to the right: 2931
+DensityTreeClassifier::train: Building Tree for class 0 iteration 4
+DensityTreeClassifier::train: Building Tree for class 0 iteration 5
+DensityTreeClassifier::train: Building Tree for class 0 iteration 6
+Splitted 53 data points: Points to the left: 10 points to the right: 43
+DensityTreeClassifier::train: Building Tree for class 0 iteration 7
+DensityTreeClassifier::train: Building Tree for class 0 iteration 8
+DensityTreeClassifier::train: Building Tree for class 0 iteration 9
+Splitted 4050 data points: Points to the left: 749 points to the right: 3301
+DensityTreeClassifier::train: Building Tree for class 0 iteration 10
+Splitted 3301 data points: Points to the left: 616 points to the right: 2685
+DensityTreeClassifier::train: Building Tree for class 0 iteration 11
+DensityTreeClassifier::train: Building Tree for class 0 iteration 12
+DensityTreeClassifier::train: Building Tree for class 0 iteration 13
+Splitted 749 data points: Points to the left: 130 points to the right: 619
+DensityTreeClassifier::train: Building Tree for class 0 iteration 14
+DensityTreeClassifier::train: Building Tree for class 0 iteration 15
+DensityTreeClassifier::train: Building Tree for class 0 iteration 16
+Splitted 2171 data points: Points to the left: 110 points to the right: 2061
+DensityTreeClassifier::train: Building Tree for class 0 iteration 17
+Splitted 2061 data points: Points to the left: 1557 points to the right: 504
+DensityTreeClassifier::train: Building Tree for class 0 iteration 18
+Splitted 504 data points: Points to the left: 111 points to the right: 393
+DensityTreeClassifier::train: Building Tree for class 0 iteration 19
+DensityTreeClassifier::train: Building Tree for class 0 iteration 20
+DensityTreeClassifier::train: Building Tree for class 0 iteration 21
+Splitted 1557 data points: Points to the left: 439 points to the right: 1118
+DensityTreeClassifier::train: Building Tree for class 0 iteration 22
+DensityTreeClassifier::train: Building Tree for class 0 iteration 23
+DensityTreeClassifier::train: Building Tree for class 0 iteration 24
+Splitted 110 data points: Points to the left: 27 points to the right: 83
+DensityTreeClassifier::train: Building Tree for class 0 iteration 25
+Splitted 83 data points: Points to the left: 18 points to the right: 65
+DensityTreeClassifier::train: Building Tree for class 0 iteration 26
+DensityTreeClassifier::train: Building Tree for class 0 iteration 27
+DensityTreeClassifier::train: Building Tree for class 0 iteration 28
+Splitted 27 data points: Points to the left: 26 points to the right: 1
+DensityTreeClassifier::train: Building Tree for class 0 iteration 29
+DensityTreeClassifier::train: Building Tree for class 0 iteration 30
+DensityTreeClassifier::train: Building Tree for class 0 iteration 31
+
