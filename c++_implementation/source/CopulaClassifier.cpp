@@ -17,6 +17,7 @@ void CopulaClassifier::train(const image_data_t & train_data, const label_data_t
 	{
 		std::cout << "CopulaClassifier::train: retraining the classifier!" << std::endl;	
 	}
+	assert( train_data.size1() == train_label.size() );
 	mNum_instances  = train_data.size1();
 	auto min_max	= std::minmax_element( train_label.begin(), train_label.end() );
 	mNum_classes    = (*min_max.second - *min_max.first) + 1;

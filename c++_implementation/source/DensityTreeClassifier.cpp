@@ -30,6 +30,7 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 	{
 		std::cout << "DensityTreeClassifier::train: Retraining the classifier " << std::endl;
 	}
+	assert( train_data.size1() == train_label.size() );
 	mTrees.clear();
 	mPriors.clear();
 // get number of instances, dimensions and classes

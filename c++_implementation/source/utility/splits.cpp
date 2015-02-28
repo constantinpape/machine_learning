@@ -314,7 +314,7 @@ std::array<node_t*, 2> split_node_gradient(node_t * node, const size_t nearest_n
 		}
 		for( size_t j = 1; j < k+1; j++)
 		{
-			size_t indx = sorted_indices(j);
+			size_t indx = static_cast<size_t>( sorted_indices(j) );
 			density += data_norm(indx);
 			matrix_row<matrix<double> > instance_j(data,j);
 			cms += instance_j;
@@ -413,7 +413,7 @@ std::array<node_t*, 2> split_node_graph(node_t * node, const size_t max_radius, 
 			data_norm(j) = norm_2(instance_j);
 		}
 // sort-indices to find the instances within max_radius
-		vector<double> sorted_indices = get_sorted_indices( get_sorted_indices(data_norm) );
+		vector<double> sorted_indices = get_ranked_indices( data_norm );
 		for( size_t k = 0; k < N_node; k++ )
 		{
 			double radius = data_norm(k);

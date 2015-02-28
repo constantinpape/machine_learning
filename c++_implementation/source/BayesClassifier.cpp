@@ -31,6 +31,7 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 	{
 		std::cout << "Called BayesClassifier::train with trained = true, retraining the classifier." << std::endl;
 	}
+	assert( train_data.size1() == train_label.size() );
 // determine number of instances, dimensions and classes
 	num_instances	= train_data.size1();
 	num_dimensions 	= train_data.size2(); 
@@ -191,7 +192,7 @@ image_data_t BayesClassifier::generate(const size_t N, const short label)
 			{
 				data_return(i,d) = 0.;
 			}
-// sampling strategy: sample from the 2 most likely histogram bins with their prob.
+// sampling strategy: sample from the 5 most likely histogram bins with their prob.
 // then sample uniform inside the chosen bin
 			else
 			{
@@ -205,18 +206,40 @@ image_data_t BayesClassifier::generate(const size_t N, const short label)
 // get probabilities of the 2 bins with highest probability
 				double p = *(histo_sort.end() - 1);
 				double q = *(histo_sort.end() - 2);
-// normalise the probability
-				double p_1 = p / (p + q);
+				double r = *(histo_sort.end() - 3);
+				double s = *(histo_sort.end() - 4);
+				double t = *(histo_sort.end() - 5);
+// normalise the probabilities
+				double p_1 = p / (p + q + r + s + t);
+				double p_2 = q / (p + q + r + s + t);
+				double p_3 = r / (p + q + r + s + t);
+				double p_4 = s / (p + q + r + s + t);
 // decide which bin according to the probs
 				size_t bin_chosen = 0;
-				if( p_1 > distr(gen) )
+				double rand_num = distr(gen);
+				if( p_1 > rand_num )
 				{
 					auto search_bin = std::find(histo.begin(), histo.end(), p);
 					bin_chosen 		= std::distance(histo.begin(), search_bin);
 				}
-				else
+				else if( p_1 + p_2 > rand_num)
 				{
 					auto search_bin = std::find(histo.begin(), histo.end(), q);
+					bin_chosen 		= std::distance(histo.begin(), search_bin);
+				}
+				else if( p_1 + p_2 + p_3 > rand_num)
+				{
+					auto search_bin = std::find(histo.begin(), histo.end(), r);
+					bin_chosen 		= std::distance(histo.begin(), search_bin);
+				}
+				else if( p_1 + p_2 + p_3 + p_4 > rand_num)
+				{
+					auto search_bin = std::find(histo.begin(), histo.end(), s);
+					bin_chosen 		= std::distance(histo.begin(), search_bin);
+				}
+				else
+				{
+					auto search_bin = std::find(histo.begin(), histo.end(), t);
 					bin_chosen 		= std::distance(histo.begin(), search_bin);
 				}
 // sample uniform inside the bin
