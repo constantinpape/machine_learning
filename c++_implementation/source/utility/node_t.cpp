@@ -6,7 +6,7 @@
 node_t::node_t() : 	mData(),
 			mChildren(),
 			mTerminal(false),
-			mDiscrete(false)
+			mDiscrete(false),
 			mProbability(0.),
 			mVolume(0.),
 			mDepth(0),
@@ -119,7 +119,7 @@ void	node_t::calculate_features()
 			mFeature_space.push_back(mData(i,d));
 		}
 		i++;
-		if(i == mNum_instances)
+		if(i == mData.size1())
 		{
 			d++;
 			i=0;
