@@ -100,6 +100,10 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 		std::vector<node_t*> stack;
 // initialize the root node
 		node_t* root(new node_t);
+		if (mNum_features)
+		{
+			root->set_discrete(true);
+		}
 		root->set_data(data_class);
 		stack.push_back(root);
 		size_t count = 0;

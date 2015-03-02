@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "../source/CopulaClassifier.h"
 
+#include <boost/numeric/ublas/detail/matrix_assign.hpp>
 using namespace boost::numeric::ublas;
 
 TEST(CopulaFunctionality,RankOrderTransformation)
@@ -13,7 +14,7 @@ TEST(CopulaFunctionality,RankOrderTransformation)
 	for(size_t i = 0; i < 9; i++)
 	{
 		data(i,0) = i;
-		copula_expected(i,0) = (i+1.) / 10.;
+		copula_expected(i,0) = (i + 1) / 10.;
 	}
 // column 2 in reverse order
 	for(size_t i = 0; i < 9; i++)
@@ -47,7 +48,7 @@ TEST(CopulaFunctionality,RankOrderTransformation)
 	{
 		matrix_column<matrix<double> > view_actual(copula_actual,i);
 		matrix_column<matrix<double> > view_expected(copula_expected,i);
-		EXPECT_TRUE( boost::numeric::ublas::detail::equals(view_actual, view_expected, 1.e-6, 0.) );
+		EXPECT_TRUE( detail::equals(view_actual, view_expected, 1.e-6, 0.) );
 	}
 }
 
@@ -60,9 +61,9 @@ TEST(CommonFuncionality,Data)
 	image_data_t test_data   = read_mnist_data( "../mnist_data/original/images_test.out");
 	label_data_t test_label  = read_mnist_label("../mnist_data/original/labels_test.out");
 // assert that number of instances and dimensions do match	
-	assert( train_data.size1() == train_label.size() );
-	assert( test_data.size1()  == test_label.size()  );
-	assert( train_data.size2() == test_data.size2()  );
+	EXPECT_EQ( train_data.size1(), train_label.size() );
+	EXPECT_EQ( test_data.size1() , test_label.size()  );
+	EXPECT_EQ( train_data.size2(), test_data.size2()  );
 // check data
 	//std::cout << "Train-instances: " << train_data.size1() << " Dimensions: " << train_data.size2() << std::endl;
 	//std::cout << "Test-instances: " << test_data.size1() << " Dimensions: " << test_data.size2() << std::endl;
@@ -127,9 +128,9 @@ TEST(CommonFuntionality,Sortindex)
 	vector<double> sorted2 = get_sorted_indices(view_2);
 	vector<double> sorted3 = get_sorted_indices(view_3);
 	
-	EXPECT_TRUE( boost::numeric::ublas::detail::equals( order1, sorted1, 1.e-6, 0.) );
-	EXPECT_TRUE( boost::numeric::ublas::detail::equals( order2, sorted2, 1.e-6, 0.) );
-	EXPECT_TRUE( boost::numeric::ublas::detail::equals( order3, sorted3, 1.e-6, 0.) );
+	EXPECT_TRUE( detail::equals( order1, sorted1, 1.e-6, 0.) );
+	EXPECT_TRUE( detail::equals( order2, sorted2, 1.e-6, 0.) );
+	EXPECT_TRUE( detail::equals( order3, sorted3, 1.e-6, 0.) );
 }
 
 int main(int argc, char **argv) 

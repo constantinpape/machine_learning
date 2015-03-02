@@ -11,6 +11,8 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
+namespace ublas = boost::numeric::ublas;
+
 //typedefs for the datastructures
 typedef boost::numeric::ublas::matrix<double>  	image_data_t;
 typedef std::vector<unsigned short> 			label_data_t;
@@ -34,13 +36,17 @@ private:
 	std::ostream& stream_obj;
 
 public:
-	formatted_ostream(std::ostream& obj, int p): precision(p), stream_obj(obj) {}
+	formatted_ostream(std::ostream& obj, int p):
+		 precision(p),
+		 stream_obj(obj)
+	{}
 
 	template<typename T>
 	formatted_ostream& operator<<(const T& output)
 	{
-		stream_obj << std::setw(precision+6) << std::setprecision(precision) << std::left << output;
-
+		stream_obj << std::setw(precision + 6)
+			   << std::setprecision(precision)
+			   << std::left << output;
 		return *this;
 	}
 
@@ -53,17 +59,17 @@ public:
 
 typedef std::pair<double,size_t> pair_t;
 
-boost::numeric::ublas::vector<double> get_sorted_indices(
-		const boost::numeric::ublas::matrix_column<boost::numeric::ublas::matrix<double> const> & data );
+ublas::vector<double> get_sorted_indices(
+		const ublas::matrix_column<ublas::matrix<double> const> & data );
 
-boost::numeric::ublas::vector<double> get_sorted_indices(
-		const boost::numeric::ublas::vector<double>& data );
+ublas::vector<double> get_sorted_indices(
+		const ublas::vector<double>& data );
 
-boost::numeric::ublas::vector<double> get_ranked_indices(
-		const boost::numeric::ublas::matrix_column<boost::numeric::ublas::matrix<double> const> & data );
+ublas::vector<double> get_ranked_indices(
+		const ublas::matrix_column<ublas::matrix<double> const> & data );
 
-boost::numeric::ublas::vector<double> get_ranked_indices(
-		const boost::numeric::ublas::vector<double>& data );
+ublas::vector<double> get_ranked_indices(
+		const ublas::vector<double>& data );
 
 image_data_t read_mnist_data(const std::string & fname, size_t buff_size = 1024);
 label_data_t read_mnist_label(const std::string & fname);

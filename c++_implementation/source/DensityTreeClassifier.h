@@ -18,7 +18,7 @@ public:
 
 	image_data_t generate(const size_t N, const short label);
 
-	double get_likelihood(const boost::numeric::ublas::vector<double> & data, const short label);
+	double get_likelihood(const ublas::vector<double> & data, const short label);
 
 	void 	set_split(const split_t split);
 	split_t get_split() const;
@@ -47,6 +47,7 @@ private:
 	size_t 	mNum_classes;
 	size_t 	mNum_dimensions;
 // in case of discrete feature space, e.g alphabet
+// NOTE: not usefull when using rank order, i mean copula
 	size_t	mNum_features;
 	std::vector<double> mFeature_space;
 	size_t  mDepth_max;
@@ -57,11 +58,11 @@ private:
 	size_t  mNearest_neighbors;
 	double  mRadius;
 // 1 tree for every class
-	std::vector<node_t*> mTrees;
+	std::vector<node_t*> 	mTrees;
 	std::vector<double>	mPriors;
 // private functions
 	bool terminate_depth(const node_t * node);
 	node_t search_tree(
-			const boost::numeric::ublas::vector<double> & data_point,
+			const ublas::vector<double> & data_point,
 			const size_t c );
 };

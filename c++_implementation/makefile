@@ -5,10 +5,13 @@ SHELL = /bin/sh
 
 BOOST = ~/programming/boost/boost_1_57_0
 CC = g++
-CDEBUG = -g3 -Wall
+CDEBUG = -g3 -Wall -Wextra 
 CFLAGS = $(CDEBUG) -O -std=c++0x
-GTEST  = ~/programming/gtest/gtest-1.7.0/include
-GTEST_FLAG = -I $(GTEST)
+
+GTEST  = ~/programming/gtest/gtest-1.7.0
+GTEST_FLAG = -isystem $(GTEST)/include -pthread
+GTEST_OBJ  = $(GTEST)/make/gtest-all.o
+
 ALL_CFLAGS = -I $(BOOST) $(CFLAGS)
 
 #defining paths
@@ -36,7 +39,6 @@ _OBJ := BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o \
         DensityForestClassifier.o CopulaForestClassifier.o \
         common.o node_t.o test_template.o splits.o
 OBJ  := $(patsubst %,$(libdir)/%,$(_OBJ))
-GTEST_OBJ := ~/programming/gtest/gtest-1.7.0/make/gtest-all.o
 
 
 # phony targets can always be called
@@ -82,9 +84,7 @@ $(libdir)/%.o: $(testdir)/%.cpp $(testdir)/%.h
 	$(CC) $(ALL_CFLAGS) -MM $< > $(libdir)/$*.d
 
 # target: test - Test suit.
-test: test_depth test_nearestneighbors
-
-unittest: test_unit
+test: test_depth test_nearestneighbors test_unit
 
 # target: classifier - Classifier suit.
 classifier: test_bayes test_densitytree test_densityforest \
@@ -94,8 +94,9 @@ classifier: test_bayes test_densitytree test_densityforest \
 test_%: $(testdir)/test_%.cpp $(OBJ) 
 	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
 
-test_unit: $(testdir)/test_unit.cpp $(OBJ) 
-	$(CC) $(ALL_CFLAGS) $(GTEST_FLAG) -o $(bindir)/$@ $^
+# target: test_unit - Testing fuctionality of the copula classifier.
+test_unit: $(testdir)/test_unit.cpp $(OBJ)
+	$(CC) $(ALL_CFLAGS) $(GTEST_FLAG) -o $(bindir)/$@ $^ $(GTEST_OBJ) 
 
 # target: test_bayes - Naive BayesClassifier & Generator.
 test_bayes: $(testdir)/test_bayes.cpp $(OBJ)

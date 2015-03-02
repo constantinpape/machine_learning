@@ -10,7 +10,8 @@ classifier="densitytree bayes copula"
 
 for c in $classifier; do
 	../bin/test_$c original/data_train.out original/labels_train.out original/data_test.out test_$c/$data
-	echo $(date) $data > ../results/$c.txt 
+	echo
+	echo $(date) $data >> ../results/$c.txt 
 	python2 eval.py original/labels_test.out test_$c/$data >> ../results/$c.txt
 done
 

@@ -28,6 +28,8 @@ public:
 	void 	set_terminal(const bool terminal);
 	bool 	get_terminal() const;
 	void 	set_features();
+	void	set_discrete(const bool enable);
+	bool	get_discrete() const;
 // static member
 	static const size_t max_nodes = 2;
 private:
@@ -36,7 +38,6 @@ private:
 	std::vector<node_t*> mChildren;	// store the 2 childeren of this node 0 -> left child, 1 -> right child
 	bool 			mTerminal;
 	bool			mDiscrete;
-	size_t			mMax_features;
 	double 			mProbability;
 	double 			mVolume;
 	size_t 			mDepth;

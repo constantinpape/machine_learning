@@ -13,14 +13,14 @@ public:
 
 	image_data_t generate(const size_t N, const short label);
 
-	boost::numeric::ublas::vector<double> inverse_cdf(
-			const boost::numeric::ublas::matrix_row<boost::numeric::ublas::matrix<double> > & data, const short label);
+	ublas::vector<double> inverse_cdf(
+			const ublas::matrix_row<ublas::matrix<double> > & data, const short label);
 
 	double get_likelihood(
-			const boost::numeric::ublas::matrix_row<boost::numeric::ublas::matrix<double> const> & data, const short label);
+			const ublas::matrix_row<ublas::matrix<double> const> & data, const short label);
 
-	boost::numeric::ublas::vector<double> get_cdf(
-			const boost::numeric::ublas::matrix_row<boost::numeric::ublas::matrix<double> const> & data, const short label);
+	ublas::vector<double> get_cdf(
+			const ublas::matrix_row<ublas::matrix<double> const> & data, const short label);
 
 	void set_fixed_bins(const bool enable, const size_t n);
 	size_t get_fixed_bins() const;

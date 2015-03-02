@@ -78,6 +78,7 @@ void node_t::calculate_probability( const size_t N_class )
 // 3rd: Node data has more than 1 instance
 	else
 	{
+		//mProbability = N_node / static_cast<double>(N_class);
 		mProbability = N_node / (V_node * N_class);
 	}
 }
@@ -171,4 +172,14 @@ void node_t::set_terminal(const bool terminal)
 bool node_t::get_terminal() const
 {
 	return mTerminal;
+}
+
+void node_t::set_discrete(const bool enable)
+{
+	mDiscrete = enable;
+}
+	
+bool node_t::get_discrete() const
+{
+	return mDiscrete;
 }

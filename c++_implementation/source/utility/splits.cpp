@@ -86,9 +86,9 @@ std::array<node_t*, 2> split_node_default(
 			{
 				continue;
 			}
-			//double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
-			double norm = pow(V_dim / N_node, 2);
-			double gain = (std::pow( N_l / V_l, 2) + std::pow( N_r / V_r, 2) ) * norm;
+			double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
+			//double norm = pow(V_dim / N_node, 2);
+			//double gain = (std::pow( N_l / V_l, 2) + std::pow( N_r / V_r, 2) ) * norm;
 			if( record )
 			{
 				formatted_ostream output(stream, 10);
@@ -145,8 +145,13 @@ std::array<node_t*, 2> split_node_default(
 		  <<  N_l << " to the left "
 		  <<  N_r << " to the right" << std::endl;
 	node_t* node_l(new node_t);
-	node_l->set_data(data_l);
 	node_t* node_r(new node_t);
+	if (node->get_discrete())
+	{
+		node_l->set_discrete(true);
+		node_r->set_discrete(true);
+	}
+	node_l->set_data(data_l);
 	node_r->set_data(data_r);
 	return std::array<node_t*, 2>{ {node_l, node_r} };  
 }

@@ -15,7 +15,7 @@
 *.out
 
 # image types
-*.png
+#*.png
 
 # bin and lib folder, data folder
 results

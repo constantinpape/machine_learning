@@ -15,10 +15,12 @@ int main(int argc, char* argv[])
 // init Bayes classifier and test it
 	DensityTreeClassifier tree_classifier;
 // TODO try diffierent tree depth 
-//	tree_classifier.set_maximal_depth(5);
-//	tree_classifier.set_split(DensityTreeClassifier::split_t::gradient);
+	//tree_classifier.set_maximal_depth(5);
+	//tree_classifier.set_nearest_neighbors(5);
+	//tree_classifier.set_split(DensityTreeClassifier::split_t::def_alt);
+	tree_classifier.set_split(DensityTreeClassifier::split_t::gradient);
+	//tree_classifier.set_discrete_features(26);
 	tree_classifier.set_record_split(true);
-	tree_classifier.set_discrete_features(26);
 	test_classifier(tree_classifier, train_data, train_label, test_data, argv[4]);
 	return 0;
 }
