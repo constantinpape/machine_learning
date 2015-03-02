@@ -58,7 +58,8 @@ std::array<node_t*, 2> split_node_default(
 // divide by the volume of this dimension
 		double min_thres = *( data_dim.begin() ) + eps;
 		double max_thres = *( data_dim.end() - 1) - eps;
-		V_dim /= ( *(data_dim.end()-1) - *(data_dim.begin()) );
+		//V_dim /= ( *(data_dim.end()-1) - *(data_dim.begin()) );
+		double V_red = V_dim / ( *(data_dim.end()-1) - *(data_dim.begin()) );
 // calculate all threshold
 		std::vector<double> thresholds;
 		for( size_t i = 0; i < N_node; i++ )
@@ -79,13 +80,15 @@ std::array<node_t*, 2> split_node_default(
 			size_t N_l 		= std::distance(data_dim.begin(), split_iter);
 			size_t N_r 		= N_node - N_l;
 // calculate volumes
-			double V_l = V_dim * ( t - min_thres );
-			double V_r = V_dim * ( max_thres - t );
+			double V_l = V_red * ( t - min_thres );
+			double V_r = V_red * ( max_thres - t );
 			if ( (V_l == 0) || (V_r == 0) )
 			{
 				continue;
 			}
-			double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
+			//double gain = std::pow( (static_cast<double>(N_l) / N_node), 2 ) / V_l + std::pow( (static_cast<double>(N_r) / N_node), 2 ) / V_r; 
+			double norm = pow(V_dim / N_node, 2);
+			double gain = (std::pow( N_l / V_l, 2) + std::pow( N_r / V_r, 2) ) * norm;
 			if( record )
 			{
 				formatted_ostream output(stream, 10);

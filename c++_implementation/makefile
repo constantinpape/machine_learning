@@ -7,7 +7,7 @@ BOOST = ~/programming/boost/boost_1_57_0
 CC = g++
 CDEBUG = -g3 -Wall
 CFLAGS = $(CDEBUG) -O -std=c++0x
-GTEST_INCLUDE  = ~/programming/gtest/gtest-1.7.0/include
+GTEST  = ~/programming/gtest/gtest-1.7.0/include
 GTEST_FLAG = -I $(GTEST)
 ALL_CFLAGS = -I $(BOOST) $(CFLAGS)
 
@@ -94,7 +94,7 @@ classifier: test_bayes test_densitytree test_densityforest \
 test_%: $(testdir)/test_%.cpp $(OBJ) 
 	$(CC) $(ALL_CFLAGS) -o $(bindir)/$@ $^
 
-test_unit: $(testdir)/test_unit.cpp $(OBJ) $(GTEST_OBJ)
+test_unit: $(testdir)/test_unit.cpp $(OBJ) 
 	$(CC) $(ALL_CFLAGS) $(GTEST_FLAG) -o $(bindir)/$@ $^
 
 # target: test_bayes - Naive BayesClassifier & Generator.

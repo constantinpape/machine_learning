@@ -12,7 +12,7 @@ def get_words(length):
 	words = []
 	
 	#read in the scowl data file
-	file = open(path + "english.55")
+	file = open(path + "british.70")
 	for word in file:
 		try:                        #skip non-ascii words
 		    word.encode('ascii')
@@ -51,7 +51,7 @@ def make_data(words, size):
 	#initalize array for instances + class
 	data = np.zeros( (2*size, len(words[0]) + 1) )
 	
-	eps = 0.05
+	#eps = 0.05
 	
 	#fill one half with existing words...
 	for i in range(size):
