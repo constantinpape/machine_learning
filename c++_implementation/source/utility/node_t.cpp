@@ -74,13 +74,14 @@ void node_t::calculate_probability( const size_t N_class )
 		mProbability = 0.;
 	}
 // 2nd Node data is empty but node has non-vanishing volume -> this should not occur!!!
-	else if( V_node != 0. && N_node == 0 )
+	else if( (V_node != 0. && N_node == 0) || (V_node != 0. && N_node == 1) )
 	{
 		throw std::runtime_error("node_t::calculate_probability: Node Volume is not zero for an empty node!");
 	}
 // 3rd: Node data has more than 1 instance
 	else
 	{
+		//mProbability = (N_node * V_node) / N_class;
 		mProbability = N_node / (V_node * N_class);
 		//mProbability = (N_node) / static_cast<double>(N_class);
 	}

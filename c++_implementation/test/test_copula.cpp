@@ -15,9 +15,9 @@ int main(int argc, char* argv[])
 // mnist: set bit for generating data to true, if data has full dimension
 // init copula classifier and test it
 	CopulaClassifier copula_classifier;
-	copula_classifier.set_maximal_depth(7);
+	//copula_classifier.set_maximal_depth(7);
 	//copula_classifier.set_fixed_bins(true, 26);
-	//copula_classifier.set_nearest_neighbors(5);
+	copula_classifier.set_nearest_neighbors(30);
 	//copula_classifier.set_split(DensityTreeClassifier::split_t::def_alt);
 	//copula_classifier.set_split(DensityTreeClassifier::split_t::gradient);
 	copula_classifier.set_record_split(true);

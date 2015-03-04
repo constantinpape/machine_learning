@@ -21,7 +21,7 @@ std::array<node_t*, 2> split_node_default(
 	size_t N_node = node->get_data().size1();
 	size_t num_dimensions = node->get_data().size2();
 	double best_thresh = 0.;
-	double best_gain   = 0.; 
+	double best_gain   = 1.; 
 	size_t best_dim	   = 0;
 	std::vector<size_t> dimensions;
 	std::fstream stream;
@@ -81,7 +81,7 @@ std::array<node_t*, 2> split_node_default(
 // calculate volumes
 			double V_l = V_red * ( t - min_thres );
 			double V_r = V_red * ( max_thres - t );
-			if ( (t-min_thres <= eps) || (max_thres-t <= eps)){continue;}
+			//if ( (t-min_thres <= eps) || (max_thres-t <= eps)){continue;}
 			if ( (V_l == 0) || (V_r == 0) ){continue;}
 			double gain_l = std::pow( (static_cast<double>(N_l) / N_node), 2 )*(V_dim / V_l);
 			double gain_r = std::pow( (static_cast<double>(N_r) / N_node), 2 )*(V_dim / V_r);
@@ -228,10 +228,7 @@ std::array<node_t*, 2> split_node_alt(node_t * node, const bool dim_shuffle, con
 // calculate volumes
 			double V_l = V_dim * ( t - min_dim );
 			double V_r = V_dim * ( max_dim - t );
-			if ( (V_l == 0) || (V_r == 0) )
-			{
-				continue;
-			}
+			if ( (V_l == 0) || (V_r == 0) ){continue;}
 			//double gain = fabs( std::pow(N_l * V_r,2) - std::pow(N_r * V_l,2)); 
 			double gain = fabs( N_l * V_r - N_r * V_l); 
 			if( record )

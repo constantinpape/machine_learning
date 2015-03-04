@@ -87,13 +87,16 @@ if __name__ == '__main__':
         words = get_words(gen_data.shape[1])
         
         print("list of generated words + true in case of existance")
+        count = 0
         for dat in gen_data:
             word = ''.join(chr(iround(i) + ord('a')) for i in dat)
             if word in words:
                 print word, "\ttrue"
+                count += 1
             else:
-				print word
-
+                print word
+        print "number of true words generated", count
+        print
         
     else:
         print("generated data was not found.")

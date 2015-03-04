@@ -1,7 +1,16 @@
 #! /bin/sh
 #compare classification and generation results 
-length=7
-data="l${length}.70"
+usage="
+usage: $0 [target_file]"
+
+if [ $# -ne 1 ]; then
+	echo $usage
+	exit 1
+fi
+
+python2 mk_data.py
+data=$(basename $1)
+#data="l${length}.70"
 classifier="densitytree bayes copula"
 
 # not need using arrays
@@ -14,10 +23,6 @@ for c in $classifier; do
 	echo $(date) $data >> ../results/$c.txt 
 	python2 eval.py original/labels_test.out test_$c/$data >> ../results/$c.txt
 done
-
-#python2 eval.py original/labels_test.out test_bayes/$data >> ../results/bayes.txt
-#python2 eval.py original/labels_test.out test_dt/$data >> ../results/dt.txt
-#python2 eval.py original/labels_test.out test_copula/$data >> ../results/copula.txt
 
 
 vimdiff ../results/*

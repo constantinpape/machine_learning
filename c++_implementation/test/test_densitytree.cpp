@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 	DensityTreeClassifier tree_classifier;
 // TODO try diffierent tree depth 
 	tree_classifier.set_maximal_depth(10);
-	//tree_classifier.set_nearest_neighbors(5);
+	tree_classifier.set_nearest_neighbors(30);
 	//tree_classifier.set_split(DensityTreeClassifier::split_t::def_alt);
 	//tree_classifier.set_split(DensityTreeClassifier::split_t::gradient);
 	//tree_classifier.set_discrete_features(26);

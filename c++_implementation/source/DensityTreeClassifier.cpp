@@ -106,7 +106,6 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 		}
 		root->set_data(data_class);
 		double V_root = root->get_volume();
-		std::cout << V_root;
 		root->set_volume_root(V_root);
 		stack.push_back(root);
 		size_t count = 0;
