@@ -10,8 +10,6 @@ CFLAGS = $(CDEBUG) -O -std=c++0x
 
 GTEST  = ~/programming/gtest/gtest-1.7.0
 GTEST_FLAG = -isystem $(GTEST)/include -pthread
-GTEST_OBJ  = $(GTEST)/make/gtest-all.o
-
 ALL_CFLAGS = -I $(BOOST) $(CFLAGS)
 
 #defining paths
@@ -39,6 +37,7 @@ _OBJ := BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o \
         DensityForestClassifier.o CopulaForestClassifier.o \
         common.o node_t.o test_template.o splits.o
 OBJ  := $(patsubst %,$(libdir)/%,$(_OBJ))
+GTEST_OBJ = $(libdir)/libgtest.so
 
 
 # phony targets can always be called

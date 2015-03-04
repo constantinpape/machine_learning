@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "../source/CopulaClassifier.h"
 
+#include <string>
 #include <boost/numeric/ublas/detail/matrix_assign.hpp>
 using namespace boost::numeric::ublas;
 
@@ -55,11 +56,12 @@ TEST(CopulaFunctionality,RankOrderTransformation)
 //TODO test something here
 TEST(CommonFuncionality,Data)
 {
+	std::string path = "~/machine_learning/c++_implementation/mnist_data";
 // read in the data
-	image_data_t train_data  = read_mnist_data( "../mnist_data/original/images_train.out");
-	label_data_t train_label = read_mnist_label("../mnist_data/original/labels_train.out");
-	image_data_t test_data   = read_mnist_data( "../mnist_data/original/images_test.out");
-	label_data_t test_label  = read_mnist_label("../mnist_data/original/labels_test.out");
+	image_data_t train_data  = read_mnist_data( path + "/original/images_train.out");
+	label_data_t train_label = read_mnist_label(path + "/original/labels_train.out");
+	image_data_t test_data   = read_mnist_data( path + "/original/images_test.out");
+	label_data_t test_label  = read_mnist_label(path + "/original/labels_test.out");
 // assert that number of instances and dimensions do match	
 	EXPECT_EQ( train_data.size1(), train_label.size() );
 	EXPECT_EQ( test_data.size1() , test_label.size()  );
@@ -72,8 +74,8 @@ TEST(CommonFuncionality,Data)
 	//for(int i = 0; i < 10; ++i)
 	//	std::cout << train_label[i] << std::endl;
 // save data and check that correct picture is reproduced (check is done with compare.py)
-	save_data( "../mnist_data/test_readin/images_train.out", train_data);
-	save_label("../mnist_data/test_readin/labels_train.out", train_label);
+	save_data( path + "/test_readin/images_train.out", train_data);
+	save_label(path + "/test_readin/labels_train.out", train_label);
 }
 
 TEST(CommonFuntionality,Sortindex)

@@ -2,6 +2,7 @@
 *.o
 *.obj
 *.p
+*.d
 
 # python object files
 *.pyc
@@ -15,12 +16,13 @@
 *.out
 
 # image types
-#*.png
+*.png
 
 # bin and lib folder, data folder
 results
 c++_implementation/bin
 c++_implementation/lib
+!c++_implementation/lib/*.so
 c++_implementation/*_data/original
 c++_implementation/*_data/test_*
 
@@ -30,5 +32,5 @@ data/mnist
 latex/*
 !latex/*.tex
 !latex/*.pdf
-!latex/graphics
+!latex/graphics/*.png
 
