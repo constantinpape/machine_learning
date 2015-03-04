@@ -105,6 +105,9 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 			root->set_discrete(true);
 		}
 		root->set_data(data_class);
+		double V_root = root->get_volume();
+		std::cout << V_root;
+		root->set_volume_root(V_root);
 		stack.push_back(root);
 		size_t count = 0;
 // build the tree
@@ -138,7 +141,9 @@ void DensityTreeClassifier::train(const image_data_t & train_data, const label_d
 				node_t * child_left  = children[0];
 				node_t * child_right = children[1];
 				child_left->set_depth(curr_node->get_depth() + 1);
+				child_left->set_volume_root(V_root);
 				child_right->set_depth(curr_node->get_depth() + 1);
+				child_right->set_volume_root(V_root);
 				curr_node->add_child( child_left);
 				curr_node->add_child( child_right);
 				stack.push_back( child_left  );
@@ -248,10 +253,13 @@ image_data_t DensityTreeClassifier::generate(const size_t N, const short label)
 // calculate p_left
 			size_t N_l = l_node->get_data().size1();
 			double V_l = l_node->get_volume();
+//normailze volume TEST!!!
+			V_l /= l_node->get_volume_root();
 			double p_l = N_l / (N * V_l);
 // calculate p_right
 			size_t N_r = r_node->get_data().size1();
 			double V_r = r_node->get_volume();
+			V_r /= r_node->get_volume_root();
 			double p_r = N_r / (N * V_r);
 // calculate p and q (normalised probabilities)
 			double p = p_l / (p_l + p_r);

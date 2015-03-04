@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 	image_data_t test_data   = read_mnist_data( argv[3] );
 // init Bayes classifier and test it
 	BayesClassifier bayes;
-	bayes.set_fixed_bins(true, 26);
+	//bayes.set_fixed_bins(true, 26);
 	test_classifier(bayes, train_data, train_label, test_data, argv[4]);
 	return 0;
 }

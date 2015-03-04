@@ -9,6 +9,7 @@ node_t::node_t() : 	mData(),
 			mDiscrete(false),
 			mProbability(0.),
 			mVolume(0.),
+			mVolume_root(0.),
 			mDepth(0),
 			mSplit_dimension(0),
 			mSplit_threshold(0.)
@@ -59,11 +60,13 @@ node_t * node_t::get_child( const side_t side )
 	}
 	return mChildren[side];
 }
-	
+
+// FIXME: probabilities not normailized because of V_node
 void node_t::calculate_probability( const size_t N_class )
 {
 	size_t N_node = get_data().size1();
 	double V_node = get_volume();
+	//double V_root = get_volume_root();
 // calculate the probability for different cases
 // 1st: Node data is empty or only one instance in node data -> set probability to 0
 	if( (V_node == 0. && N_node == 0) || (V_node == 0. && N_node == 1) )
@@ -78,8 +81,8 @@ void node_t::calculate_probability( const size_t N_class )
 // 3rd: Node data has more than 1 instance
 	else
 	{
-		//mProbability = N_node / static_cast<double>(N_class);
 		mProbability = N_node / (V_node * N_class);
+		//mProbability = (N_node) / static_cast<double>(N_class);
 	}
 }
 
@@ -182,4 +185,14 @@ void node_t::set_discrete(const bool enable)
 bool node_t::get_discrete() const
 {
 	return mDiscrete;
+}
+
+void	node_t::set_volume_root(const double vol)
+{
+	mVolume_root = vol;
+}
+
+double	node_t::get_volume_root() const
+{
+	return mVolume_root;
 }

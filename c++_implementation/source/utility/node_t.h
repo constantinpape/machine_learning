@@ -30,6 +30,8 @@ public:
 	void 	set_features();
 	void	set_discrete(const bool enable);
 	bool	get_discrete() const;
+	void	set_volume_root(const double vol);
+	double	get_volume_root() const;
 // static member
 	static const size_t max_nodes = 2;
 private:
@@ -40,6 +42,7 @@ private:
 	bool			mDiscrete;
 	double 			mProbability;
 	double 			mVolume;
+	double 			mVolume_root;
 	size_t 			mDepth;
 	size_t 			mSplit_dimension;
 	double 			mSplit_threshold;

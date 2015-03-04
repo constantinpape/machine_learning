@@ -73,7 +73,7 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 	histograms.clear(); 
 	for( size_t d = 0; d < num_dimensions; d++)
 	{
-		histogram_t histo_dim = histogram_t(bins[d].num_bins, num_classes);
+		histogram_t histo_dim(bins[d].num_bins, num_classes);
 // make sure that all histogrms are empty - apparently we have to do this !
 		for( size_t c = 0; c < num_classes; c++)
 		{
@@ -100,9 +100,9 @@ void BayesClassifier::train(const image_data_t & train_data, const label_data_t 
 				// find the bin
 				size_t bin = static_cast<size_t>( ( (val - bins[d].lowest_val) / bins[d].val_range) * bins[d].num_bins );
 // lower bin by 1 if it is too big (this may happen...) FIXME
-				if( bin == bins[d].num_bins)
+				if( bin >= bins[d].num_bins)
 				{
-					bin--;
+					bin = bins[d].num_bins - 1;
 				}
 // debug output
 				//std::cout << "Dim " << d << " instance " << i << " bin " << bin << " bin-max " << bins[d].num_bins << std::endl;
@@ -162,6 +162,13 @@ label_data_t BayesClassifier::predict(const image_data_t & test_data)
 			likelihood *= priors[c];
 			class_likelihoods.push_back(likelihood);
 		}
+		double sum_likelihoods = 0.;
+		for ( double i : class_likelihoods)
+		{
+		//	std::cout << i << " ";
+			sum_likelihoods += i;
+		}
+		//std::cout << "instance " << i << " sum " << sum_likelihoods << std::endl;
 // find the class with biggest likelihood
 		auto max = std::max_element(class_likelihoods.begin(), class_likelihoods.end());
 		size_t max_class = std::distance(class_likelihoods.begin(), max);
