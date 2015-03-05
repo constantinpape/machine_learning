@@ -22,7 +22,7 @@ void test_classifier(Classifier & classifier,
 // generate 50 instances of the class 3 ( == 0 ) 
 	unsigned int N = 500;
 	high_resolution_clock::time_point t_3 = high_resolution_clock::now();
-	image_data_t data_generated = classifier.generate(N,0);
+	image_data_t data_generated = classifier.generate(N,1);
 	high_resolution_clock::time_point t_4 = high_resolution_clock::now();
 	std::string gen_name = fpath + "_generated";
 	save_data(gen_name, data_generated);

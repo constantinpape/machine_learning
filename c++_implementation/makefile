@@ -38,6 +38,7 @@ _OBJ := BayesClassifier.o DensityTreeClassifier.o CopulaClassifier.o \
         common.o node_t.o test_template.o splits.o
 OBJ  := $(patsubst %,$(libdir)/%,$(_OBJ))
 GTEST_OBJ = $(libdir)/libgtest.so
+GTEST_OBJ = $(GTEST)/make/gtest-all.o
 
 
 # phony targets can always be called

@@ -103,8 +103,8 @@ if __name__ == '__main__':
 	split_indx 		= int( np.floor( 0.8*data.shape[0] ) )
 	train_data 		= data[:split_indx]
 	train_labels 	= labels[:split_indx]
-	test_data 		= data[split_indx+1:]
-	test_labels 	= labels[split_indx+1:]
+	test_data 		= data[split_indx:]
+	test_labels 	= labels[split_indx:]
 	
 	print("eeeaasy")
 	

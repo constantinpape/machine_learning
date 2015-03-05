@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 	//copula_classifier.set_fixed_bins(true, 26);
 	copula_classifier.set_nearest_neighbors(30);
 	//copula_classifier.set_split(DensityTreeClassifier::split_t::def_alt);
-	//copula_classifier.set_split(DensityTreeClassifier::split_t::gradient);
+	copula_classifier.set_split(DensityTreeClassifier::split_t::gradient);
 	copula_classifier.set_record_split(true);
 	test_classifier(copula_classifier, train_data, train_label, test_data, argv[4]);
 	return 0;
