@@ -17,7 +17,7 @@
 
 \section{Introduction}
 
-In this project we combine two different classifiers to adress the issue of generating new instances for data with interdependent feature dimensions. As basis we take the Naive Bayes Classifier, that treats feature dimensions as independent and the Density Tree Classifier, that captures the dependency between the feature dimensions. 
+In this project we combine two different classifiers to address the issue of generating new instances for data with interdependent feature dimensions. As basis we take the Naive Bayes Classifier, that treats feature dimensions as independent and the Density Tree Classifier, that captures the dependency between the feature dimensions. 
 \newline
 Both Classifiers share the concept of learning the data by learning the posterior $p(B|A)$ in Bayes Theorem 
 \begin{equation} \label{eq1}
@@ -90,7 +90,7 @@ See figure \ref{fig1} for examples.
 The Density Tree Classifier captures the interdependence of the feature dimensions. This is done by 
 building a binary tree from the data for each class.
 First all data is put in the root node of the tree. This node is splitted in two children nodes according to a split criterion.
-This is repeated for all nodes until a termnination criterion is met.
+This is repeated for all nodes until a termination criterion is met.
 \newline
 We started with a simple splitting criterion in the beginning:
 We iterate over the dimensions. For each dimension we create a set of thresholds. 
@@ -110,7 +110,7 @@ criteria later.
 To each node the probability $p_i = \frac{N_i}{N ~ V_i}$ is assigned. Here $N$ is the total number of instances
 and $N_i$, $V_i$ the values for the corresponding node.
 \newline
-A node is terminated if it has either reached a maximal depth in the tree or has fallen below the minmal number
+A node is terminated if it has either reached a maximal depth in the tree or has fallen below the minimal number
 of instances $N_min = N^{\frac{1}{3}}$.
 \newline
 To predict the labels for new data the posterior is calculated for each class by finding the leave node in which this data point
@@ -138,7 +138,7 @@ For the full dataset the classification rate is below 50 \%!
 \end{table}
 
 To test the generation ability we generate 50 new instances of data.
-Only in some of these 3s are barely discenible. In general all are noisy.
+Only in some of these 3s are barely discernible. In general all are noisy.
 See \ref{fig2} for examples.
 
 \begin{figure}[h]
@@ -200,9 +200,9 @@ This criterion is supposed to yield more balanced splits than the original, beca
 number of instances and the volumes of the splits. We will refer to it as alternative criterion.
 \newline
 Finally we implement a criterion based on the gradient of each datapoint.
-For this we need an estimation of the gradient. First we find the k nearest neighbors of
-the datapoint. Then we estimate the gradient as the displacement to the center of these neighbors.
-Additionally the density is estimated by the average distance of the datapoint to the neighbors.
+For this we need an estimation of the gradient. First we find the k nearest neighbour of
+the datapoint. Then we estimate the gradient as the displacement to the centre of these neighbours.
+Additionally the density is estimated by the average distance of the datapoint to the neighbours.
 We choose to split at the datapoint, which has the biggest value for the gradient divided by density.
 Then we split along the dimension, where the gradient is biggest.
 
@@ -272,7 +272,7 @@ The gradient criterion seems to produce splits with many big leaves and many ver
 
 \subsection{Results}
 
-To evaluate the split criteria thouroughly, we sweep the parameters they depend on.
+To evaluate the split criteria thoroughly, we sweep the parameters they depend on.
 \newline
 First we sweep different tree depth values for the standard and alternative criterion.
 See table \ref{tab3} for the results. The performance of the standard criterion on the full data 
@@ -298,7 +298,7 @@ Hence we continue with a maximal tree depth of 4 for the following tests.
 	\label{tab3}
 \end{table}
 
-Then we sweep the number of neareset neighbors k, that are taken into account for the calculation 
+Then we sweep the number of nearest neighbours k, that are taken into account for the calculation 
 of gradient and density in the gradient split criterion.
 \newline
 The results are shown in \ref{tab4}. In contrast to the standard criterion the gradient split 
@@ -318,7 +318,7 @@ the standard or alternative criterion.
 		  15	&   0.8428	  & 0.8348			\\
 		  30	& 	0.5357	  & 0.8159			\\
 	\end{tabular}
-	\caption{Results for different numbers of nearest neighbors for the gradient criterion.}
+	\caption{Results for different numbers of nearest neighbours for the gradient criterion.}
 	\label{tab4}
 \end{table}
 
@@ -366,7 +366,7 @@ split criteria.
 
 About 10 to 15 \% of the instances generated with all three criteria are discernible as 3s.
 In comparison the results with the Bayes Classifier they look more noisy, but the shape of the 3 is 
-in general more distinct. Qualitatevely there is no difference between the generated data of the three criteria.
+in general more distinct. Qualitatively there is no difference between the generated data of the three criteria.
 
 Next we compare all three criteria and also compare them with the Bayes Classifier.
 Table \ref{tab5} shows all results. We see that the Bayes Classifier has the best classification
@@ -408,9 +408,45 @@ It is better than the other two criteria, which perform at level, by nearly 8 \%
 This is quite surprising, because this criterion performed worst with regard to prediction.
 \newline
 To further evaluate the generating performance of the Copula Classifier, we will turn to more complex data,
-begining with a dataset of words. We hope that the Copula Classifier will profit from its ability to take into 
+finalizing with a dataset of words. We hope that the Copula Classifier will profit from its ability to take into 
 account feature dimension interdependency here.
 
 \section{Complex Data}
+Firstly let us test our classifiers against the classification problem generator from sklearn
+($sklearn.datasets.make_classification()$) which produces a Madelon-like dataset.
+Secondly, we will set up scheme to train our algorithm to generated valid words.
+The lists of British words used are generated by scowl \url{http://wordlist.aspell.net/}.
+
+\subsection{Madelon (sklearn)}
+We will consider datasets composed of 5000 instances (4000 train, 1000 test) to check the validity
+of our algorithm for a non-linear hypercube problem with two classes and 20 feature dimensions.
+
+\subsection{Wordlists}
+Lastly the Bayes, Density Tree and Copula Classifiers are trained with datasets consisting of 'valid words' and 'non-words'
+of a given length. Our initial list of valid words takes into account all British-spelled words
+excluding abbreviations, special signs and proper names (e.g. abbrv., we're, Africa, Einstein, ...).
+Non-words are random character strings not included in those wordlists.
+The goal is to subsequently generate valid words.
+\newline
+The number of features is determined by the word length
+and the feature space has the dimension 26 according to the low-letter alphabet.
+We will study the behaviour of the classifiers for words of length 5,7 and 10 and discuss the results.
+Again the train set makes up $80\%$ and the test set $20\%$ of the data.
+
+\subsubsection{Bayes}
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c c c c c c }
+		wordlength	& \multicolumn{2}{|c|}{Bayes} 	& \multicolumn{2}{|c|}{Density Tree}	& \multicolumn{2}{|c|}{Copula} 	\\
+					& ACC		& GAIN				& ACC		& GAIN						& ACC		& GAIN				\\ \hfill
+		5			&	0.8654	&	0.5285	&	0.6372		& 0.8245	\\
+	 	7			&   0.7 s	&	61.3 s	&	62.7 s		& 140 min	\\
+		10 			& 	0.8376	&	0.8375	&	0.8364		& 0.8245	\\
+	\end{tabular}
+	\caption{Correct classification rate (accuracy) and gain in accuracy.}
+	\label{tab6}
+\end{table}
+
 
 \end{document}
