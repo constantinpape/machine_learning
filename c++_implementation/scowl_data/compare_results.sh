@@ -1,7 +1,8 @@
 #! /bin/sh
 #compare classification and generation results 
 usage="
-usage: $0 [target_file]"
+usage: $0 target_file
+"
 
 if [ $# -ne 1 ]; then
 	echo $usage

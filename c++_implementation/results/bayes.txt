@@ -1,0 +1,189 @@
+Mo 9. Mär 17:14:31 CET 2015 l5.70
+correct classification rate (accuracy): 0.845671758715
+gain in accuracy:  1.69134118197
+gain in precision:  1.67397316821
+the higher the gain, the better. unity means not better than random!
+words classified as nonwords (type I error):  215
+low if high specificity:  0.831768388106
+low if low fall-out:  0.168231611894
+nonwords classified as words (type II error):  179
+low if high sensitivity:  0.859607843137
+list of generated words + true in case of existance
+sties 	true
+curer 	true
+pinee
+riqey
+rbqtd
+roqfr
+bijfq
+cajmr
+rootr
+ciamy
+cfbsr
+cnasd
+rined
+bbrfq
+rfnfr
+cioer
+qijie
+fbqbr
+fbosx
+bejed
+rejir
+bbqby
+fejfr
+ffobs
+reier
+pabes
+ahnmd
+fniee
+cbafd
+babfy
+cnafr
+sirjr
+boiee
+boqbq
+sbime
+biimy
+bhaiy
+punbd
+aoieq
+riier
+bojjq
+pubfr
+roieq
+cbaey
+binte
+buqmr
+rbonr
+pomtr
+cbnar
+coaar
+number of true words generated 2
+
+Mo 9. Mär 17:19:18 CET 2015 l7.70
+correct classification rate (accuracy): 0.925931981687
+gain in accuracy:  1.85180673406
+gain in precision:  1.83560199318
+the higher the gain, the better. unity means not better than random!
+words classified as nonwords (type I error):  239
+low if high specificity:  0.921407431766
+low if low fall-out:  0.0785925682341
+nonwords classified as words (type II error):  214
+low if high sensitivity:  0.930406504065
+list of generated words + true in case of existance
+pertoeg
+tinqess
+sonkens
+borkitr
+pbabier
+ooniieg
+pibqles
+stianqr
+sinkbed
+cbnqlee
+cbbsbes
+pibkles
+rooihtg
+tuniorr
+btasbne
+bhilder
+conqenr
+seisald
+panalnr
+bbaaier
+dnnqaeg
+ptiienr
+shbsder
+toakikd
+baitike
+cabsiqd
+stokeks
+tarries 	true
+snrrbee
+rhnsier
+sanaier
+stokdns
+cehklsd
+shbheer
+bhhaied
+dinsoes
+teitnqg
+bnosens
+bahqies
+taobaqe
+canrees
+bibsier
+ptraied
+pohbeer
+carried 	true
+ctbresh
+suntaed
+deordtr
+puabded
+corqheg
+number of true words generated 2
+
+Mo 9. Mär 17:23:56 CET 2015 l10.70
+correct classification rate (accuracy): 0.967518636848
+gain in accuracy:  1.93494924929
+gain in precision:  1.94404842395
+the higher the gain, the better. unity means not better than random!
+words classified as nonwords (type I error):  97
+low if high specificity:  0.965796897038
+low if low fall-out:  0.0342031029619
+nonwords classified as words (type II error):  86
+low if high sensitivity:  0.969263759828
+list of generated words + true in case of existance
+sproeatnfg
+ceoepeiios
+aoatoiiefr
+sestbeiomx
+cestotainx
+afarettend
+brrrretime
+snsoeriotr
+seniataifd
+senoratier
+daaiabqilx
+bbsirabfeg
+erttbatifr
+tbarprnite
+dnrrptteef
+setiaabinr
+tesheetioy
+ansfhiaiog
+poahobnfnx
+cosooqrene
+snntrtailr
+aeteiranns
+drreaeitle
+dnroeeiier
+dptrotaies
+darrritiex
+caspbitnld
+qnbearafes
+braoriqtme
+toooaqnifg
+bestranjfr
+cbribetnee
+eotiaiiimr
+tbseeriens
+sooepqailf
+aentpanoex
+srbrabqeos
+pratitneod
+seneaeajnr
+sprretniff
+tesratbflr
+castptitse
+crsfrtiflr
+aentiebjur
+teafbeaftr
+cpbtoqannr
+cnreetntes
+qeseabnnfe
+brrrabaefr
+eetireioer
+number of true words generated 0
+

@@ -19,7 +19,7 @@
 *.png
 
 # bin and lib folder, data folder
-results
+#results
 c++_implementation/bin
 c++_implementation/lib
 !c++_implementation/lib/*.so

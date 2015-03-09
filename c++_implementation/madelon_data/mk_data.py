@@ -3,7 +3,7 @@ import numpy as np
 
 if __name__ == "__main__":
 	#Generate a random n-class classification problem.
-	data, labels    = make_classification(n_samples=5000) 
+	data, labels    = make_classification(n_samples=5000, n_informative=3) 
 	train_data	= data[:4000,:]
 	train_labels    = labels[:4000]
 	test_data	= data[4000:,:]
@@ -15,8 +15,8 @@ if __name__ == "__main__":
 	#save data to files
 	path="original/"
 	np.savetxt(path + "data_train.out",     train_data,     fmt='%f')
-	np.savetxt(path + "labels_train.out",   train_labels,   fmt='%f')
+	np.savetxt(path + "labels_train.out",   train_labels,   fmt='%i')
 	np.savetxt(path + "data_test.out",      test_data,      fmt='%f')
-	np.savetxt(path + "labels_test.out",    test_labels,    fmt='%f')
+	np.savetxt(path + "labels_test.out",    test_labels,    fmt='%i')
 	print("'.out' files save to " + path)
 

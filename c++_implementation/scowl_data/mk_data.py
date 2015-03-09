@@ -100,18 +100,19 @@ if __name__ == '__main__':
 	# set up data
 	data, labels = make_data( dic, len(dic) )
 	# split into training data (80 %) and test_data (20%)
-	split_indx 		= int( np.floor( 0.8*data.shape[0] ) )
-	train_data 		= data[:split_indx]
+	split_indx 	= int( np.floor( 0.8*data.shape[0] ) )
+	train_data 	= data[:split_indx]
 	train_labels 	= labels[:split_indx]
-	test_data 		= data[split_indx:]
+	test_data 	= data[split_indx:]
 	test_labels 	= labels[split_indx:]
 	
 	print("eeeaasy")
+	#print "mean word length british language: ", mean_word_length()
 	
 	#save data to files
 	path="original/"
 	np.savetxt(path + "data_train.out", 	train_data, 	fmt='%f')
 	np.savetxt(path + "labels_train.out", 	train_labels, 	fmt='%i')
-	np.savetxt(path + "data_test.out", 		test_data, 		fmt='%f')
+	np.savetxt(path + "data_test.out", 	test_data, 	fmt='%f')
 	np.savetxt(path + "labels_test.out", 	test_labels, 	fmt='%i')
-	print("'.out' files save to " + path)
+	print("'.out' files saved to " + path)

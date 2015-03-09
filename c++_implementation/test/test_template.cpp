@@ -20,12 +20,14 @@ void test_classifier(Classifier & classifier,
 	high_resolution_clock::time_point t_2 = high_resolution_clock::now();
 	save_label(fpath, results);
 // generate 50 instances of the class 3 ( == 0 ) 
-	unsigned int N = 500;
+	unsigned int N = 50;
 	high_resolution_clock::time_point t_3 = high_resolution_clock::now();
-	image_data_t data_generated = classifier.generate(N,1);
+	image_data_t data_generated0 = classifier.generate(N,0);
+	image_data_t data_generated1 = classifier.generate(N,1);
 	high_resolution_clock::time_point t_4 = high_resolution_clock::now();
 	std::string gen_name = fpath + "_generated";
-	save_data(gen_name, data_generated);
+	save_data(gen_name, data_generated0);
+	save_data(gen_name + "_false", data_generated1);
 // report the train, prediction and generation time
 	auto train_time = std::chrono::duration_cast<std::chrono::microseconds>( t_1 - t_0 ).count();
 	auto predict_time = std::chrono::duration_cast<std::chrono::microseconds>( t_2 - t_1 ).count();
