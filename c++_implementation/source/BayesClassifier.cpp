@@ -210,7 +210,7 @@ image_data_t BayesClassifier::generate(const size_t N, const short label)
 				std::copy( histo.begin(), histo.end(), histo_sort.begin() );
 // sort bins by their probability
 				std::sort( histo_sort.begin(), histo_sort.end() );
-// get probabilities of the 2 bins with highest probability
+// get probabilities of the 5 bins with highest probability
 				double p = *(histo_sort.end() - 1);
 				double q = *(histo_sort.end() - 2);
 				double r = *(histo_sort.end() - 3);

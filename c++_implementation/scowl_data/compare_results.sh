@@ -14,7 +14,7 @@ data=$(basename $1)
 #data="l${length}.70"
 classifier="densitytree bayes copula"
 
-# not need using arrays
+# no need using arrays
 # clsfy=(densitytree bayes copula)
 # for c in ${clsfy[@]} ; do
 

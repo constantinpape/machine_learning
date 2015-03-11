@@ -53,6 +53,8 @@ def evaluate_result(target, result):
     print "low if low fall-out: ", 1 - TNR 
     print "nonwords classified as words (type II error): ", false_neg
     print "low if high sensitivity: ", TPR 
+    return ACC, gain_ACC
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
