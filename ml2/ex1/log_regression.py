@@ -53,7 +53,6 @@ def test_sigmoid():
 # A = 1 x N
 # B = N x D
 def gradient(beta, X, y):
-	print X.shape, y.shape
 	assert(X.shape[0] == y.shape[0])
 	assert(X.shape[1] == beta.shape[0])
 	M   = y.shape[0]
@@ -151,6 +150,7 @@ def average_stochastic_gradient(X, y, m, beta_0, tau_0, gamma, mu):
 		beta = (1 - mu)*beta + mu*g
 	return beta
 
+#FIXME doesnt converge
 # stochastic avergae gradient
 def stochastic_average_gradient(X, y, m, beta_0, tau_0, gamma, mu):
 	beta = beta_0
@@ -168,6 +168,7 @@ def stochastic_average_gradient(X, y, m, beta_0, tau_0, gamma, mu):
 		beta -= tau_t(tau_0, gamma, 1., t)*d 
 	return beta
 
+#FIXME overflow occurs
 # dual coordinate ascent
 def dual_coordinate_ascent(X, y, m, beta_0, tau_0, gamma, mu):
 	alpha = np.random.uniform(size = (X.shape[0]) )
@@ -183,45 +184,154 @@ def dual_coordinate_ascent(X, y, m, beta_0, tau_0, gamma, mu):
 
 # weigthed least squares
 # TODO
+# use least squares solver
 def weighted_least_squares(X, y, m, beta_0, tau_0, gamma, mu):
 	N = X.shape[0]
 	beta = beta_0
 	for t in range(m):
 		z = X.dot(beta)
-		print z.shape
-		V = np.sqrt( sigmoid(z).dot( np.ones(z.shape) - sigmoid(z) ) / N )
-		print V.shape
+		V = np.diag( np.sqrt( np.multiply( sigmoid(z),( np.ones(z.shape) - sigmoid(z) ) ) / N ) ) 
 		_y = np.divide(y, sigmoid( np.multiply(y,z) ) )
 		_z = (z + _y).dot(V)
-		_X = X.dot(V)
-		# TODO use least square solver for this!
-		# beta = argmin_beta( _z - X beta)**2
+		_X = V.dot(X)
+		# use least square solver
+		beta = np.linalg.lstsq(_X,_z)[0]
 	return beta
-		
+
+# dictionary for all optimization methods		
+methods = { "gradient_descent" : gradient_descent, "stochastic_gradient_descent" : stochastic_gradient_descent, 
+	"sg_minibatch" : sg_minibatch, "sg_momentum" : sg_momentum, "average_stochastic_gradient": average_stochastic_gradient, 
+	"stochastic_average_gradient" : stochastic_average_gradient, "dual_coordinate_ascent" : dual_coordinate_ascent,
+	"weighted_least_squares" : weighted_least_squares }
+
+stochastic_methods = ("stochastic_gradient_descent","sg_minbatch","sg_momentum","average_stochastic_gradient","stochastic_average_gradient", "dual_coordinate_ascent")
+
+search_tau 		= ("gradient_descent")
+search_tau_gamma 	= ("stochastic_gradient_descent", "sg_minibatch", "stochastic_average_gradient")
+search_tau_gamma_mu 	= ("average_stochastic_gradient", "sg_momentum")
+search_none 		= ("dual_coordinate_ascent","weighted_least_squares")
+
 # check if methods are working
-def test_methods(X,y):
-	methods = { "gradient_descent" : gradient_descent, "stochastic_gradient_descent" : stochastic_gradient_descent, 
-		"sg_minbatch" : sg_minibatch, "sg_momentum" : sg_momentum, "average_stochastic_gradient": average_stochastic_gradient, 
-		"stochastic_average_gradient" : stochastic_average_gradient, "dual_coordinate_ascent" : dual_coordinate_ascent,
-		"weighted_least_squares" : weighted_least_squares }
+def test_method(X, y, key, iterations):
 
 	# make test/train split
 	X_train, X_test, y_train, y_test = cross_validation.train_test_split(
 		X,y, test_size = 0.3, random_state = 0)
-	# test all methods with first row of parameters, just to check that they are working
-	tau = 0.001
-	mu = 0.1
-	gamma = 0.0001
+	tau = 0.01
+	mu = 0.2
+	gamma = 0.001
 	beta_0 = np.zeros( X.shape[1] )
-	iterations = 5
+	beta_res = methods[key](X_train, y_train, iterations, beta_0, tau, gamma, mu)
+	prediction = predict(beta_res,X_test)
+	print "loss =", zero_one_loss(prediction, y_test)
+
+
+# make a grid search for the best parameters for this method
+def grid_search_tau_gamma_mu(X, y, method, iterations):
+	beta_0 = np.zeros( X.shape[1] )
+	res = str('\n')
+	for tau in (0.001, 0.01, 0.1):
+		for mu in (0.1, 0.2, 0.5):
+			for gamma in (0.0001, 0.001, 0.01):
+				kf = cross_validation.KFold(y.shape[0], n_folds = 10)
+				loss = 0.
+				for train_index, validation_index in kf:
+					X_train, X_validation = X[train_index], X[validation_index]	
+					y_train, y_validation = y[train_index], y[validation_index]	
+					beta = method(X_train, y_train, iterations, beta_0, tau, gamma, mu )
+					pred = predict(beta, X_validation)
+					loss += zero_one_loss(pred, y_validation)
+				#report results
+				res_append = "Parameters: Tau: " + str(tau) + " Mu: " + str(mu) + " Gamma: " + str(gamma) + " loss: " + str(loss) + " test_size: " + str(X_train.shape[0]) + '\n'
+				res += res_append
+	res += '\n'
+	return res
+
+
+def grid_search_tau_gamma(X, y, method, iterations):
+	beta_0 = np.zeros( X.shape[1] )
+	res = str('\n')
+	# dummy value for mu
+	mu = 1.
+	for tau in (0.001, 0.01, 0.1):
+		for gamma in (0.0001, 0.001, 0.01):
+			kf = cross_validation.KFold(y.shape[0], n_folds = 10)
+			loss = 0.
+			for train_index, validation_index in kf:
+				X_train, X_validation = X[train_index], X[validation_index]	
+				y_train, y_validation = y[train_index], y[validation_index]	
+				beta = method(X_train, y_train, iterations, beta_0, tau, gamma, mu )
+				pred = predict(beta, X_validation)
+				loss += zero_one_loss(pred, y_validation)
+			#report results
+			res_append = "Parameters: Tau: " + str(tau) + " Gamma: " + str(gamma) + " loss: " + str(loss) + " test_size: " + str(X_train.shape[0]) + '\n'
+			res += res_append
+	res += '\n'
+	return res
+
+
+def grid_search_tau(X, y, method, iterations):
+	beta_0 = np.zeros( X.shape[1] )
+	res = str('\n')
+	# dummy values for mu and gamma
+	gamma = 1.
+	mu  = 1.
+	for tau in (0.001, 0.01, 0.1):
+		kf = cross_validation.KFold(y.shape[0], n_folds = 10)
+		loss = 0.
+		for train_index, validation_index in kf:
+			X_train, X_validation = X[train_index], X[validation_index]	
+			y_train, y_validation = y[train_index], y[validation_index]	
+			beta = method(X_train, y_train, iterations, beta_0, tau, gamma, mu )
+			pred = predict(beta, X_validation)
+			loss += zero_one_loss(pred, y_validation)
+		#report results
+		res_append = "Parameters: Tau: " + str(tau) + " loss: " + str(loss) + " test_size: " + str(X_train.shape[0]) + '\n'
+		res += res_append
+	res += '\n'
+	return res
+
+
+def grid_search_none(X, y, method, iterations):
+	beta_0 = np.zeros( X.shape[1] )
+	res = str('\n')
+	# dummy values for mu, gamma and tau
+	gamma = 1.
+	mu  = 1.
+	tau = 1.
+	kf = cross_validation.KFold(y.shape[0], n_folds = 10)
+	loss = 0.
+	for train_index, validation_index in kf:
+		X_train, X_validation = X[train_index], X[validation_index]	
+		y_train, y_validation = y[train_index], y[validation_index]	
+		beta = method(X_train, y_train, iterations, beta_0, tau, gamma, mu )
+		pred = predict(beta, X_validation)
+		loss += zero_one_loss(pred, y_validation)
+	#report results
+		res_append = "Loss: " + str(loss) + " test_size: " + str(X_train.shape[0]) + '\n'
+	res += res_append
+	res += '\n'
+	return res
+
+
+def grid_search(X,y):
+	file_out = open('res_gridsearch.txt', 'w')
 	for key in methods:
-		# weighted least sqaures not properly implemented yet!
-		if key == "weighted_least_squares":
-			continue
-		print key
-		beta_res = methods[key](X_train, y_train, iterations, beta_0, tau, gamma, mu)
-		prediction = predict(beta_res,X_test)
-		print "worked, loss =", zero_one_loss(prediction, y_test)
+		iterations = 10
+		if key in stochastic_methods:
+			iterations = 75
+		s = "Results for " + key + " :\n"
+		file_out.write(s)
+		res = str(" ")
+		if key in search_tau:
+			res = grid_search_tau(X,y,methods[key],iterations)
+		elif key in search_tau_gamma:
+			res = grid_search_tau_gamma(X,y,methods[key],iterations)
+		elif key in search_tau_gamma_mu:
+			res = grid_search_tau_gamma_mu(X,y,methods[key],iterations)
+		elif key in search_none:
+			res = grid_search_none(X,y,methods[key],iterations)
+		file_out.write(res)
 
 
 if  __name__ == '__main__':
@@ -231,7 +341,8 @@ if  __name__ == '__main__':
 	#print labels.shape
 	#test_sigmoid()
 	#test_gradient(X,y)
-	
-	test_methods(X,y)	
+
+	grid_search(X,y)
+
 		
 
