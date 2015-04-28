@@ -1,4 +1,5 @@
 import vigra 
+import time
 import numpy as np
 import sklearn
 from sklearn import cross_validation
@@ -99,46 +100,155 @@ def tau_t(tau_0, gamma, exp, t):
 # mu	 = parameter for sg_momentum and average stochastic gradient
 
 # gradient descent
-def gradient_descent(X, y, m, beta_0, tau_0, gamma, mu):
+def gradient_descent(X,
+		y,
+		m,
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = False,
+		X_test = None,
+		y_test = None):
+	
+	
+	f_out = open('gradient_descent.txt', 'w')
+	if measure_time:
+		assert( X_test != None and y_test != None )
 	beta = beta_0
 	for t in range(m):
 		beta -= tau_0*gradient(beta,X,y)
+		
+		# time estimate
+		if measure_time:
+			# gradient descent: iteration = O(ND)
+			T = t*X.shape[0]*X.shape[1]
+			pred_train = predict(beta,X)
+			err_train = zero_one_loss( y, pred_train)
+			pred_test = predict( beta, X_test )
+			err_test = zero_one_loss( y_test, pred_test)
+			f_out.write( str(T) + " " + str(err_train) + " " + str(err_test) + '\n' )
+	
 	return beta
 
 # stochastic gradient descent
-def stochastic_gradient_descent(X, y, m, beta_0, tau_0, gamma, mu):
+def stochastic_gradient_descent(X,
+		y,
+		m,
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = False,
+		X_test = None,
+		y_test = None):
+	
+	f_out = open('stochastic_gradient_descent.txt', 'w')
 	beta = beta_0
+	if measure_time:
+		assert( X_test != None and y_test != None )
 	for t in range(m):
 		# choose a random training sample (sampling with replacement)
 		i = np.random.randint(0, X.shape[0])
 		X_i = np.expand_dims( np.array( X[i] ), axis = 0)
 		y_i = np.array( [ y[i] ] )
 		beta -= tau_t(tau_0,gamma,1.,t)*gradient(beta,X_i,y_i)
+		
+		# time estimate
+		if measure_time:
+			# stochastic gradient descent: iteration = O(D)
+			T = t*X.shape[1]
+			pred_train = predict(beta,X)
+			err_train = zero_one_loss( y, pred_train)
+			pred_test = predict( beta, X_test )
+			err_test = zero_one_loss( y_test, pred_test)
+			f_out.write( str(T) + " " + str(err_train) + " " + str(err_test) + '\n' )
+	
 	return beta
 
 # stochastic gradient descent with mini batch
-def sg_minibatch(X, y, m, beta_0, tau_0, gamma, mu):
+def sg_minibatch(X,
+		y,
+		m,
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = False,
+		X_test = None,
+		y_test = None):
+
+	f_out = open('sg_minibatch.txt', 'w')
 	beta = beta_0
+	if measure_time:
+		assert( X_test != None and y_test != None )
 	# minibatch size
 	B = 10
 	for t in range(m):
 		# choose a random mini batch (with replacement)
 		batch = np.random.randint(0, X.shape[0], size = B)
 		beta -= tau_t(tau_0,gamma,1.,t)*gradient(beta,X[batch],y[batch]) / B
+		
+		# time estimate
+		if measure_time:
+			# sg_minibatch: iteration = O(B D)
+			T = t*B*X.shape[1]
+			pred_train = predict(beta,X)
+			err_train = zero_one_loss( y, pred_train)
+			pred_test = predict( beta, X_test )
+			err_test = zero_one_loss( y_test, pred_test)
+			f_out.write( str(T) + " " + str(err_train) + " " + str(err_test) + '\n' )
+	
 	return beta
 
 # stochastic gradient descent with momentum
-def sg_momentum(X, y, m, beta_0, tau_0, gamma, mu):
+def sg_momentum(X,
+		y,
+		m,
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = False,
+		X_test = None,
+		y_test = None):
+
+	f_out = open('sg_momentum.txt', 'w')
+	if measure_time:
+		assert( X_test != None and y_test != None )
 	beta = beta_0
 	g    = np.zeros(beta.shape)
 	for t in range(m):
 		g    =  mu*g + (1 - mu)*gradient(beta, X, y)
 		beta -= tau_t(tau_0,gamma,1.,t)*g
+		
+		# time estimate
+		if measure_time:
+			# sg_momentum: iteration = O(D)
+			T = t*X.shape[1]
+			pred_train = predict(beta,X)
+			err_train = zero_one_loss( y, pred_train)
+			pred_test = predict( beta, X_test )
+			err_test = zero_one_loss( y_test, pred_test)
+			f_out.write( str(T) + " " + str(err_train) + " " + str(err_test) + '\n' )
+	
 	return beta
 
 # average stochastic gradient
-def average_stochastic_gradient(X, y, m, beta_0, tau_0, gamma, mu):
+def average_stochastic_gradient(X,
+		y,
+		m,
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = False,
+		X_test = None,
+		y_test = None):
 
+	f_out = open('average_stochastic_gradient.txt', 'w')
+	if measure_time:
+		assert( X_test != None and y_test != None )
 	beta = beta_0
 	g    = np.zeros(beta.shape)
 	for t in range(m):
@@ -148,11 +258,35 @@ def average_stochastic_gradient(X, y, m, beta_0, tau_0, gamma, mu):
 		y_i = np.array( [ y[i] ] )
 		g -= tau_t(tau_0,gamma,.75,t)*gradient(g, X_i, y_i)
 		beta = (1 - mu)*beta + mu*g
+		
+		# time estimate
+		if measure_time:
+			# average_stochastic_gradient: iteration = O(D)
+			T = t*X.shape[1]
+			pred_train = predict(beta,X)
+			err_train = zero_one_loss( y, pred_train)
+			pred_test = predict( beta, X_test )
+			err_test = zero_one_loss( y_test, pred_test)
+			f_out.write( str(T) + " " + str(err_train) + " " + str(err_test) + '\n' )
+	
 	return beta
 
 #FIXME doesnt converge
 # stochastic avergae gradient
-def stochastic_average_gradient(X, y, m, beta_0, tau_0, gamma, mu):
+def stochastic_average_gradient(X,
+		y,
+		m,
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = False,
+		X_test = None,
+		y_test = None):
+	
+	f_out = open('stochastic_average_gradient.txt', 'w')
+	if measure_time:
+		assert( X_test != None and y_test != None )
 	beta = beta_0
 	N    = X.shape[0]
 	d    = np.zeros(beta.shape)
@@ -166,11 +300,35 @@ def stochastic_average_gradient(X, y, m, beta_0, tau_0, gamma, mu):
 		d_mat[i] = gradient( beta, X_i, y_i )
 		d += (d_mat[i] - d_old) / N
 		beta -= tau_t(tau_0, gamma, 1., t)*d 
+		
+		# time estimate
+		if measure_time:
+			# stochastic_average_gradient: iteration = O(D)
+			T = t*X.shape[1]
+			pred_train = predict(beta,X)
+			err_train = zero_one_loss( y, pred_train)
+			pred_test = predict( beta, X_test )
+			err_test = zero_one_loss( y_test, pred_test)
+			f_out.write( str(T) + " " + str(err_train) + " " + str(err_test) + '\n' )
+	
 	return beta
 
 #FIXME overflow occurs
 # dual coordinate ascent
-def dual_coordinate_ascent(X, y, m, beta_0, tau_0, gamma, mu):
+def dual_coordinate_ascent(X,
+		y,
+		m,
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = False,
+		X_test = None,
+		y_test = None):
+
+	f_out = open('dual_coordinate_ascent.txt', 'w')
+	if measure_time:
+		assert( X_test != None and y_test != None )
 	alpha = np.random.uniform(size = (X.shape[0]) )
 	# init beta
 	beta = np.multiply(alpha,y).dot(X)
@@ -180,12 +338,36 @@ def dual_coordinate_ascent(X, y, m, beta_0, tau_0, gamma, mu):
 		alpha_old = alpha[i]
 		alpha[i] = np.clip( alpha[i] - y[i]*X[i].dot(beta) / X[i].dot(X[i]), 0, 1)
 		beta += (alpha[i] - alpha_old) * y[i] * X[i]
+		
+		# time estimate
+		if measure_time:
+			# ddual_coordiante_ascent: iteration = O(D)
+			T = t*X.shape[1]
+			pred_train = predict(beta,X)
+			err_train = zero_one_loss( y, pred_train)
+			pred_test = predict( beta, X_test )
+			err_test = zero_one_loss( y_test, pred_test)
+			f_out.write( str(T) + " " + str(err_train) + " " + str(err_test) + '\n' )
+	
 	return beta
 
 # weigthed least squares
 # TODO
 # use least squares solver
-def weighted_least_squares(X, y, m, beta_0, tau_0, gamma, mu):
+def weighted_least_squares(X,
+		y,
+		m,
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = False,
+		X_test = None,
+		y_test = None):
+	
+	f_out = open('weighted_least_squares.txt', 'w')
+	if measure_time:
+		assert( X_test != None and y_test != None )
 	N = X.shape[0]
 	beta = beta_0
 	for t in range(m):
@@ -196,6 +378,17 @@ def weighted_least_squares(X, y, m, beta_0, tau_0, gamma, mu):
 		_X = V.dot(X)
 		# use least square solver
 		beta = np.linalg.lstsq(_X,_z)[0]
+		
+		# time estimate
+		if measure_time:
+			# least_squares: iteration = O(N D**2)
+			T = t*X.shape[0]*X.shape[1]**2
+			pred_train = predict(beta,X)
+			err_train = zero_one_loss( y, pred_train)
+			pred_test = predict( beta, X_test )
+			err_test = zero_one_loss( y_test, pred_test)
+			f_out.write( str(T) + " " + str(err_train) + " " + str(err_test) + '\n' )
+	
 	return beta
 
 # dictionary for all optimization methods		
@@ -210,21 +403,6 @@ search_tau 		= ("gradient_descent")
 search_tau_gamma 	= ("stochastic_gradient_descent", "sg_minibatch", "stochastic_average_gradient")
 search_tau_gamma_mu 	= ("average_stochastic_gradient", "sg_momentum")
 search_none 		= ("dual_coordinate_ascent","weighted_least_squares")
-
-# check if methods are working
-def test_method(X, y, key, iterations):
-
-	# make test/train split
-	X_train, X_test, y_train, y_test = cross_validation.train_test_split(
-		X,y, test_size = 0.3, random_state = 0)
-	tau = 0.01
-	mu = 0.2
-	gamma = 0.001
-	beta_0 = np.zeros( X.shape[1] )
-	beta_res = methods[key](X_train, y_train, iterations, beta_0, tau, gamma, mu)
-	prediction = predict(beta_res,X_test)
-	print "loss =", zero_one_loss(prediction, y_test)
-
 
 # make a grid search for the best parameters for this method
 def grid_search_tau_gamma_mu(X, y, method, iterations):
@@ -346,7 +524,7 @@ def grid_search(X,y):
 	for key in methods:
 		iterations = 10
 		if key in stochastic_methods:
-			iterations = 75
+			iterations = 50
 		s = "Results for " + key + " :\n"
 		file_out.write(s)
 		res = str(" ")
@@ -361,15 +539,103 @@ def grid_search(X,y):
 		file_out.write(res)
 
 
+# best parameter from the grid search
+best_params = { "gradient_descent" : (0.1,-1,-1), "stochastic_gradient_descent" : (0.01,0.01,-1), 
+	"sg_minibatch" : (0.1,0.01,-1), "sg_momentum" : (0.01,0.01,0.1), "average_stochastic_gradient": (0.1,0.01,0.5), 
+	"stochastic_average_gradient" : (0.01,0.01,-1), "dual_coordinate_ascent" : (-1,-1,-1),
+	"weighted_least_squares" : (-1,-1,-1) }
+
+
 if  __name__ == '__main__':
 	X, y = load_data()
+	
+	X_train, X_test, y_train, y_test = cross_validation.train_test_split(
+		X,y, test_size = 0.3, random_state = 0)
+	beta_0 = np.zeros( X.shape[1] )
 
 	#print data.shape
 	#print labels.shape
 	#test_sigmoid()
 	#test_gradient(X,y)
 
-	grid_search(X,y)
+	#grid_search(X,y)
+	
+	## measure the speed
+	#for key in methods:
+	#	tau_0 = best_params[key][0]
+	#	gamma = best_params[key][1]
+	#	mu    = best_params[key][2]
+	#	
+	#	iterations = 15
+	#	if key in stochastic_methods:
+	#		iterations = 150
 
-		
+	#	methods[key](X_train,
+	#		y_train,
+	#		iterations, 
+	#		beta_0,
+	#		tau_0,
+	#		gamma,
+	#		mu,
+	#		measure_time = True,
+	#		X_test = X_test,
+	#		y_test = y_test)
+
+	# signal processing	
+
+	# B = 10
+	eta = 60
+	mu  = 1. - np.exp( -1./eta )
+	
+	tau_0 = 0.01
+	gamma = 0.01
+	iterations = 100
+	
+	#sg_momentum( X_train,
+	#	y_train,
+	#	iterations, 
+	#	beta_0,
+	#	tau_0,
+	#	gamma,
+	#	mu,
+	#	measure_time = True,
+	#	X_test = X_test,
+	#	y_test = y_test)
+
+	#sg_minibatch( X_train,
+	#	y_train,
+	#	iterations, 
+	#	beta_0,
+	#	tau_0,
+	#	gamma,
+	#	mu,
+	#	measure_time = True,
+	#	X_test = X_test,
+	#	y_test = y_test)
+
+	eta = 0.6*X_train.shape[0]
+	mu  = 1. - np.exp( -1./eta )
+
+	sg_momentum( X_train,
+		y_train,
+		iterations, 
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = True,
+		X_test = X_test,
+		y_test = y_test)
+
+	stochastic_gradient_descent( X_train,
+		y_train,
+		iterations, 
+		beta_0,
+		tau_0,
+		gamma,
+		mu,
+		measure_time = True,
+		X_test = X_test,
+		y_test = y_test)
+	
 
