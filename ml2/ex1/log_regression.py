@@ -160,7 +160,7 @@ def stochastic_average_gradient(X, y, m, beta_0, tau_0, gamma, mu):
 	for t in range(m):
 		# choose a random training sample (sampling with replacement)
 		i = np.random.randint(0, X.shape[0])
-		d_old = d_mat[i]
+		d_old = d_mat[i].copy()
 		X_i = np.expand_dims( np.array( X[i] ), axis = 0)
 		y_i = np.array( [ y[i] ] )
 		d_mat[i] = gradient( beta, X_i, y_i )
@@ -230,6 +230,10 @@ def test_method(X, y, key, iterations):
 def grid_search_tau_gamma_mu(X, y, method, iterations):
 	beta_0 = np.zeros( X.shape[1] )
 	res = str('\n')
+	best_loss = float(np.inf)
+	best_tau = -1.
+	best_gamma = -1.
+	best_mu = -1.
 	for tau in (0.001, 0.01, 0.1):
 		for mu in (0.1, 0.2, 0.5):
 			for gamma in (0.0001, 0.001, 0.01):
@@ -244,6 +248,13 @@ def grid_search_tau_gamma_mu(X, y, method, iterations):
 				#report results
 				res_append = "Parameters: Tau: " + str(tau) + " Mu: " + str(mu) + " Gamma: " + str(gamma) + " loss: " + str(loss) + " test_size: " + str(X_train.shape[0]) + '\n'
 				res += res_append
+				if loss < best_loss:
+					best_loss = loss
+					best_tau = tau
+					best_gamma = gamma
+					best_mu = mu
+	res += '\n'
+	res += "Best result " + str(best_loss) + " for tau = " + str(best_tau) + " gamma = " + str(best_gamma) + " mu = " + str(best_mu)
 	res += '\n'
 	return res
 
@@ -253,6 +264,9 @@ def grid_search_tau_gamma(X, y, method, iterations):
 	res = str('\n')
 	# dummy value for mu
 	mu = 1.
+	best_loss = float(np.inf)
+	best_tau = -1.
+	best_gamma = -1.
 	for tau in (0.001, 0.01, 0.1):
 		for gamma in (0.0001, 0.001, 0.01):
 			kf = cross_validation.KFold(y.shape[0], n_folds = 10)
@@ -266,6 +280,12 @@ def grid_search_tau_gamma(X, y, method, iterations):
 			#report results
 			res_append = "Parameters: Tau: " + str(tau) + " Gamma: " + str(gamma) + " loss: " + str(loss) + " test_size: " + str(X_train.shape[0]) + '\n'
 			res += res_append
+			if loss < best_loss:
+				best_loss = loss
+				best_tau = tau
+				best_gamma = gamma
+	res += '\n'
+	res += "Best result " + str(best_loss) + " for tau = " + str(best_tau) + " gamma = " + str(best_gamma)
 	res += '\n'
 	return res
 
@@ -276,6 +296,8 @@ def grid_search_tau(X, y, method, iterations):
 	# dummy values for mu and gamma
 	gamma = 1.
 	mu  = 1.
+	best_loss = float(np.inf)
+	best_tau = -1.
 	for tau in (0.001, 0.01, 0.1):
 		kf = cross_validation.KFold(y.shape[0], n_folds = 10)
 		loss = 0.
@@ -288,6 +310,11 @@ def grid_search_tau(X, y, method, iterations):
 		#report results
 		res_append = "Parameters: Tau: " + str(tau) + " loss: " + str(loss) + " test_size: " + str(X_train.shape[0]) + '\n'
 		res += res_append
+		if loss < best_loss:
+			best_loss = loss
+			best_tau = tau
+	res += '\n'
+	res += "Best result " + str(best_loss) + " for tau = " + str(best_tau)
 	res += '\n'
 	return res
 
