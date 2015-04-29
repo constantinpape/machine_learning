@@ -1,9 +1,9 @@
 \documentclass{article}
 
-%\usepackage{graphicx}
+\usepackage{graphicx}
 \usepackage{hyperref}
-%\usepackage{placeins}
-%\usepackage{subcaption}
+\usepackage{placeins}
+\usepackage{subcaption}
 
 \begin{document}
 
@@ -56,8 +56,118 @@ An exception is the SG Momentum method, here we used only 5 iterations and still
 		weighted least squares		& -        &  -   &   -      & 23    \\
 	\end{tabular}
 	\caption{Parameters for the grid search.}
-	\label{tab1}
+	\label{tab2}
 \end{table}
+
+
+\section{Speed}
+
+To measure the speed of the algorithm we cannot rely on an ordinary timing tool, because of the different levels of optimization of the aalgorithms.
+Instead we estimate the time by multiplying the number of iterations with the theoretical complexity per iteration for each algoorithm.
+Each algorithm is run with the best parameters found in the grid search. For this purpose we split the data into a training and testset.
+In \autoref{fig1} and \autoref{fig2} the training error / test error over time of all methods is plotted.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = .8\textwidth]{../results/train_error.png}
+	\caption{Train error for all methods}
+	\label{fig1}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = .8\textwidth]{../results/test_error.png}
+	\caption{Test error for all methods}
+	\label{fig2}
+\end{figure}
+
+\FloatBarrier
+
+Unfortunately this representation is quite unorderly, so we also added the course of the test and training error for the individual algorithms in \autoref{fig3} to \autoref{fig}.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/gradient_descent.png}
+		\caption{Results for gradient descent}
+		\label{fig3}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/stochastic_gradient_descent.png}
+		\caption{Results for stochastic gradient descent}
+		\label{fig4}
+	\end{subfigure}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/sg_minibatch.png}
+		\caption{Results for SG minibatch}
+		\label{fig5}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/sg_momentum.png}
+		\caption{Results for SG momentm}
+		\label{fig6}
+	\end{subfigure}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/average_stochastic_gradient.png}
+		\caption{Results for average stochastic gradient}
+		\label{fig7}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/stochastic_average_gradient.png}
+		\caption{Results for stochastic average gradient}
+		\label{fig8}
+	\end{subfigure}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/dual_coordinate_ascent.png}
+		\caption{dual coordinate ascent}
+		\label{fig9}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/weighted_least_squares.png}
+		\caption{Results for weighted least squares}
+		\label{fig10}
+	\end{subfigure}
+\end{figure}
+		
+From these plots we can see that most algorithms converge quite orderly. However the gradient descent algorithm, the stochastic average gradient and the dual coordinate ascent show a strange behaviour, in which both test and training error go up again after some time of training.
+Unfortunately we did not have further time to look into this behaviour, however for the dual coordinate ascent it might be due to an overflow occuring, which was reported by python.
+Overall the SG momemntum algorithm shows the fastest convergence, after T $\approx$ 4000 training and test error have reduced to zero.
+
+\section{Signal Processing}
+
+At last we investigate the relation between SG momentum and SG minibatch / stochastic gradient descent.
+From considerations derived from signal processing one expects that these methods show similar convergence behaviour
+if one sets $\mu = 1 - e^{- \frac{1}{\eta}}$ for $\eta = 0.6 B$ (minibatch size) , $\eta = 0.6 N$ (trainingset size) respectively.
+In the case of SG momentum vs SG minibatch this seems to be approximately the case (see \autoref{fig11}).
+However for SG momentum and stochastic gradient descent the momentum algorithm doesnt converge well (see \autoref{fig12}).
+
+\FloatBarrier
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/signal_processing0.png}
+		\caption{Comparison of SG momentum and SG minibatch}
+		\label{fig11}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../results/signal_processing1.png}
+		\caption{Comparison of SG momentum and stochastic gradient descent}
+		\label{fig12}
+	\end{subfigure}
+\end{figure}
 
 \end{document}
 
