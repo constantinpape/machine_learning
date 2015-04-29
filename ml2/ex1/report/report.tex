@@ -1,0 +1,63 @@
+\documentclass{article}
+
+%\usepackage{graphicx}
+\usepackage{hyperref}
+%\usepackage{placeins}
+%\usepackage{subcaption}
+
+\begin{document}
+
+Machine Learning 2, exercise 1 by Constantin Pape, Marcus Theisen and Johann Klaehn
+ 
+\section{Exercise and data}
+
+In this exercise we compare different optimization methods for the problem of logistic regression.
+The methods are tested on the digits dataset of sklearn.
+We start by implementing vectorized versions of the sigmoid function and the gradient.
+We further implement a function for prediction and a function to evaluate the error.
+
+\section{Optimization methods}
+
+For the optimization, we implement different methods:
+First the gradient descent, then stochastich gradient descent and some variants of it.
+As non-gradient based techniques, we use dual coordinate ascent and weighted least squares.
+
+\section{Grid Search}
+
+All gradient based methods depend on different parameters: The initial learning rate $\tau_0$, the learning update paramter $\gamma$ and for some methods an additional parameter $\mu$.
+For the non-gradient based methods no parameters have to be optimized.
+We perform a grid-search to find the best parameter (see \ref{tab1} for values).
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c c c}
+		$\tau_0$	&	0.001	& 0.01	& 0.1	\\
+		$\mu$		&	0.1	& 0.2	& 0.5	\\
+	 	$\gamma$ 	& 	0.0001	& 0.001	& 0.01	\\
+	\end{tabular}
+	\caption{Parameters for the grid search.}
+	\label{tab1}
+\end{table}
+
+For each set of parameters, we perform 10-fold cross validation. As error measure we use the total number of missclassifications.  \autoref{tab2} shows the best parameters for each methof together with the error for these parameters. For all stochastic methods we used 50 iterations, for the non-stochastic methods we used 10 iterations.
+An exception is the SG Momentum method, here we used only 5 iterations and still had zero training error for more than one set of parameters. 
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c c c c}
+		Method				& $\tau_0$ & $\mu$& $\gamma$ & error \\	
+		grdient descent			&	   & 	  & &	\\
+		stochastic gradient descent	& 0.01	   & - 	  & 0.01     & 5     \\
+	 	SG minibatch 			& 0.1	   & -	  & 0.01     & 0     \\
+		SG momentum			& 0.01	   & 0.1  & 0.01     & 0     \\
+		average stochastic gradient	& 0.01     &0.5   & 0.001    & 17    \\	
+		stochastic average gradient	& 0.01	   &  -   & 0.01     & 6     \\
+		dual coordinate asenct		& -	   &  -   &   -	     & 100   \\
+		weighted least squares		& -        &  -   &   -      & 23    \\
+	\end{tabular}
+	\caption{Parameters for the grid search.}
+	\label{tab1}
+\end{table}
+
+\end{document}
+

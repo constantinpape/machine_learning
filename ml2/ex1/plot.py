@@ -35,29 +35,48 @@ def plot_processing(data1, data2, fname, name1, name2):
 	fname = "results/" + fname + '.png'
 
 	fig.savefig(fname)
+
+def plot_comparison(data, names, fname):
+	
+	fig = plot.figure()
+	
+	for i in range( len(data) ):
+		plot.loglog( data[i][:,0], data[i][:,2], label = names[i] )
+	plot.title(fname)
+	plot.xlabel('T')
+	plot.ylabel(fname)
+	plot.legend()
+	
+	fname = "results/" + fname + '.png'
+
+	fig.savefig(fname)
+	
 	
 if __name__ == '__main__':
 	
-	#for name in methods:
-	#	fname = "results/" + name + ".txt" 
-	#	data = np.loadtxt(fname)
-	#	plot_errors(data, name)
+	data = []
+	names = []
+	for name in methods:
+		fname = "results/" + name + ".txt" 
+		data.append( np.loadtxt(fname) )
+		names.append( name )
+	plot_comparison(data, names, "test_error")
 
-	data_0_minibatch = np.loadtxt("/home/consti/Work/machine_learning/ml2/ex1/results/sp_minibatch.txt")
-	data_0_momentum  = np.loadtxt("/home/consti/Work/machine_learning/ml2/ex1/results/sp_momentum0.txt")
-	
-	plot_processing(data_0_minibatch,
-			data_0_momentum,
-			"signal_processing0",
-			"sg_momentum",
-			"sg_minibatch")
+	#data_0_minibatch = np.loadtxt("/home/consti/Work/machine_learning/ml2/ex1/results/sp_minibatch.txt")
+	#data_0_momentum  = np.loadtxt("/home/consti/Work/machine_learning/ml2/ex1/results/sp_momentum0.txt")
+	#
+	#plot_processing(data_0_minibatch,
+	#		data_0_momentum,
+	#		"signal_processing0",
+	#		"sg_momentum",
+	#		"sg_minibatch")
 
-	data_1_sgd	= np.loadtxt("/home/consti/Work/machine_learning/ml2/ex1/results/sp_sg.txt")
-	data_1_momentum = np.loadtxt("/home/consti/Work/machine_learning/ml2/ex1/results/sp_momentum1.txt")
-	
-	plot_processing(data_1_sgd,
-			data_1_momentum,
-			"signal_processing1",
-			"sg_momentum",
-			"sgd")
-	
+	#data_1_sgd	= np.loadtxt("/home/consti/Work/machine_learning/ml2/ex1/results/sp_sg.txt")
+	#data_1_momentum = np.loadtxt("/home/consti/Work/machine_learning/ml2/ex1/results/sp_momentum1.txt")
+	#
+	#plot_processing(data_1_sgd,
+	#		data_1_momentum,
+	#		"signal_processing1",
+	#		"sg_momentum",
+	#		"sgd")
+	#
