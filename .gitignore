@@ -1,5 +1,6 @@
 # c++ object files
 *.o
+*.so
 *.obj
 
 # python object files
@@ -15,6 +16,11 @@
 
 # image types
 *.png
+
+# latex aux files and documents
+*.log
+*.aux
+*.pdf
 
 # bin and lib folder, data folder
 results
