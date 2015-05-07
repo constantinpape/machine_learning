@@ -24,6 +24,8 @@
 *.aux
 *.pdf
 
+ml2/ex3/datasets
+
 # bin and lib folder, data folder
 #results
 c++_implementation/bin
