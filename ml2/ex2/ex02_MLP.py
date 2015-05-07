@@ -20,7 +20,7 @@ class Tanh(Node):
     self.input   = None    
   def forward(self, input):
     self.input = input
-    return ...
+    return np.tanh(input) 
   def backward(self, top_error):
     """ return d out / d in """ 
     return ...
@@ -44,9 +44,9 @@ class PerceptronLayer(Node):
           
   def forward(self, input):
     """ (bs, n_in) --> (bs, n_out) """
-    self.lin =   ...
-    self.act =   ...
-    self.input = ...
+    self.lin   = np.dot(input, self.W)
+    self.act   = act_func(self.lin)
+    self.input = input 
     return self.act   
 
   def backward(self, top_error):
@@ -75,11 +75,11 @@ class Softmax(Node):
   def forward(self, input):
     self.input = input
     """ return softmax function to input vector"""
-    return ...
-    
+    return np.exp(input)/np.sum(np.exp(input), axis=1, keepdims=True) 
+
   def backward(self, top_error):
   	""" return the back propagation error """
-    return ...
+    return ... 
 
 
 class NLL(object):
@@ -91,10 +91,10 @@ class NLL(object):
     self.input = input
     self.n     = Y.shape[0]
     self.active_class = np.equal(self.classes,Y[:,None])
-    return ...
+    return np.sum(np.log(input[np.where(active_class)]))
     
   def backward(self):
-    return ...
+    return np.ones(n) - input[np.where(active_class)]
 
 
 class MLP(object):
@@ -177,7 +177,7 @@ if __name__=="__main__":
   pos = 0
   perm = np.random.permutation(n)
   
-  nn = MLP([3,3,10], nin)
+  nn = MLP([3,3,2], nin)
   for i in xrange(10000):
     grads, loss, pred = nn.gradients(X[perm[pos:pos+bs]], Y[perm[pos:pos+bs]])
     nn.update(lr)
