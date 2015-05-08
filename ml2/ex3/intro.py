@@ -94,8 +94,8 @@ updates = RMSprop(cost, params, lr=0.001)
 train = theano.function(inputs=[X, Y], outputs=cost, updates=updates, allow_input_downcast=True)
 predict = theano.function(inputs=[X], outputs=y_x, allow_input_downcast=True)
 
-f_out = open('res/res_simple_nn', 'w')
-for i in range(1000): #you can adjust this if training takes too long
+f_out = open('res/res_dropout_nn', 'w')
+for i in range(100): #you can adjust this if training takes too long
     for start, end in zip(range(0, len(trX), 128), range(128, len(trX), 128)):
         cost = train(trX[start:end], trY[start:end])
     print i
