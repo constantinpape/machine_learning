@@ -4,8 +4,8 @@ import numpy as np
 def plot_trainerror(data1, data2):
     fig = plot.figure()
 
-    plot.plot( data1[0:100,0], data1[0:100,1], label = 'simple' )
-    plot.plot( data2[0:100,0], data2[0:100,1], label = 'dropout' )
+    plot.plot( data1[0:10,0], data1[0:10,1], label = 'simple' )
+    plot.plot( data2[0:10,0], data2[0:10,1], label = 'dropout' )
     plot.title('test_error')
     plot.xlabel('iteration')
     plot.ylabel('error')
