@@ -14,6 +14,7 @@ srng = RandomStreams()
 
 # return X as theano float array
 def floatX(X):
+    print theano.config.floatX
     return np.asarray(X, dtype=theano.config.floatX)
 
 # return (random) weights of given shape
@@ -51,9 +52,7 @@ def dropout(X, p_use = 1.):
     # only change X if p_use is smaller than 1
     if p_use < 1.:
 
-        binomial = srng.binomial(size = X.shape, n = 1, p = p_use) * X / p_use
-
-        #draw     =  theano.function([X], bin)
+        binomial = srng.binomial(size = X.shape, n = 1, p = p_use, dtype = theano.config.floatX) * X / p_use
         return binomial
     else:
         return X
@@ -298,8 +297,8 @@ def conv_nn():
     w_2 = init_weights((64, 32, 5, 5))
     w_3 = init_weights((128, 64, 2, 2))
     #number of pixel in last conv layer:
-    #num_filter * pix_per_filter = 128 * 12 = 1536
-    w_h2 = init_weights((1536, 625 ))
+    #num_filter * pix_per_filter = 128 * 9 = 1152
+    w_h2 = init_weights((1152, 625 ))
     w_o = init_weights((625, 10))
 
     noise_out_1, noise_out_2, noise_out_2, noise_h2, noise_py_x = model_conv(
