@@ -30,12 +30,12 @@ in the output layer.
 \newline
 For the convolutional network, we use 3 convolutional layers, each with a filter and subsampling layer. The last of these layers is connected to the second hidden layer (from before). The exact configuration is depicted in \autoref{fig1}.
 
-%\begin{figure}[h]
-%	\centering
-%	\includegraphics[width = .8\textwidth]{graphics/conv_net.png}
-%	\caption{Architecure of the Convolutional Net.}
-%	\label{fig1}
-%\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = .8\textwidth]{graphics/sketch.pdf}
+	\caption{Architecure of the Convolutional Net.}
+	\label{fig1}
+\end{figure}
 
 \section{Results}
 
@@ -47,7 +47,7 @@ In \autoref{tab1} the result for each network is shown.
 
 \begin{table}[h]
 	\centering
-	\begin{tabular}{l c c c C}
+	\begin{tabular}{l c c c c}
         Model	&	Simple	& Dropout & PreLU   & Convolutional	\\
         Result	&	0.9852	& 0.9868  & 0.9871  &	0.9943      \\
 	\end{tabular}
@@ -57,7 +57,7 @@ In \autoref{tab1} the result for each network is shown.
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width = .8\textwidth]{graphics/compare_nets.png}
+    \includegraphics[width = .8\textwidth]{graphics/compare_nets.png}
 	\caption{Test classification over iterations.}
 	\label{fig2}
 \end{figure}
@@ -71,29 +71,123 @@ In contrast to the simple case, they show more noise, which is due to the fact t
 To investigate the Convolutional Net further, we look at three filters from the first convolutional layer.
 For this we convolve these filters with an image from the dataset and look at the convolution and the filter.
 In \autoref{fig3} the image is shown.
+\autoref{fig4} to \autoref{fig9} show the filters 0, 15 and 30 and the convolution with the image.
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width = .8\textwidth]{graphics/digt.png}
-	\caption{Test classification over iterations.}
-	\label{fig2}
+	\includegraphics[width = .8\textwidth]{graphics/digit.png}
+	\caption{Original MNIST image.}
+	\label{fig3}
 \end{figure}
 
+\newpage
 
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/filt0.png}
+		\caption{Filter 0 from first layer.}
+		\label{fig4}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/conv0.png}
+		\caption{Convolution with Filter 0.}
+		\label{fig5}
+	\end{subfigure}
+\end{figure}
 
-%\begin{figure}
-%	\centering
-%	\begin{subfigure}[b]{0.45\textwidth} 
-%		\includegraphics[width=\textwidth]{../results/gradient_descent.png}
-%		\caption{Results for gradient descent}
-%		\label{fig3}
-%	\end{subfigure}
-%	\begin{subfigure}[b]{0.45\textwidth} 
-%		\includegraphics[width=\textwidth]{../results/stochastic_gradient_descent.png}
-%		\caption{Results for stochastic gradient descent}
-%		\label{fig4}
-%	\end{subfigure}
-%\end{figure}
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/filt1.png}
+		\caption{Filter 15 from first layer.}
+		\label{fig6}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/conv1.png}
+		\caption{Convolution with Filter 15.}
+		\label{fig7}
+	\end{subfigure}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/filt2.png}
+		\caption{Filter 30 from first layer.}
+		\label{fig8}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/conv2.png}
+		\caption{Convolution with Filter 30.}
+		\label{fig9}
+	\end{subfigure}
+\end{figure}
+
+\FloatBarrier
+
+Here we can see, that the filters learn different structure: 
+The first filter looks like a sharpening filter, because it has high intensity in the center, however it is not quite symmetric.
+The second filter shows no particular structure.
+The last filter, which has nearly uniform intensity, except for the central pixel, which is off, corresponds to a kind of blurring.
+
+To further investigate the filters we retrain the convolutional network, this time with anisotropic filters in the first two layer ( we use a (6,3) kernel in the first layer and a (3,6) kernel in the second layer).
+Due to time reasons we only trained this network for 40 iterations. It achieves a classification rate of 0.9937 after training.
+\autoref{fig10} shows its convergence.
+We again choose three filters and plot their convolution with the image from \autoref{fig3}.
+The filters and convoultions are shown in \autoref{fig11} to \autoref{fig16}.
+Again we see different structure learned by the filters:
+\newline 
+The second again shows a blurring effect and the third is asymmetric.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width = .8\textwidth]{graphics/conv_aniso.png}
+	\caption{Test error over iterations for the anisotropic filters.}
+	\label{fig10}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/aniso0.png}
+		\caption{Filter 0 from first layer.}
+		\label{fig11}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/conv_aniso0.png}
+		\caption{Convolution with Filter 0.}
+		\label{fig12}
+	\end{subfigure}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/aniso1.png}
+		\caption{Filter 15 from first layer.}
+		\label{fig13}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/conv_aniso1.png}
+		\caption{Convolution with Filter 15.}
+		\label{fig14}
+	\end{subfigure}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/aniso2.png}
+		\caption{Filter 30 from first layer.}
+		\label{fig15}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{graphics/conv_aniso2.png}
+		\caption{Convolution with Filter 30.}
+		\label{fig16}
+	\end{subfigure}
+\end{figure}
 
 \end{document}
 
