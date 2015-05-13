@@ -1,0 +1,5 @@
+Results:
+Simple:         0.9852
+Dropout:        0.9868
+PreLU:          0.9871
+Convolutional:  0.9943

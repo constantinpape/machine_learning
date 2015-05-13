@@ -133,7 +133,7 @@ def simple_nn():
             )
 
     f_out = open('res/res_dropout_nn', 'w')
-    for i in range(10): #you can adjust this if training takes too long
+    for i in range(100): #you can adjust this if training takes too long
         # train batches of 128 instances
         for start, end in zip(range(0, len(trX), 128), range(128, len(trX), 128)):
             cost = train(trX[start:end], trY[start:end])
@@ -141,6 +141,7 @@ def simple_nn():
         correct = np.mean(np.argmax(teY, axis=1) == predict(teX))
         res = str(i) + " " + str(correct) + "\n"
         f_out.write( res )
+    print 'Result dropout:', correct
 
 # definition of 2-layer neural network with prelu activation function
 # @params:
@@ -229,7 +230,7 @@ def prelu_nn():
 
     f_out = open('res/res_prelu_nn', 'w')
 
-    for i in range(10): #you can adjust this if training takes too long
+    for i in range(100): #you can adjust this if training takes too long
         # train batches of 128 instances
         for start, end in zip(range(0, len(trX), 128), range(128, len(trX), 128)):
             cost = train(trX[start:end], trY[start:end])
@@ -237,6 +238,7 @@ def prelu_nn():
         correct = np.mean(np.argmax(teY, axis=1) == predict(teX))
         res = str(i) + " " + str(correct) + "\n"
         f_out.write( res )
+    print 'Result PReLU:', correct
 
 # definition of convolutional neural network
 # @params:
@@ -340,15 +342,26 @@ def conv_nn():
             )
 
     f_out = open('res/res_conv_nn', 'w')
-    for i in range(10): #you can adjust this if training takes too long
+    for i in range(100): #you can adjust this if training takes too long
         for start, end in zip(range(0, len(trX), 128), range(128, len(trX), 128)):
             cost = train(trX[start:end], trY[start:end])
         print i
         correct = np.mean(np.argmax(teY, axis=1) == predict(teX))
         res = str(i) + " " + str(correct) + "\n"
         f_out.write( res )
+    print 'Result Conv:', correct
+
+    fweights = w_1.get_value()
+    # save the filters of the first layer
+    for i in range(fweights.shape[0]):
+        fname = 'res/filter/filter_' + str(i)
+        np.save(fname, fweights[i,0,:,:])
+
 
 if __name__ == '__main__':
+    print theano.config.device
+    print theano.config.floatX
+
     #simple_nn()
     #prelu_nn()
     conv_nn()
