@@ -295,11 +295,14 @@ def conv_nn():
     Y = T.fmatrix()
 
     # init the weights
+    # isotropic filters: (5,5)
+    # anisotropic filters: (6,3) and (3,6)
     w_1 = init_weights((32, 1, 5, 5))
     w_2 = init_weights((64, 32, 5, 5))
     w_3 = init_weights((128, 64, 2, 2))
     #number of pixel in last conv layer:
-    #num_filter * pix_per_filter = 128 * 9 = 1152
+    #for isotropic filter: num_filter * pix_per_filter = 128 * 9 = 1152
+    #for anisotropic filter: num_filter * pix_per_filter = 128 * 8 = 1024
     w_h2 = init_weights((1152, 625 ))
     w_o = init_weights((625, 10))
 
@@ -341,7 +344,7 @@ def conv_nn():
             allow_input_downcast=True
             )
 
-    f_out = open('res/res_conv_nn', 'w')
+    f_out = open('res/res_conv_aniso_nn', 'w')
     for i in range(100): #you can adjust this if training takes too long
         for start, end in zip(range(0, len(trX), 128), range(128, len(trX), 128)):
             cost = train(trX[start:end], trY[start:end])
@@ -354,7 +357,7 @@ def conv_nn():
     fweights = w_1.get_value()
     # save the filters of the first layer
     for i in range(fweights.shape[0]):
-        fname = 'res/filter/filter_' + str(i)
+        fname = 'res/filters_aniso/filter_' + str(i)
         np.save(fname, fweights[i,0,:,:])
 
 
