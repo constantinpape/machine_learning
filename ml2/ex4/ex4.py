@@ -112,15 +112,18 @@ def evaluate_error_correcting(data, target):
     for P in (9,10,11):
         for random_code in (False, True):
             classifier = ErrorCorrectingClassifier(C, P, random_code)
-            res = evaluate_classifier(classifier, data, target)
-            mat = classifier.get_code_matrix()
+            mat = classifier.calculate_code_matrix(
+                    np.concatenate( [d for d in data] ),
+                    np.concatenate( [t for t in target] )
+                    )
             dist = 0.5 * ( P - np.max( mat.dot(mat.transpose()) - P * np.eye(C) ) )
             print "Maximum Code distance, random_code =", random_code, ", P =", P, ":", dist
+            res = evaluate_classifier(classifier, data, target)
             print "Result for ErrorCorrecting, P =", P, ", random_code =", random_code, ":", res
 
 def evaluate_multiclass_rf(data, target):
-    # use 10 * number of trees in other classifiers (default value is 10)
-    classifier = RandomForestClassifier(n_estimators = 100)
+    # use 10 * number of trees in other classifiers (before we used 20)
+    classifier = RandomForestClassifier(n_estimators = 200)
     res = evaluate_classifier(classifier, data, target)
     print "Result for multiclass random forest:", res
 
@@ -128,5 +131,5 @@ if __name__ == '__main__':
     data, target = load_data()
     #evaluate_one_vs_rest(data, target))
     #evaluate_one_vs_one(data, target)
-    #evaluate_error_correcting(data, target)
-    evaluate_multiclass_rf(data, target)
+    evaluate_error_correcting(data, target)
+    #evaluate_multiclass_rf(data, target)

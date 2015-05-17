@@ -1,0 +1,52 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{placeins}
+\usepackage{subcaption}
+
+\begin{document}
+
+Machine Learning 2, exercise 4 by Constantin Pape, Marcus Theisen and Johann Klaehn
+ 
+\section{Exercise and data}
+
+In this exercise we implement different Multi-Class Classifiers.
+All of them are based on the RandomForest from sklearn, which is configured with 20 trees.
+We use the digits dataset from sklearn for evaluating the classifiers.
+Before using it, we normalize the data.
+
+\section{One Vs Rest}
+
+\section{Error-Correcting}
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{l c c c c}
+        P	            &	9	& 10    &   11   \\
+        Theoretical	    &	6	&  7    &    8   \\
+        Random Code     &   1   &  2    &    1   \\
+        Correlation Code&   0   &  0    &    0   \\ 
+	\end{tabular}
+	\caption{Table of the maximum code distance. Showing the theoretical maximum and the values for both codes. All calculations on the full data.}
+	\label{tab1}
+\end{table}
+
+\section{One Vs One}
+
+\section{Multi-Class RandomForest}
+
+\section{Results}
+
+%\begin{table}[h]
+%	\centering
+%	\begin{tabular}{l c c c c}
+%        Model	&	Simple	& Dropout & PreLU   & Convolutional	\\
+%        Result	&	0.9852	& 0.9868  & 0.9871  &	0.9943      \\
+%	\end{tabular}
+%	\caption{Test classification after training.}
+%	\label{tab1}
+%\end{table}
+
+\end{document}
+

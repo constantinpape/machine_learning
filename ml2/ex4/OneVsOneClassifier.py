@@ -37,7 +37,7 @@ class OneVsOneClassifier():
             c1 = self.index_to_pair[index][1]
             mask0 = np.where(y_train == c0)
             mask1 = np.where(y_train == c1)
-            rfc = RandomForestClassifier()
+            rfc = RandomForestClassifier(n_estimators = 20)
             train_data = np.concatenate(
                     [ x_train[mask0],
                       x_train[mask1] ] )
@@ -52,7 +52,7 @@ class OneVsOneClassifier():
         self.forests = []
         # train 9 classifiers, each on 2 consecutive classes
         for index in range( self.C - 1 ):
-            rfc = RandomForestClassifier()
+            rfc = RandomForestClassifier(n_estimators = 20)
             c0 = index
             c1 = index + 1
             mask0 = np.where( y_train == c0 )

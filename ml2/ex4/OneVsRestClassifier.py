@@ -19,9 +19,9 @@ class OneVsRestClassifier():
             # if use_subsample is true set the class weights
             if self.use_subsample:
                 # TODO make this work, need current sklearn!
-                rfc = RandomForestClassifier( class_weight = "subsample" )
+                rfc = RandomForestClassifier( n_estimators = 20, class_weight = "subsample" )
             else:
-                rfc = RandomForestClassifier()
+                rfc = RandomForestClassifier(n_estimators = 20)
             rfc.fit(x_train, y_train_c)
             self.forests.append(rfc)
 

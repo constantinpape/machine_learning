@@ -12,14 +12,14 @@ class ErrorCorrectingClassifier():
         self.code_matrix = None
 
     # get random code matrix
-    def compute_random_code_matrix(self):
-        mat = np.random.binomial(1, 0.5, (self.C,self.P) )
-        mat[np.where(mat == 0)] = -1
-        self.code_matrix = mat
-        assert( self.code_matrix.shape == (self.C, self.P) )
+    def _calculate_random_code_matrix(self):
+        code_mat = np.random.binomial(1, 0.5, (self.C,self.P) )
+        code_mat[np.where(code_mat == 0)] = -1
+        assert( code_mat.shape == (self.C, self.P) )
+        return code_mat
 
     # get code matrix
-    def compute_code_matrix(self, data, target):
+    def _calculate_correlation_code_matrix(self, data, target):
         # calculate normalized mean vectors
         mean_vectors = []
         for c in range(self.C):
@@ -43,26 +43,27 @@ class ErrorCorrectingClassifier():
         eigvecs = np.sign(eigvecs)
         # take care of 0 values, which have sign = 0
         eigvecs[np.where(eigvecs == 0)] = 1
-        self.code_matrix = np.zeros( (self.C,self.P) )
+        code_mat = np.zeros( (self.C,self.P) )
         # P = 10: use eigenvectors as codematrix
         if self.P == 10:
-            assert( self.code_matrix.shape == eigvecs.shape)
-            self.code_matrix = eigvecs
+            assert( code_mat.shape == eigvecs.shape)
+            code_mat = eigvecs
         # P = 9: remove eigenvector with the smallest eigenvalue
         elif self.P == 9:
             min_val = np.argmin(eigvals)
             eigvecs = np.delete(eigvecs, min_val, axis = 1)
-            assert( self.code_matrix.shape == eigvecs.shape)
-            self.code_matrix = eigvecs
+            assert( code_mat.shape == eigvecs.shape)
+            code_mat = eigvecs
         # P = 10: add arbitrary bit vector (with same number of 1 and -1)
         elif self.P == 11:
             vec_add = np.array( [1,1,1,1,1,-1,-1,-1,-1,-1] )
             np.random.shuffle( vec_add )
             vec_add = np.expand_dims(vec_add, axis = 1)
             eigvecs = np.concatenate( [eigvecs, vec_add], axis = 1)
-            assert( self.code_matrix.shape == eigvecs.shape)
-            self.code_matrix = eigvecs
-        assert( self.code_matrix.shape == (self.C, self.P) )
+            assert( code_mat.shape == eigvecs.shape)
+            code_mat = eigvecs
+        assert( code_mat.shape == (self.C, self.P) )
+        return code_mat
 
     def get_code_matrix(self):
         if self.code_matrix == None:
@@ -70,12 +71,16 @@ class ErrorCorrectingClassifier():
         else:
             return self.code_matrix
 
+    def calculate_code_matrix(self, data, target):
+        if self.random_code:
+            code_mat = self._calculate_random_code_matrix()
+        else:
+            code_mat = self._calculate_correlation_code_matrix(data, target)
+        return code_mat
+
     def fit(self, x_train, y_train):
         # get the code matrix
-        if self.random_code:
-            self.compute_random_code_matrix()
-        else:
-            self.compute_code_matrix(x_train, y_train)
+        self.code_matrix = self.calculate_code_matrix(x_train, y_train)
         self.forests = []
         for p in range(self.P):
             code = self.code_matrix[:,p]
@@ -84,7 +89,7 @@ class ErrorCorrectingClassifier():
             for c in range(self.C):
                 assert( code[c] == -1 or code[c] == 1)
                 target[np.where(y_train == c)] = code[c]
-            rfc = RandomForestClassifier()
+            rfc = RandomForestClassifier(n_estimators = 20)
             rfc.fit(x_train, target)
             self.forests.append(rfc)
 
