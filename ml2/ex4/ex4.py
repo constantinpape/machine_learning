@@ -96,11 +96,10 @@ def evaluate_classifier(classifier, data, target):
 
 def evaluate_one_vs_rest(data, target):
     for pred_probs in (False, True):
-        #for use_subsample in (False, True):
-        use_subsample = False
-        classifier = OneVsRestClassifier( C, use_subsample, pred_probs )
-        res = evaluate_classifier(classifier, data, target)
-        print "Result for OneVsRest, predict_probabilities =", pred_probs, ", use_subsample =", use_subsample, ":", res
+        for use_subsample in (False, True):
+            classifier = OneVsRestClassifier( C, use_subsample, pred_probs )
+            res = evaluate_classifier(classifier, data, target)
+            print "Result for OneVsRest, predict_probabilities =", pred_probs, ", use_subsample =", use_subsample, ":", res
 
 def evaluate_one_vs_one(data, target):
     for greedy in (False, True):
@@ -129,7 +128,7 @@ def evaluate_multiclass_rf(data, target):
 
 if __name__ == '__main__':
     data, target = load_data()
-    #evaluate_one_vs_rest(data, target))
+    evaluate_one_vs_rest(data, target)
     #evaluate_one_vs_one(data, target)
-    evaluate_error_correcting(data, target)
+    #evaluate_error_correcting(data, target)
     #evaluate_multiclass_rf(data, target)
