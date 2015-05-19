@@ -38,14 +38,18 @@ For P = 9 we delete the eigenvector with the smallest eigenvalue, for P = 11 we 
 Alternatively a random code matrix is generated.
 First we investigate the maximal achievable distance between the code words.
 The theoretical maximum is given by:
-\begin{equation*}
+
+\begin{equation}
     d = P - Q + 1 
-\end{equation*}
+\end{equation}
+
 where Q is the log of the number of class (here Q = 4).
 The experimental code distance is calculated by:
-\begin{equation*}
+
+\begin{equation}
     d = \frac{1}{2} (P - \textrm{max}(C \cdot C^{T} - P \cdot I) )
-\end{equation*}
+\end{equation}
+
 See \autoref{tab1} for the results. 
 
 \begin{table}[h]
