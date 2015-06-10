@@ -25,6 +25,8 @@ def process_command_line():
     return parser.parse_args()
 
 def kernel_ridge_regression(im, tau, rho, gamma):
+    # copy the image
+    im_ret = im.copy()
 
     # Find the known pixels and the pixels that shall be predicted.
     known_ind = numpy.where(im != 0)
@@ -39,17 +41,15 @@ def kernel_ridge_regression(im, tau, rho, gamma):
     r = ModifiedKernelRidgeRegressor(tau, rho, gamma)
     r.train(known_x, known_y)
     print "done training"
-    # pickle.dump(r, open("regressor.p", "wb"))
-    # r = pickle.load(open("regressor.p", "rb"))
     print "predicting..."
     pred_y = r.predict(pred_x)
     print "done predicting"
 
     # Write the predicted values back into the image and show the result.
-    im[unknown_ind] = pred_y
+    im_ret[unknown_ind] = pred_y
     stop = time.time()
     print "Train and predict took %.02f seconds." % (stop-start)
-    return im
+    return im_ret
 
 def matern_regression(Q, P, E, sig_rho, sig_gamma, sig_tau, lambd):
 
@@ -144,10 +144,10 @@ def random_hp_optimization(Q):
         interpolation = kernel_ridge_regression( image, Q[i,2], Q[i,0], Q[i,1] )
         P.append( [Q[i,0], Q[i,1], Q[i,2]] )
         E.append( calc_mse(im_orig, interpolation) )
-        res = str(Q[best_hp,0]) + str(" ") + str(Q[best_hp,1]) + str(" ") + str(Q[best_hp,2]) + str(" ") + str(E[-1]) + '\n'
+        res = str(Q[i,0]) + str(" ") + str(Q[i,1]) + str(" ") + str(Q[i,2]) + str(" ") + str(E[-1]) + '\n'
         f.write(res)
         f.flush()
-    best_hp = numpy.argmin(E)
+    rand_hp = numpy.argmin(E)
     stop = time.time()
     print "Random parameter optimization took %.02f seconds." % (stop-start)
     f.close()
@@ -163,11 +163,11 @@ def main():
     print "Rho:", best_hp[0], "Gamma:", best_hp[1], "Tau:", best_hp[2]
     print "Resulting MSE:", best_mse
 
-    print "starting optimization with grid search"
-    rand_hp, rand_mse = random_hp_optimization(Q)
-    print "Best hyperparameter found via Random Optimization of HP:"
-    print "Rho:", rand_hp[0], "Gamma:", rand_hp[1], "Tau:", rand_hp[2]
-    print "Resulting MSE:", rand_mse
+    #print "starting optimization with grid search"
+    #rand_hp, rand_mse = random_hp_optimization(Q)
+    #print "Best hyperparameter found via Random Optimization of HP:"
+    #print "Rho:", rand_hp[0], "Gamma:", rand_hp[1], "Tau:", rand_hp[2]
+    #print "Resulting MSE:", rand_mse
 
     return 0
 
