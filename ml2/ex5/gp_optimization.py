@@ -92,17 +92,21 @@ def bayesian_hp_optimization(Q):
     P = []
     E = []
     # initialize
-    f = open("cache/bayes_opt.txt","w")
+    #f = open("cache/bayes_opt.txt","w")
     start = time.time()
-    for i in range(20):
-        interpolation = kernel_ridge_regression( im, Q[i,2], Q[i,0], Q[i,1] )
-        P.append( [Q[i,0], Q[i,1], Q[i,2]] )
-        E.append( calc_mse(im_orig, interpolation) )
-        # save result
-        res = str(Q[i,0]) + str(" ") + str(Q[i,1]) + str(" ") + str(Q[i,2]) + str(" ") + str(E[i]) + '\n'
-        f.write(res)
-        f.flush()
+    #for i in range(20):
+    #    interpolation = kernel_ridge_regression( im, Q[i,2], Q[i,0], Q[i,1] )
+    #    P.append( [Q[i,0], Q[i,1], Q[i,2]] )
+    #    E.append( calc_mse(im_orig, interpolation) )
+    #    # save result
+    #    res = str(Q[i,0]) + str(" ") + str(Q[i,1]) + str(" ") + str(Q[i,2]) + str(" ") + str(E[i]) + '\n'
+    #    f.write(res)
+    #    f.flush()
 
+    save = numpy.loadtxt("cache/bayes_opt.txt")
+    for d in save:
+        P.append( [d[0], d[1], d[2]] )
+        E.append( d[3] )
 
     # TODO should we remove known vals from Q ?
     # remove known values from Q
@@ -114,21 +118,22 @@ def bayesian_hp_optimization(Q):
     lambd       = .3
     for i in range(20):
         mse, var = matern_regression(Q, P, E, sig_rho, sig_gamma, sig_tau, lambd)
+        print "MSE, VAR:", mse, var
         utility = numpy.divide( mse, numpy.sqrt(var) )
         best_hp = numpy.argmin(utility)
         P.append( Q[best_hp])
-        interpolation = kernel_ridge_regression( ima, Q[best_hp,2], Q[best_hp,0], Q[best_hp,1])
+        interpolation = kernel_ridge_regression( im, Q[best_hp,2], Q[best_hp,0], Q[best_hp,1])
         E.append( calc_mse(im_orig, interpolation))
         res = str(Q[best_hp,0]) + str(" ") + str(Q[best_hp,1]) + str(" ") + str(Q[best_hp,2]) + str(" ") + str(E[-1]) + '\n'
-        f.write(res)
-        f.flush()
+        #f.write(res)
+        #f.flush()
     # TODO should we remove known vals from Q ?
     # remove known values from Q
     # Q = numpy.delete(Q, new_hp, axis=0)
     stop = time.time()
     print "Bayesian parameter optimization took %.02f seconds." % (stop-start)
     best_hp = numpy.argmin(E)
-    f.close()
+    #f.close()
     return P[best_hp], E[best_hp]
 
 def random_hp_optimization(Q):
