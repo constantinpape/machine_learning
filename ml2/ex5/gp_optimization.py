@@ -7,134 +7,24 @@ import scipy.sparse
 import scipy.sparse.linalg
 import scipy.spatial
 
-def modified_exponential_kernel(data, params):
-    """Compute the modified exponential kernel matrix.
+from ModifiedKernelRidgeRegressor   import ModifiedKernelRidgeRegressor
+from MaternKernelRidgeRegressor     import MaternKernelRidgeRegressor
 
-    :param data: data matrix
-    :param params: paramters of the kernel
-    :param params[0]: parameter gamma of the kernel
-    :param params[1]: parameter rho of the kernel
-    :param params[2]: parameter max_distance of the kernel
-    :return: modified exponential kernel matrix
+def process_command_line():
+    """Parse the command line arguments.
     """
-    assert len(data.shape) == 2
-    gamma           = params[0]
-    rho             = params[1]
-    max_distance    = params[2]
+    parser = argparse.ArgumentParser(description="Machine Learning exercise 5.",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-t", "--tau", type=float, default=0.8,
+                        help="parameter tau for ridge regression")
+    parser.add_argument("-r", "--rho", type=float, default=7.5,
+                        help="parameter rho of the modified_exponential_kernel")
+    parser.add_argument("-g", "--gamma", type=float, default=1.7,
+                        help="parameter gamma of the modified_exponential_kernel")
 
-    factor = - 1. /  rho**gamma
-    limit = numpy.exp(factor*max_distance**gamma)
-    # Find the pairwise distances and compute the modified exponential kernel.
-    K = []
-    for k in data:
-        d = numpy.exp(factor*numpy.sum(np.abs((data - k))**gamma,axis=1))
-        d[d < limit] = 0.0  # truncate the modified exponential
-        d = scipy.sparse.csc_matrix(d[:,None])
-        K.append(d)
-    K = scipy.sparse.hstack(K)
-    return K
+    return parser.parse_args()
 
-def matern_kernel(data, sig_rho, sig_gamma, sig_tau):
-    assert len(data.shape) == 2
-
-    # Find the pairwise distances and compute the matern kernel.
-    K = []
-    for k in data:
-        s = ( ( data[:,0] - k[:,0] ) / sig_rho )**2 + ( ( data[:,1] - k[:,1] ) / sig_gamma )**2 + ( ( data[:,2] - k[:,2] ) / sig_tau )**2
-        d = (1. + np.sqrt(5*s) + 5./3. * s)*np.exp(-np.sqrt(5*s))
-        K.append(d)
-    K = hstack(K)
-    return K
-
-def compute_alpha(train_x, train_y, kernel, kernel_params, tau):
-    """Compute the alpha vector of the ridge regressor.
-
-    :param train_x: training x data
-    :param train_y: training y data
-    :param tau: parameter tau of the ridge regressor
-    :param sigma: parameter sigma of the gaussian kernel
-    :return: alpha vector
-    """
-    print "building input kernel matrix"
-    K = kernel(train_x, kernel_params)
-    print "sparsity: %.2f%%" % (float(100*K.nnz) / (K.shape[0]*K.shape[1]))
-    M = K + tau * scipy.sparse.identity(train_x.shape[0])
-    y = scipy.sparse.csc_matrix(train_y[:,None])
-    print "solving sparse system"
-    alpha = scipy.sparse.linalg.cg(M, train_y)
-    print "done computing alpha"
-    return alpha[0]
-
-class ModifiedKernelRidgeRegressor(object):
-    """Kernel Ridge Regressor with modified exponential kernel.
-    """
-
-    def __init__(self, tau, rho, gamma):
-        self.dim = None
-        self.train_x = None
-        self.alpha = None
-        self.mean_y = None
-        self.std_y = None
-        self.tau = tau
-        self.rho = rho
-        self.gamma = gamma
-        self.max_distance = 4.0*rho
-        self.scale = -1./rho**gamma
-        print self.tau, self.rho, self.gamma
-
-    def train(self, train_x, train_y):
-        """Train the kernel ridge regressor.
-
-        :param train_x: training x data
-        :param train_y: training y data
-        """
-        assert len(train_x.shape) == 2
-        assert len(train_y.shape) == 1
-        assert train_x.shape[0] == train_y.shape[0]
-
-        self.dim = train_x.shape[1]
-        self.train_x = train_x.astype(numpy.float32)
-        self.tree = scipy.spatial.cKDTree(self.train_x)
-
-        self.mean_y = train_y.mean()
-        self.std_y = train_y.std()
-        train_y_std = (train_y - self.mean_y) / self.std_y
-
-        params = (self.gamma, self.rho, self.max_distance)
-        self.alpha = compute_alpha(self.train_x, train_y_std, gaussian_kernel, params, self.tau)
-
-    def predict_single(self, pred_x):
-        """Predict the value of a single instance.
-
-        :param pred_x: x data
-        :return: predicted value of pred_x
-        """
-        assert len(pred_x.shape) == 1
-        assert pred_x.shape[0] == self.dim
-        indices = numpy.asarray(self.tree.query_ball_point(pred_x, self.max_distance))
-        dist = numpy.sum( numpy.absolute(self.train_x[indices]-pred_x)**self.gamma, axis=1)
-        kappa = numpy.exp(self.scale*dist)
-        pred_y = numpy.dot(kappa, self.alpha[indices])
-        return self.std_y * pred_y + self.mean_y
-
-    def predict(self, pred_x):
-        """Predict the values of pred_x.
-
-        :param pred_x: x data
-        :return: predicted values of pred_x
-        """
-        assert len(pred_x.shape) == 2
-        assert pred_x.shape[1] == self.dim
-        pred_x = pred_x.astype(numpy.float32)
-        return numpy.array([self.predict_single(x) for x in pred_x])
-
-
-def kernel_ridge_regression(tau, rho, gamma):
-    # Load the image.
-    im_orig = numpy.squeeze(vigra.readImage("cc_90.png"))
-
-    # Make a copy, so both the original and the regressed image can be shown afterwards.
-    im = numpy.array(im_orig)
+def kernel_ridge_regression(im, tau, rho, gamma):
 
     # Find the known pixels and the pixels that shall be predicted.
     known_ind = numpy.where(im != 0)
@@ -159,32 +49,150 @@ def kernel_ridge_regression(tau, rho, gamma):
     im[unknown_ind] = pred_y
     stop = time.time()
     print "Train and predict took %.02f seconds." % (stop-start)
-    vigra.impex.writeImage(im, "res.png")
+    return im
 
-def process_command_line():
-    """Parse the command line arguments.
-    """
-    parser = argparse.ArgumentParser(description="Machine Learning exercise 5.",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-t", "--tau", type=float, default=0.8,
-                        help="parameter tau for ridge regression")
-    parser.add_argument("-r", "--rho", type=float, default=7.5,
-                        help="parameter rho of the modified_exponential_kernel")
-    parser.add_argument("-g", "--gamma", type=float, default=1.7,
-                        help="parameter gamma of the modified_exponential_kernel")
+def matern_regression(Q, P, E, sig_rho, sig_gamma, sig_tau, lambd):
 
-    return parser.parse_args()
+    # known points in the hyperparameter space
+    known_x = numpy.array(P)
+    known_y = numpy.array(E)
 
+    r = MaternKernelRidgeRegressor(sig_rho, sig_gamma, sig_tau, lambd)
+    r.train(known_x, known_y)
+    return r.predict(Q)
+
+
+def calc_mse(image, interpolation):
+    assert image.shape == interpolation.shape
+    width = float(image.shape[0])
+    heigth = float(image.shape[1])
+    return 1./( width * heigth) * numpy.sum( (image - interpolation)**2 )
+
+def get_sobol(N):
+    import sobol
+    limit_rho_up = 10.
+    limit_tau_up = 1.
+    limit_gamma_up = 4.
+    limit_rho_dn = 2.
+    limit_tau_dn = 0.1
+    limit_gamma_dn = 1.
+    parameterLowerLimits = numpy.array([limit_rho_dn, limit_gamma_dn, limit_tau_dn])
+    parameterUpperLimits = numpy.array([limit_rho_up, limit_gamma_up, limit_tau_up])
+    Q = numpy.zeros( (N, 3) )
+    for i in range(N):
+        rho, gamma, tau = sobol.i4_sobol(3,i)[0] * (parameterUpperLimits - parameterLowerLimits) +parameterLowerLimits
+        Q[i,0] = rho
+        Q[i,1] = gamma
+        Q[i,2] = tau
+    return Q
+
+def bayesian_hp_optimization(Q):
+    im = numpy.squeeze(vigra.readImage("cc_90.png"))
+    im_orig = numpy.squeeze(vigra.readImage("charlie-chaplin.jpg"))
+    P = []
+    E = []
+    # initialize
+    f = open("cache/bayes_opt.txt","w")
+    start = time.time()
+    for i in range(20):
+        interpolation = kernel_ridge_regression( im, Q[i,2], Q[i,0], Q[i,1] )
+        P.append( [Q[i,0], Q[i,1], Q[i,2]] )
+        E.append( calc_mse(im_orig, interpolation) )
+        # save result
+        res = str(Q[i,0]) + str(" ") + str(Q[i,1]) + str(" ") + str(Q[i,2]) + str(" ") + str(E[i]) + '\n'
+        f.write(res)
+        f.flush()
+
+
+    # TODO should we remove known vals from Q ?
+    # remove known values from Q
+    # Q = numpy.delete(Q, numpy.arange(20), axis=0)
+    # parameter for the matern regression
+    sig_rho     = 4.
+    sig_gamma   = 1.
+    sig_tau     = 1.
+    lambd       = .3
+    for i in range(20):
+        mse, var = matern_regression(Q, P, E, sig_rho, sig_gamma, sig_tau, lambd)
+        utility = numpy.divide( mse, numpy.sqrt(var) )
+        best_hp = numpy.argmin(utility)
+        P.append( Q[best_hp])
+        interpolation = kernel_ridge_regression( ima, Q[best_hp,2], Q[best_hp,0], Q[best_hp,1])
+        E.append( calc_mse(im_orig, interpolation))
+        res = str(Q[best_hp,0]) + str(" ") + str(Q[best_hp,1]) + str(" ") + str(Q[best_hp,2]) + str(" ") + str(E[-1]) + '\n'
+        f.write(res)
+        f.flush()
+    # TODO should we remove known vals from Q ?
+    # remove known values from Q
+    # Q = numpy.delete(Q, new_hp, axis=0)
+    stop = time.time()
+    print "Bayesian parameter optimization took %.02f seconds." % (stop-start)
+    best_hp = numpy.argmin(E)
+    f.close()
+    return P[best_hp], E[best_hp]
+
+def random_hp_optimization(Q):
+    f = open("cache/rand_opt.txt","w")
+    image = numpy.squeeze(vigra.readImage("cc_90.png"))
+    im_orig = numpy.squeeze(vigra.readImage("charlie-chaplin.jpg"))
+    start = time.time()
+    P = []
+    E = []
+    N = Q.shape[0]
+    rand_indices = numpy.random.randint(0, N, size = 40)
+    for i in rand_indices:
+        interpolation = kernel_ridge_regression( image, Q[i,2], Q[i,0], Q[i,1] )
+        P.append( [Q[i,0], Q[i,1], Q[i,2]] )
+        E.append( calc_mse(image, interpolation) )
+        res = str(Q[best_hp,0]) + str(" ") + str(Q[best_hp,1]) + str(" ") + str(Q[best_hp,2]) + str(" ") + str(E[-1]) + '\n'
+        f.write(res)
+        f.flush()
+    best_hp = numpy.argmin(E)
+    stop = time.time()
+    print "Random parameter optimization took %.02f seconds." % (stop-start)
+    f.close()
+    return P[rand_hp], E[rand_hp]
 
 def main():
-    """Call the exercises.
-    """
-    # Read the command line arguments.
-    args = process_command_line()
-    kernel_ridge_regression(args.tau, args.rho, args.gamma)
+    N_samples = 2000
+    Q = get_sobol(N_samples)
+
+    print "starting optimization with gaussian process"
+    best_hp, best_mse = bayesian_hp_optimization(Q)
+    print "Best hyperparameter found via Bayesian Optimization of HP:"
+    print "Rho:", best_hp[0], "Gamma:", best_hp[1], "Tau:", best_hp[2]
+    print "Resulting MSE:", best_mse
+
+    print "starting optimization with grid search"
+    rand_hp, rand_mse = random_hp_optimization(Q)
+    print "Best hyperparameter found via Random Optimization of HP:"
+    print "Rho:", rand_hp[0], "Gamma:", rand_hp[1], "Tau:", rand_hp[2]
+    print "Resulting MSE:", rand_mse
+
     return 0
 
+def use_ridge_regression():
+    # Read the command line arguments.
+    args = process_command_line()
+    im_orig = numpy.squeeze(vigra.readImage("cc_90.png"))
+    im = kernel_ridge_regression(im_orig, args.tau, args.rho, args.gamma)
+    vigra.impex.writeImage(im, "res.png")
+    im_true = numpy.squeeze(vigra.readImage("charlie-chaplin.jpg"))
+    print "MSE: ", calc_mse(im, im_true)
+
+    return 0
+
+def test_matern_reg():
+    Q = get_sobol(100)
+    P = [Q[0],Q[1],Q[2],Q[3],Q[4],Q[5]]
+    E = [   1,   2,   3,   4,   5,  6 ]
+    for i in range(10):
+        mse, var = matern_regression(Q, P, E, 1, 1, 1, 0.3)
+    print "Matern regression ran completely"
+    return 0
 
 if __name__ == "__main__":
     status = main()
+    #status = test_matern_reg()
+    #status = use_ridge_regression()
     sys.exit(status)
