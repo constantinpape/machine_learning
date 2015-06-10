@@ -1,0 +1,62 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage{bbold}
+
+\begin{document}
+
+Machine Learning 2, exercise 5 by Constantin Pape, Marcus Theisen and Johann Klaehn
+ 
+\section{Exercise and data}
+
+In this exercise we use Gaussian Processes for paramater optimization.
+To this end, we use a first Gaussian Process to regress an image and then use a second Gaussian Process to find the best hyperparameters for the first GP.
+
+\section{Kernels}
+
+We implement two different Kernels: 
+A modified exponential kernel, that depends on the paramaters $\rho$ and $\gamma$, for the 
+interpolation and a Matern kernel, that depends on $\sigma_\rho$, $\sigma_\gamma$  and $\sigma_\tau$ for learning hyperparamers.
+
+To test the modified exponential kernel. we reconstruct the given image with the parameters
+$\tau$ = 0.8, $\rho$ = 7.5, $\gamma$ = 1.8.
+With this paramers, we achieve a mean squared pixel error of 350.86. 
+The resulting image is shown in \autoref{fig1}, along with the target image.
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../res_1.png}
+		\caption{Reconstruction with GP.}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\textwidth} 
+		\includegraphics[width=\textwidth]{../charlie-chaplin.jpg}
+		\caption{Target image.}
+	\end{subfigure}
+    \caption{GP without parameter optimization.}
+	\label{fig1}
+\end{figure}
+
+\section{Speedup}
+
+To speedup the computation of the Gaussian Process we stick to the implementation provided.
+\newline
+In this two features provide a speedup:
+\begin{itemize}
+    \item The inversion of the kernel is not done explicitly. Instead the linear system 
+        $\mathbf{\tilde{y}} = (K + \tau \mathbb{1})^{-1}$ is solved for $\mathbf{\tilde{y}}$.
+    \item A KDTree is used in the prediction step for finding datapoints that are inside
+        the maximum distance to the query point.
+        A KDTree is a binary tree with axis-aligned splits, that speeds up neighbor search for 
+        low dimensions significantly.
+\end{itemize}
+
+\section{Bayesian Optimization of Hyperparameters}
+
+
+
+
+\end{document}

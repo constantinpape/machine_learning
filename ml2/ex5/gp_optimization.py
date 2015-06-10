@@ -3,9 +3,6 @@ import argparse
 import vigra
 import numpy
 import time
-import scipy.sparse
-import scipy.sparse.linalg
-import scipy.spatial
 
 from ModifiedKernelRidgeRegressor   import ModifiedKernelRidgeRegressor
 from MaternKernelRidgeRegressor     import MaternKernelRidgeRegressor
@@ -92,7 +89,7 @@ def bayesian_hp_optimization(Q):
     P = []
     E = []
     # initialize
-    #f = open("cache/bayes_opt.txt","w")
+    f = open("cache/bayes_opt.txt","w")
     start = time.time()
     #for i in range(20):
     #    interpolation = kernel_ridge_regression( im, Q[i,2], Q[i,0], Q[i,1] )
@@ -103,7 +100,7 @@ def bayesian_hp_optimization(Q):
     #    f.write(res)
     #    f.flush()
 
-    save = numpy.loadtxt("cache/bayes_opt.txt")
+    save = numpy.loadtxt("cache/save.txt")
     for d in save:
         P.append( [d[0], d[1], d[2]] )
         E.append( d[3] )
@@ -112,28 +109,27 @@ def bayesian_hp_optimization(Q):
     # remove known values from Q
     # Q = numpy.delete(Q, numpy.arange(20), axis=0)
     # parameter for the matern regression
-    sig_rho     = 4.
-    sig_gamma   = 1.
-    sig_tau     = 1.
+    sig_rho     = 8. / 10
+    sig_gamma   = 3. / 10
+    sig_tau     = .9 / 10
     lambd       = .3
     for i in range(20):
         mse, var = matern_regression(Q, P, E, sig_rho, sig_gamma, sig_tau, lambd)
-        print "MSE, VAR:", mse, var
-        utility = numpy.divide( mse, numpy.sqrt(var) )
-        best_hp = numpy.argmin(utility)
+        #utility = numpy.divide( mse, numpy.sqrt(var) )
+        utility = numpy.abs(numpy.divide( mse, var ) )
+        best_hp = numpy.nanargmin(utility)
         P.append( Q[best_hp])
+        print Q[best_hp]
+        print utility[best_hp], mse[best_hp], var[best_hp]
         interpolation = kernel_ridge_regression( im, Q[best_hp,2], Q[best_hp,0], Q[best_hp,1])
         E.append( calc_mse(im_orig, interpolation))
         res = str(Q[best_hp,0]) + str(" ") + str(Q[best_hp,1]) + str(" ") + str(Q[best_hp,2]) + str(" ") + str(E[-1]) + '\n'
-        #f.write(res)
-        #f.flush()
-    # TODO should we remove known vals from Q ?
-    # remove known values from Q
-    # Q = numpy.delete(Q, new_hp, axis=0)
+        f.write(res)
+        f.flush()
     stop = time.time()
     print "Bayesian parameter optimization took %.02f seconds." % (stop-start)
     best_hp = numpy.argmin(E)
-    #f.close()
+    f.close()
     return P[best_hp], E[best_hp]
 
 def random_hp_optimization(Q):
