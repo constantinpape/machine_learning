@@ -143,7 +143,7 @@ def random_hp_optimization(Q):
     for i in rand_indices:
         interpolation = kernel_ridge_regression( image, Q[i,2], Q[i,0], Q[i,1] )
         P.append( [Q[i,0], Q[i,1], Q[i,2]] )
-        E.append( calc_mse(image, interpolation) )
+        E.append( calc_mse(im_orig, interpolation) )
         res = str(Q[best_hp,0]) + str(" ") + str(Q[best_hp,1]) + str(" ") + str(Q[best_hp,2]) + str(" ") + str(E[-1]) + '\n'
         f.write(res)
         f.flush()
