@@ -1,11 +1,14 @@
 import numpy as np
 import pylab as plot
+import scipy.sparse
+import scipy.sparse.linalg
 
 def get_transition_probability_matrix(M):
     P = np.zeros(M.shape)
     for i in range(M.shape[0]):
-        P[i,:] = M[i,:] / np.sum(M[i,:])
-        assert np.isclose( np.sum(P[i,:]), 1. )
+        if np.sum(M[i,:]) != 0.:
+            P[i,:] = M[i,:] / np.sum(M[i,:])
+            assert np.isclose( np.sum(P[i,:]), 1. )
     return P
 
 def random_walker(M, start, target):
@@ -115,9 +118,38 @@ def plot_maze(M):
     plot.show()
 
 
+def get_expected_random_walk_time(R, start, target):
+    n_rooms = R.shape[0]
+    lin_sys_eq = scipy.sparse.lil_matrix((n_rooms * n_rooms, n_rooms * n_rooms))
+    res = np.ones(n_rooms * n_rooms) * -1
+
+    # build a large linear system of equations
+    for i in range(n_rooms):
+        for j in range(n_rooms):
+            # we need to lniearize coordinates i, j to idx
+            idx = i * n_rooms + j
+            lin_sys_eq[idx, idx] = -1
+            for adjacent_room in np.where(R[i] != 0.)[0]:
+                idx2 = adjacent_room * n_rooms + j
+                lin_sys_eq[idx, idx2] = R[i, adjacent_room]
+    lin_sys_eq = lin_sys_eq.tocsc()
+
+    # for some reason this does only work for end up to 98. If end = 99 is gives 3*10**17 as a result(?!)
+    # if we run this with cropped M and R (M[:98, :98]) we end up with pretty much the exact time as the random walker...
+    all_times = scipy.sparse.linalg.spsolve(lin_sys_eq, res)
+
+    # our result should now be here:
+    expected_time = all_times[start * n_rooms + target]
+
+    return expected_time
+
+
 if __name__ == '__main__':
     M = np.load("maze.npy")
+    M -= np.diag( np.ones( M.shape[0] ) )
     R = get_transition_probability_matrix(M)
+
+    #plot_maze(M)
 
     shortest_path, shortest_dist = find_shortest_path(M, 0, 99)
     print "Shortest Path:", shortest_path, "Distance:", shortest_dist
@@ -125,7 +157,8 @@ if __name__ == '__main__':
     max_path, max_prob = find_most_probable_path(R, 0, 99)
     print "Most Probable Path:", max_path, "Probability:", max_prob
 
-    #plot_maze(M)
+    res_exp = get_expected_random_walk_time(R[:98,:98], 0, 97)
+    print "Expected time for Random walker to cross the maze:", res_exp
 
-    #res = random_traversal_time(M, 0, 99)
-    #print res[0], "+-", res[1]
+    #res_rw = random_traversal_time(M, 0, 99)
+    #print "Experimental time:", res_rw[0], "+-", res_rw[1]
