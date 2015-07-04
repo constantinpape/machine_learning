@@ -1,0 +1,17 @@
+Deep Neural Networks are Easily Fooled:
+
+In a project about this paper one could do several things:
+
+- Reproduce the papers results first.
+
+- Try the evolutionary generation of high confindence class images with different learning algorithms. Start with "Simple" Random Forest, compare to CNN.
+Depeneding on results, use "global" modifications of RF (Jungles, Convolutional Jungles, Autocontext, etc. ).
+Hypothesis: If the classifier has more "global knowledge", it wont be that vulnerable to fooling images.
+
+- Think about: How to make CNNs more resilient against fooling images?
+If possible implement and test.
+
+The first task is relatively straight forward, the second more challenging.
+
+All code used in the paper is available on GitHub:
+https://github.com/Evolving-AI-Lab/fooling
